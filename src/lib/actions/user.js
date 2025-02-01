@@ -7,14 +7,18 @@ export const createOrUpdateUser = async (
   last_name,
   image_url,
   email_addresses,
+  phone_numbers,
   username
 ) => {
   try {
     await connect();
 
-    // Safely extract email
     const email = Array.isArray(email_addresses) && email_addresses.length > 0
       ? email_addresses[0]?.email_address
+      : null; // Fallback to null if empty
+
+    const phoneNumber = Array.isArray(phone_numbers) && phone_numbers.length > 0
+      ? phone_numbers[0]?.phone_number
       : null; // Fallback to null if empty
 
     const user = await User.findOneAndUpdate(
@@ -24,8 +28,9 @@ export const createOrUpdateUser = async (
           firstName: first_name,
           lastName: last_name,
           avatar: image_url,
-          email: email, // Now safely assigned
+          email,
           username,
+          phoneNumber,
         },
       },
       { new: true, upsert: true }

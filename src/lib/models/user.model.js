@@ -10,21 +10,20 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
     },
+    phoneNumber: {
+      type: String,
+    },
     firstName: {
       type: String,
-      required: true,
     },
     lastName: {
       type: String,
-      required: true,
     },
     username: {
       type: String,
-      required: true,
     },
     avatar: {
       type: String,
-      required: true,
     },
     followers: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
