@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { FaXTwitter } from 'react-icons/fa6';
 import { HiHome } from 'react-icons/hi';
-// import {
-//   SignedIn,
-//   SignedOut,
-//   SignInButton,
-//   SignOutButton,
-// } from '@clerk/nextjs';
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignOutButton,
+} from '@clerk/nextjs';
 
 // import MiniProfile from './MiniProfile';
 export default function LeftSidebar() {
@@ -23,15 +23,16 @@ export default function LeftSidebar() {
           <HiHome className='w-7 h-7' />
           <span className='font-bold hidden xl:inline'>Home</span>
         </Link>
-        <button className='bg-blue-400 text-white rounded-full  hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md hidden xl:inline font-semibold'>
-          Sign In
-          {/* <SignedIn>
-            <SignOutButton />
-          </SignedIn>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut> */}
-        </button>
+        <div className='bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md hidden md:inline font-semibold'>
+          <div className="flex justify-center items-center h-full w-full">
+            <SignedIn>
+              <SignOutButton />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+          </div>
+        </div>
       </div>
       {/* <SignedIn>
         <MiniProfile />
