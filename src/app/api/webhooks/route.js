@@ -69,14 +69,17 @@ export async function POST(req) {
         phone_numbers,
         username
       );
-      console.log('User Created in Mongo', user)
+      console.log('User Created in Mongo:', user)
       console.log('Clerk User Id:', id)
 
       if (user && eventType === 'user.created') {
         try {
+          const mongoUserId = user._id.toString();
+          console.log('mongoUserId:', mongoUserId);
+
           await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
-              userMongoId: user._id.toString(),
+              userMongoId: mongoUserId,
             },
           });
         } catch (error) {
