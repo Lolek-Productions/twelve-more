@@ -7,7 +7,7 @@ import {
 } from '@clerk/nextjs'
 
 const appName = process.env.APP_NAME;
-const appDescription = process.env.APP_DESCRIPTION
+const appDescription = process.env.APP_DESCRIPTION;
 
 export const metadata = {
   title: appName,
