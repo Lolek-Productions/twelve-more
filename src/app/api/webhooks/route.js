@@ -1,7 +1,6 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
-// import { clerkClient } from '@clerk/nextjs/server';
-import { clerkClient } from '@clerk/clerk-sdk-node';
+import { clerkClient } from '@clerk/nextjs/server';
 import { createOrUpdateUser, deleteUser } from '@/lib/actions/user';
 
 export async function POST(req) {
@@ -78,11 +77,15 @@ export async function POST(req) {
           const mongoUserId = user._id.toString();
           console.log('mongoUserId:', mongoUserId);
 
-          await clerkClient.users.updateUserMetadata(id, {
+          const client = await clerkClient()
+
+          const response = await client.users.updateUserMetadata(id, {
             publicMetadata: {
               userMongoId: mongoUserId,
             },
           });
+
+          console.log('Response from Clerk:', response)
         } catch (error) {
           console.log('Error updating user metadata:', error);
         }
