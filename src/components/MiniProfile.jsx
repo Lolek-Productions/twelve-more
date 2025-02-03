@@ -1,35 +1,28 @@
 'use client';
 
-import { useClerk, useUser } from '@clerk/nextjs';
+import { useRef } from 'react';
+import { UserButton, useUser } from '@clerk/nextjs';
+import { HiDotsHorizontal } from 'react-icons/hi';
 
 export default function MiniProfile() {
   const { user } = useUser();
-  const { openUserProfile } = useClerk(); // Clerk function to open profile modal
+  const userButtonRef = useRef(null); // Reference for UserButton
 
   if (!user) {
     return null;
   }
 
-  // Function to open the User Profile modal
+  // Function to simulate clicking the UserButton
   const handleClick = () => {
-    openUserProfile(); // Opens Clerk's User Profile modal
+    if (userButtonRef.current) {
+      userButtonRef.current.click(); // Simulate a click on UserButton
+    }
   };
 
   return (
-    <div
-      className='text-gray-700 text-sm flex items-center cursor-pointer p-3 hover:bg-gray-100 rounded-full transition-all duration-200 justify-between lg:w-40 xl:w-56 w-fit gap-2'
-      onClick={handleClick} // Clicking anywhere on the div triggers User Profile
-    >
-      {/* User Avatar */}
-      <div className="w-8 h-8 rounded-full overflow-hidden">
-        <img src={user.imageUrl} alt="User Avatar" className="w-full h-full object-cover" />
-      </div>
-
-      {/* Username & Handle */}
-      <div className='hidden lg:inline flex-1 w-8'>
-        <h4 className='font-bold text-sm truncate'>{user.fullName}</h4>
-      </div>
-
+    <div className='flex items-center gap-3 py-5'>
+      <UserButton />
+      <div className='font-bold text-sm'>{user.fullName}</div>
     </div>
   );
 }
