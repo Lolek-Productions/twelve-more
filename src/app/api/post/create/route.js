@@ -19,12 +19,7 @@ export const POST = async (req) => {
       text: data.text,
       profileImg: data.profileImg,
       image: data.image,
-      // username: '123',
     });
-
-    // console.log(newPost);
-    // return;
-
 
     await newPost.save();
     return new Response(JSON.stringify(newPost), {
