@@ -87,7 +87,7 @@ export default function CommentModal() {
           className='max-w-lg w-[90%] absolute top-24 left-[50%] translate-x-[-50%] bg-white border-2 border-gray-200 rounded-xl shadow-md'
         >
           <div className='p-4'>
-            <div className='border-b border-gray-200 py-2 px-1.5'>
+            <div className='border-b border-gray-200 py-2 px-1.5 flex justify-end'>
               <HiX
                 className='text-2xl text-gray-700 p-1 hover:bg-gray-200 rounded-full cursor-pointer'
                 onClick={() => setOpen(false)}
