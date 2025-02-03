@@ -23,15 +23,13 @@ export default function LeftSidebar() {
           <HiHome className='w-7 h-7' />
           <span className='font-bold hidden xl:inline'>Home</span>
         </Link>
-        <div className='bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md hidden md:inline font-semibold'>
-          <div className="flex justify-center items-center h-full w-full">
-            <SignedIn>
-              <SignOutButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-          </div>
+        <div className='hidden md:inline font-semibold'>
+          <SignedIn>
+            <SignOutButton className="bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md" />
+          </SignedIn>
+          <SignedOut>
+            <SignInButton className="bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md" />
+          </SignedOut>
         </div>
       </div>
       {/* <SignedIn>
