@@ -1,0 +1,40 @@
+import React from 'react'
+
+export default function Landing() {
+  return (
+    <div className="bg-gray-100 min-h-screen flex flex-col justify-between">
+      <header className="bg-white shadow">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-gray-800">TwelveMore</div>
+          <nav className="space-x-4">
+            <a href="#" className="text-gray-600 hover:text-gray-800">Home</a>
+            <a href="#" className="text-gray-600 hover:text-gray-800">Features</a>
+            <a href="#" className="text-gray-600 hover:text-gray-800">Pricing</a>
+            <a href="#" className="text-gray-600 hover:text-gray-800">Contact</a>
+          </nav>
+        </div>
+      </header>
+
+      {/* <!-- Hero Section --> */}
+      <div className="max-w-4xl mx-auto px-6 py-16 text-center bg-white rounded-lg">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Connect with Friends and the World Around You
+        </h1>
+        <p className="mt-4 text-gray-600">
+          Join Socialize today and start sharing your moments.
+        </p>
+        <a
+          href="/sign-up"
+          className="mt-6 inline-block bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600"
+          >Get Started</a
+        >
+      </div>
+
+      <footer className="bg-gray-800">
+        <div className="container mx-auto px-6 py-4 text-center text-white">
+          &copy; 2025 Socialize. All rights reserved.
+        </div>
+      </footer>
+    </div>
+  )
+}
