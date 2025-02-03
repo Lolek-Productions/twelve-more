@@ -6,10 +6,10 @@ export default function Comments({ comments }) {
   );
 
   return (
-    <div>
+    <>
       {sortedComments.map((comment) => (
         <Comment key={comment.id} comment={comment} />
       ))}
-    </div>
+    </>
   );
 }

@@ -7,7 +7,7 @@ export const POST = async (req) => {
 
     const data = await req.json();
 
-    const user = await User.findOne({ username: data.username });
+    const user = await User.findOne({ user: data.user });
 
     return new Response(JSON.stringify(user), { status: 200 });
   } catch (err) {
