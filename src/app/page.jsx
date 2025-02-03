@@ -16,7 +16,6 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* <!-- Hero Section --> */}
       <div className="max-w-4xl mx-auto px-6 py-16 text-center bg-white rounded-lg">
         <h1 className="text-4xl font-bold text-gray-800">
           Foster belonging, promote growth, equip communities
@@ -27,8 +26,7 @@ export default function Landing() {
         <a
           href="/sign-up"
           className="mt-6 inline-block bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600"
-          >Get Started</a
-        >
+          >Get Started</a>
       </div>
 
       <footer className="bg-gray-800">
