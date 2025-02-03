@@ -11,6 +11,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.10.6",
     "firebase": "^11.2.0",
+    "jotai": "^2.11.3",
     "moment": "^2.30.1",
     "mongodb": "^6.13.0",
     "mongoose": "^8.9.6",
@@ -19,7 +20,6 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
     "react-modal": "^3.16.3",
-    "recoil": "^0.7.7",
     "svix": "^1.45.1"
   },
   "devDependencies": {

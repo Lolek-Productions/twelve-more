@@ -9,14 +9,14 @@ import {
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { modalAtom, postIdAtom } from '@/atom/modalAtom';
-import { useRecoilState } from 'recoil';
+import { modalState, postIdState } from '@/modalState/modalStateDefinition';
+import { useAtom } from 'jotai';
 
 export default function Icons({ post }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes || []);
-  const [open, setOpen] = useRecoilState(modalAtom);
-  const [postId, setPostId] = useRecoilState(postIdAtom);
+  const [open, setOpen] = useAtom(modalState);
+  const [postId, setPostId] = useAtom(postIdState);
   const { user } = useUser();
   const router = useRouter();
 

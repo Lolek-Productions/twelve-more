@@ -1,7 +1,11 @@
 'use client';
 
-import { RecoilRoot } from 'recoil';
+import { Provider } from 'jotai'
 
 export default function SessionWrapper({ children }) {
-  return <RecoilRoot>{children}</RecoilRoot>;
+  return (
+    <Provider>
+      {children}
+    </Provider>
+  );
 }
