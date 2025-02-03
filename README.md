@@ -40,3 +40,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 https://react-icons.github.io/react-icons/
 
 
+# Notes
+After changing the schema on the Post model, I had to restart the development server, before it would use the updated Post Model.

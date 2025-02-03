@@ -72,7 +72,7 @@ export default function Input() {
       body: JSON.stringify({
         userMongoId: user.publicMetadata.userMongoId,
         name: user.fullName,
-        username: user.username,
+        // username: user.username,
         text,
         profileImg: user.imageUrl,
         image: imageFileUrl,
