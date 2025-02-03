@@ -7,8 +7,8 @@ import {
   SignInButton,
   SignOutButton,
 } from '@clerk/nextjs';
+import MiniProfile from './MiniProfile';
 
-// import MiniProfile from './MiniProfile';
 export default function LeftSidebar() {
   return (
     <div className='flex flex-col p-3 justify-between h-screen items-center'>
@@ -23,7 +23,7 @@ export default function LeftSidebar() {
           <HiHome className='w-7 h-7' />
           <span className='font-bold hidden xl:inline'>Home</span>
         </Link>
-        {/* hidden md: */}
+        {/* hidden md:inline */}
         <div className='inline font-semibold'>
           <SignedIn>
             <SignOutButton className="bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md" />
@@ -33,9 +33,9 @@ export default function LeftSidebar() {
           </SignedOut>
         </div>
       </div>
-      {/* <SignedIn>
+      <SignedIn>
         <MiniProfile />
-      </SignedIn> */}
+      </SignedIn>
     </div>
   );
 }

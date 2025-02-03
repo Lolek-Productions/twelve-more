@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
         </ClerkLoading>
         <ClerkLoaded>
           <div className='flex justify-between max-w-6xl mx-auto'>
-          {/* hidden sm: */}
+          {/* hidden sm:inline */}
             <div className='inline border-r h-screen sticky top-0'>
               <LeftSidebar />
             </div>
