@@ -14,14 +14,15 @@ export default function LeftSidebar() {
   return (
     <div className='flex flex-col p-3 justify-between h-screen items-center'>
       <div className='flex flex-col gap-4 p-3 w-48'>
-        <Link href='/home'>
-        <Image
-          src="/logo.png" // Use the path from the public folder
-          alt="TwelveMore"
-          width={45} // Adjust width as needed
-          height={45} // Adjust height as needed
-          priority // Ensures faster loading
-        />
+        <Link href='/home' className='flex items-center gap-2'>
+          <Image
+            src="/logo.png" // Use the path from the public folder
+            alt="TwelveMore"
+            width={45} // Adjust width as needed
+            height={45} // Adjust height as needed
+            priority // Ensures faster loading
+          />
+          <div className='font-semibold text-xl'>TwelveMore</div>
         </Link>
         <Link href='/home' className='flex items-center p-3 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
           <HiHome className='w-7 h-7' />

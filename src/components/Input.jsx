@@ -7,7 +7,6 @@ import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
 
-
 export default function Input() {
   const { user, isSignedIn, isLoaded } = useUser();
 
@@ -210,7 +209,6 @@ export default function Input() {
               : <HiOutlineMicrophone onClick={startRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
             }
           </div>
-
           <input
             type='file'
             ref={imagePickRef}
