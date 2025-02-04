@@ -19,7 +19,6 @@ export default function Post({ post }) {
             <h4 className='font-bold text-xs truncate max-w-32'>
               {post?.name}
             </h4>
-            <span className='text-xs truncate max-w-32'>@{post?.username}</span>
             {/* add dot space here */}
             <span className='text-xl text-gray-500'>·</span>
             <span className='text-xs text-gray-500 flex-1 truncate max-w-32'>
@@ -33,6 +32,13 @@ export default function Post({ post }) {
         </Link>
         <Link href={`/posts/${post?._id}`}>
           <img src={post?.image} className='rounded-2xl mr-2' />
+        </Link>
+        <Link href={`/posts/${post?._id}`}>
+          {post?.audio &&
+            <div className="w-full py-1">
+              <audio controls src={post?.audio} />
+            </div>
+          }
         </Link>
         <Icons post={post} id={post._id} />
       </div>

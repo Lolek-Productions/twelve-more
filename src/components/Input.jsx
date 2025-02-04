@@ -204,7 +204,6 @@ export default function Input() {
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
               onClick={() => imagePickRef.current.click()}
             />
-
             {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
               : <HiOutlineMicrophone onClick={startRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
             }
