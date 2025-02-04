@@ -5,6 +5,8 @@ import { HiOutlinePhotograph, HiOutlineMicrophone, HiX, HiOutlineStop } from 're
 import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
+import { Button } from "@/components/ui/button"
+
 
 export default function Input() {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -216,13 +218,10 @@ export default function Input() {
             hidden
             onChange={addImageToPost}
           />
-          <button
-            disabled={text.trim() === '' || postLoading || imageFileUplaoding}
-            className='bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50'
+          <Button
             onClick={handleSubmit}
-          >
-            Post
-          </button>
+            disabled={text.trim() === '' || postLoading || imageFileUplaoding}
+          >Post</Button>
         </div>
       </div>
     </div>
