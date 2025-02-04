@@ -20,15 +20,14 @@ export default function LeftSidebar() {
           <HiHome className='w-7 h-7' />
           <span className='font-bold hidden xl:inline'>Home</span>
         </Link>
-        {/* hidden md:inline */}
-        <div className='inline font-semibold'>
+        {/* <div className='inline font-semibold'>
           <SignedIn>
             <SignOutButton className="bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md" />
           </SignedIn>
           <SignedOut>
             <SignInButton className="bg-blue-400 text-white rounded-full hover:brightness-95 transition-all duration-200 w-48 h-9 shadow-md" />
           </SignedOut>
-        </div>
+        </div> */}
       </div>
       <SignedIn>
         <MiniProfile />
