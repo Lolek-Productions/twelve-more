@@ -33,13 +33,11 @@ export default function Post({ post }) {
         <Link href={`/posts/${post?._id}`}>
           <img src={post?.image} className='rounded-2xl mr-2' />
         </Link>
-        <div>
-          {post?.audio &&
-            <div className="w-full py-1">
-              <audio controls src={post?.audio} />
-            </div>
-          }
-        </div>
+        {post?.audio &&
+          <div className="w-full py-1">
+            <audio controls src={post?.audio} />
+          </div>
+        }
         <Icons post={post} id={post._id} />
       </div>
     </div>
