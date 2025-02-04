@@ -2,12 +2,14 @@
 
 import React, { useRef, useState } from 'react'
 import { FaCircleStop, FaMicrophone } from 'react-icons/fa6'
+import { app } from '../../../firebase';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 
-export default function Recorder
-  () {
+export default function Recorder() {
   const [isRecording, setIsRecording] = useState(false)
   const [recordedURL, setRecordedURL] = useState('')
   const [seconds, setSeconds] = useState(0)
+  const [audioFileUplaoding, setAudioFileUploading] = useState(false);
 
   const mediaStream = useRef(null)
   const mediaRecorder = useRef(null)
@@ -30,9 +32,12 @@ export default function Recorder
         setSeconds(prev => prev + 1)
       }, 1000)
 
-      mediaRecorder.current.onstop = () => {
+      mediaRecorder.current.onstop = async () => {
         console.log('onStop')
         const recordedBlob = new Blob(chunks.current, { type: 'audio/mp3' })
+
+        await uploadAudioFileToStorage(recordedBlob);
+
         const url = URL.createObjectURL(recordedBlob)
         setRecordedURL(url)
 
@@ -45,9 +50,35 @@ export default function Recorder
     } catch (error) {
       console.log(error);
     }
-
-
   }
+
+  const uploadAudioFileToStorage = async (recordedBlob) => {
+    setAudioFileUploading(true);
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + '.mp3';
+    const storageRef = ref(storage, fileName);
+
+    const uploadTask = uploadBytesResumable(storageRef, recordedBlob);
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+      },
+      (error) => {
+        console.log(error);
+        setAudioFileUploading(false);
+        setRecordedURL('');
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        console.log('File available at', downloadURL);
+        setRecordedURL(downloadURL);
+        setAudioFileUploading(false);
+      }
+    );
+  };
 
   const stopRecording = () => {
     console.log('stopRecording')

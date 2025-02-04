@@ -1,15 +1,11 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { HiOutlinePhotograph } from 'react-icons/hi';
+import { HiOutlinePhotograph, HiOutlineMicrophone, HiX, HiOutlineStop } from 'react-icons/hi';
 import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
+import Modal from 'react-modal';
 
 export default function Input() {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -72,7 +68,6 @@ export default function Input() {
       body: JSON.stringify({
         userMongoId: user.publicMetadata.userMongoId,
         name: user.fullName,
-        // username: user.username,
         text,
         profileImg: user.imageUrl,
         image: imageFileUrl,
@@ -118,10 +113,13 @@ export default function Input() {
           />
         )}
         <div className='flex items-center justify-between pt-2.5'>
-          <HiOutlinePhotograph
-            className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
-            onClick={() => imagePickRef.current.click()}
-          />
+          <div className='flex items-center'>
+            <HiOutlinePhotograph
+              className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
+              onClick={() => imagePickRef.current.click()}
+              />
+          </div>
+
           <input
             type='file'
             ref={imagePickRef}
