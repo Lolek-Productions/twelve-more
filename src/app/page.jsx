@@ -25,8 +25,9 @@ export default function Landing() {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-16 text-center bg-white rounded-lg">
-        <h1 className="text-4xl font-bold text-gray-800">
-          Foster belonging, promote growth, equip communities
+        <h1 className="text-4xl font-bold text-gray-800 leading-normal">
+          Foster belonging, Promote growth,<br />
+          Equip communities
         </h1>
         <p className="mt-4 text-gray-600">
           Join TwelveMore to start Building!
