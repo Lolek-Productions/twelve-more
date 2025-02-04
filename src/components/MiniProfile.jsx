@@ -2,7 +2,6 @@
 
 import { useRef } from 'react';
 import { UserButton, useUser } from '@clerk/nextjs';
-import { HiDotsHorizontal } from 'react-icons/hi';
 
 export default function MiniProfile() {
   const { user } = useUser();

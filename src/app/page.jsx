@@ -2,6 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { SignedIn, SignedOut } from '@clerk/nextjs'
 
 export default function Landing() {
 
@@ -13,7 +14,12 @@ export default function Landing() {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-gray-800">TwelveMore</div>
           <nav className="space-x-4">
-            <a href="/sign-in" className="text-gray-600 hover:text-gray-800">Log In</a>
+            <SignedIn>
+              <a href="/home" className="text-gray-600 hover:text-gray-800">Home</a>
+            </SignedIn>
+            <SignedOut>
+              <a href="/sign-in" className="text-gray-600 hover:text-gray-800">Log In</a>
+            </SignedOut>
           </nav>
         </div>
       </header>

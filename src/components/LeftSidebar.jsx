@@ -37,9 +37,9 @@ export default function LeftSidebar() {
           </SignedOut> */}
         {/* </div> */}
       </div>
-      <SignedIn>
+      {/* <SignedIn> */}
         <MiniProfile />
-      </SignedIn>
+      {/* </SignedIn> */}
     </div>
   );
 }
