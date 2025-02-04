@@ -5,10 +5,11 @@ import { HiOutlinePhotograph, HiOutlineMicrophone, HiX, HiOutlineStop } from 're
 import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
-import Modal from 'react-modal';
 
 export default function Input() {
   const { user, isSignedIn, isLoaded } = useUser();
+
+  //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUplaoding, setImageFileUploading] = useState(false);
@@ -16,6 +17,15 @@ export default function Input() {
   const [postLoading, setPostLoading] = useState(false);
   const imagePickRef = useRef(null);
 
+  //Audio
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordedURL, setRecordedURL] = useState('')
+  const [audioFileUplaoding, setAudioFileUploading] = useState(false);
+  const mediaStream = useRef(null)
+  const mediaRecorder = useRef(null)
+  const chunks = useRef([])
+
+  //Image
   const addImageToPost = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -58,6 +68,75 @@ export default function Input() {
     );
   };
 
+  //Audio
+  const startRecording = async () => {
+    console.log('startRecording')
+    setIsRecording(true)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      mediaStream.current = stream
+      mediaRecorder.current = new MediaRecorder(stream)
+      mediaRecorder.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.current.push(e.data)
+        }
+      }
+
+      mediaRecorder.current.onstop = async () => {
+        console.log('onStop')
+        const recordedBlob = new Blob(chunks.current, { type: 'audio/mp3' })
+
+        await uploadAudioFileToStorage(recordedBlob);
+
+        const url = URL.createObjectURL(recordedBlob)
+        setRecordedURL(url)
+
+        chunks.current = []
+      }
+
+      mediaRecorder.current.start()
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const uploadAudioFileToStorage = async (recordedBlob) => {
+    setAudioFileUploading(true);
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + '.mp3';
+    const storageRef = ref(storage, fileName);
+
+    const uploadTask = uploadBytesResumable(storageRef, recordedBlob);
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+      },
+      (error) => {
+        console.log(error);
+        setAudioFileUploading(false);
+        setRecordedURL('');
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        console.log('File available at', downloadURL);
+        setRecordedURL(downloadURL);
+        setAudioFileUploading(false);
+      }
+    );
+  };
+
+  const stopRecording = () => {
+    console.log('stopRecording')
+    setIsRecording(false)
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop()
+      mediaStream.current.getTracks().forEach(track => track.stop())
+    }
+  }
+
   const handleSubmit = async () => {
     setPostLoading(true);
     const response = await fetch('/api/post/create', {
@@ -71,12 +150,14 @@ export default function Input() {
         text,
         profileImg: user.imageUrl,
         image: imageFileUrl,
+        audio: recordedURL,
       }),
     });
     setPostLoading(false);
     setText('');
     setSelectedFile(null);
     setImageFileUrl(null);
+    setRecordedURL(null);
     location.reload();
   };
 
@@ -94,7 +175,7 @@ export default function Input() {
       <div className='w-full divide-y divide-gray-200'>
         <textarea
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700 '
-          placeholder='Whats happening'
+          placeholder="What's happening"
           rows='2'
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -110,14 +191,23 @@ export default function Input() {
             className={`w-full max-h-[250px] object-cover cursor-pointer ${
               imageFileUplaoding ? 'animate-pulse' : ''
             }`}
-          />
-        )}
+
+            />
+          )}
+        {recordedURL &&
+          <div className="w-full py-5">
+            <audio controls src={recordedURL} />
+          </div>
+        }
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
-            <HiOutlinePhotograph
-              className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
+            <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
               onClick={() => imagePickRef.current.click()}
-              />
+            />
+
+            {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+              : <HiOutlineMicrophone onClick={startRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+            }
           </div>
 
           <input

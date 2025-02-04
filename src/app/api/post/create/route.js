@@ -19,6 +19,7 @@ export const POST = async (req) => {
       text: data.text,
       profileImg: data.profileImg,
       image: data.image,
+      audio: data.audio,
     });
 
     await newPost.save();

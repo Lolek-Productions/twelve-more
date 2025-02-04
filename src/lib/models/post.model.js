@@ -9,6 +9,9 @@ const postSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    audio: {
+      type: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -18,10 +21,6 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // username: {
-    //   type: String,
-    //   required: false,
-    // },
     profileImg: {
       type: String,
       required: true,
