@@ -176,7 +176,7 @@ export default function Input() {
       <div className='w-full divide-y divide-gray-200'>
         <textarea
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700 '
-          placeholder="What's happening"
+          placeholder="What's happening?"
           rows='2'
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -205,8 +205,8 @@ export default function Input() {
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
               onClick={() => imagePickRef.current.click()}
             />
-            {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
-              : <HiOutlineMicrophone onClick={startRecording} className='h-10 w-10 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+            {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+              : <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
             }
           </div>
           <input

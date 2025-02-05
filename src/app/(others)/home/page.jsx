@@ -2,7 +2,7 @@ import Feed from '@/components/Feed';
 import Input from '@/components/Input';
 
 //Not sure if this necessary
-export const dynamic = 'force-dynamic'; // ✅ Ensures Next.js treats this as a dynamic page
+//export const dynamic = 'force-dynamic'; // ✅ Ensures Next.js treats this as a dynamic page
 
 export default async function Home() {
   let data = null;
