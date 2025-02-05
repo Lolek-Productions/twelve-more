@@ -32,7 +32,6 @@ export const columns = [
       )
     },
   },
-
   {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
