@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import News from './News';
+import Tasks from './Tasks';
 
 export default function RightSidebar() {
   const [input, setInput] = useState('');
@@ -30,7 +30,7 @@ export default function RightSidebar() {
           />
         </form>
       </div>
-      <News />
+      <Tasks />
     </>
   );
 }
