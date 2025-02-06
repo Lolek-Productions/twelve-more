@@ -35,7 +35,6 @@ const postSchema = new mongoose.Schema(
           comment: String,
           user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
           name: String,
-          // username: String,
           profileImg: String,
           createdAt: { type: Date, default: Date.now },
         },

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { HiHome, HiCog, HiOutlineUserGroup, HiOutlineServer } from 'react-icons/hi';
+import { HiHome, HiCog, HiOutlineUserGroup, HiOutlineServer, HiCheckCircle } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 
 export default function LeftSidebar() {
@@ -11,9 +11,9 @@ export default function LeftSidebar() {
           <Image
             src="/logo.png" // Use the path from the public folder
             alt="TwelveMore"
-            width={45} // Adjust width as needed
-            height={45} // Adjust height as needed
-            priority // Ensures faster loading
+            width={45}
+            height={45}
+            priority
           />
           <div className='font-semibold text-xl'>TwelveMore</div>
         </Link>
@@ -22,6 +22,11 @@ export default function LeftSidebar() {
           <Link href='/home' className='flex items-center p-2 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
             <HiHome className='w-6 h-6' />
             <span className='font-bold hidden xl:inline'>Home</span>
+          </Link>
+
+          <Link href='/tasks' className='flex items-center p-2 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
+            <HiCheckCircle className='w-6 h-6' />
+            <span className='font-bold hidden xl:inline'>Tasks</span>
           </Link>
 
           <Link href='/settings' className='flex items-center p-2 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
