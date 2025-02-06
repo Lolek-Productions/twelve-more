@@ -6,6 +6,7 @@ import Loader from "@/components/Loader"
 import CommentModal from "@/components/CommentModal"
 import { ClerkProvider, ClerkLoaded, ClerkLoading, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs'
 import SessionWrapper from "@/components/SessionWrapper";
+import { Toaster } from "@/components/ui/toaster"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({ children }) {
                   </div>
                 </div>
                 <CommentModal />
+                <Toaster />
               </SignedIn>
             </ClerkLoaded>
           </body>

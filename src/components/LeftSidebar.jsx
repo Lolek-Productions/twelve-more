@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { HiHome, HiCog, HiOutlineUserGroup, HiOutlineServer, HiCheckCircle } from 'react-icons/hi';
+import { HiHome, HiCog, HiOutlineUserGroup, HiOutlineServer, HiCheckCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 
 export default function LeftSidebar() {
@@ -24,6 +24,11 @@ export default function LeftSidebar() {
             <span className='font-bold hidden xl:inline'>Home</span>
           </Link>
 
+          <Link href='/invite' className='flex items-center p-2 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
+            <HiOutlinePaperAirplane className='w-6 h-6' />
+            <span className='font-bold hidden xl:inline'>Invite</span>
+          </Link>
+
           <Link href='/tasks' className='flex items-center p-2 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
             <HiCheckCircle className='w-6 h-6' />
             <span className='font-bold hidden xl:inline'>Tasks</span>
@@ -42,12 +47,11 @@ export default function LeftSidebar() {
 
         <div className="p-3 bg-gray-100 rounded-md mt-2">
           <div className="flex items-center">
-            <HiOutlineUserGroup className='w-6 h-6' />
             <div className="ml-2 font-semibold">
-              Communities
+              My Communities
             </div>
           </div>
-          <div className="mt-1">
+          <div className="">
 
             <Link href='/settings' className='flex items-center p-3 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
               <span className=''>
