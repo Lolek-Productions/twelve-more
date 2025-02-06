@@ -6,16 +6,18 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 export default function Comment({ comment, id }) {
   return (
     <div className='flex p-3 border-b border-gray-200 hover:bg-gray-50 pl-10'>
-      <img
-        src={comment?.profileImg}
-        alt='user-img'
-        className='h-9 w-9 rounded-full mr-4'
-      />
+      <Link href={`/users/${comment?.user?._id}`}>
+        <img
+          src={comment?.profileImg}
+          alt='user-img'
+          className='h-9 w-9 rounded-full mr-4'
+        />
+      </Link>
       <div className='flex-1'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-1 whitespace-nowrap'>
             <h4 className='font-bold text-xs truncate max-w-32'>
-              {comment?.user.firstName} {comment?.user.lastName}
+              {comment?.user?.firstName} {comment?.user?.lastName}
             </h4>
             <span className='text-xl text-gray-500'>·</span>
             <span className='text-xs text-gray-500 flex-1 truncate max-w-32'>
