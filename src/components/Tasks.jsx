@@ -4,7 +4,7 @@ import tasks from "@/data/tasks";
 
 export default function Tasks() {
   return (
-    <div className='mt-1 text-gray-700 space-y-3 bg-gray-100 rounded-xl pt-2'>
+    <div className='mt-3 text-gray-700 space-y-3 bg-gray-100 rounded-xl pt-2'>
       <h4 className='font-bold text-xl px-4'>Tasks</h4>
       {tasks.map((task) => (
         <div key={task.id}>
