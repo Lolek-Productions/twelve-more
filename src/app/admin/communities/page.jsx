@@ -27,12 +27,13 @@ export default function AdminCommunitiesPage() {
   const [serverResponse, setServerResponse] = useState(null);
 
   useEffect(() => {
-    async function fetchData() {
-      const communities = await getCommunities();
-      setData(communities);
-    }
     fetchData();
   }, []);
+
+  async function fetchData() {
+    const communities = await getCommunities();
+    setData(communities);
+  }
 
   const {
     register,
@@ -53,6 +54,7 @@ export default function AdminCommunitiesPage() {
     if (response?.success) {
       setModalOpen(false); // ✅ Close modal on success
       reset(); // ✅ Reset form fields
+      fetchData();
     }
   };
 

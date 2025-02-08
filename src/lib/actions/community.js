@@ -8,6 +8,7 @@ export async function createOrUpdateCommunity(formData) {
   console.log('hello createOrUpdateCommunity:', formData);
 
   const { id, name } = formData;
+  const organization = 1;
 
   if (!name) {
     return { error: "Community name is required." };
@@ -16,19 +17,33 @@ export async function createOrUpdateCommunity(formData) {
   try {
     await connect();
 
-    const filter = id ? { _id: new mongoose.Types.ObjectId(id) } : {};
+    if (id) {
+      // ✅ If `id` exists, update the existing community
+      const community = await Community.findByIdAndUpdate(
+        id,
+        { $set: {
+          name,
+          // organization,
+        } },
+        { new: true }
+      );
 
-    const community = await Community.findOneAndUpdate(
-      filter,
-      {
-        $set: {
-          name: name,
-        },
-      },
-      { new: true, upsert: true }
-    );
-    return { success: "Community created successfully!" };
+      if (!community) {
+        return { error: "Community not found." };
+      }
+
+      return { success: "Community updated successfully!" };
+    } else {
+      console.log('Creating a new community');
+
+      const newCommunity = await Community.create({
+        name,
+        // organization,
+      });
+      return { success: "Community created successfully!" };
+    }
   } catch (error) {
+    console.log(error);
     return { error: "Failed to save community." };
   }
 }

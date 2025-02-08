@@ -9,7 +9,7 @@ const communitySchema = new mongoose.Schema(
     organization: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Organization',
-      required: true,
+      // required: true,
     },
     members: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

@@ -84,8 +84,6 @@ export function CommunityTable({ data }) {
     getFilteredRowModel: getFilteredRowModel(),
   })
 
-
-
   return (
     <div>
       <div className="flex items-center justify-between">
