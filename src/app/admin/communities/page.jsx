@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {createOrUpdateCommunity, getCommunities} from "@/lib/actions/community";
+import {createOrUpdateCommunity, deleteCommunity, getCommunities} from "@/lib/actions/community";
 import {CommunityTable} from "@/app/admin/communities/community-table";
+import { useToast } from "@/hooks/use-toast"
+import {error} from "next/dist/build/output/log";
 
 const communitySchema = z.object({
   name: z.string().min(1, "Community name is required"),
@@ -25,6 +27,7 @@ export default function AdminCommunitiesPage() {
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [serverResponse, setServerResponse] = useState(null);
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchData();
@@ -33,6 +36,19 @@ export default function AdminCommunitiesPage() {
   async function fetchData() {
     const communities = await getCommunities();
     setData(communities);
+  }
+
+  const deleteEntity = (id) => {
+    try {
+      deleteCommunity(id)
+      toast({
+        title: "Community Deleted",
+        description: "The community has been deleted successfully.",
+      })
+      fetchData();
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const {
@@ -103,7 +119,7 @@ export default function AdminCommunitiesPage() {
           </DialogContent>
         </Dialog>
 
-        <CommunityTable data={data} />
+        <CommunityTable data={data} deleteEntity={deleteEntity} />
 
       </div>
     </div>

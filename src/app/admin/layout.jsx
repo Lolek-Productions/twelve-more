@@ -4,6 +4,7 @@ import { SidebarNav } from "@/app/admin/components/sidebar-nav"
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
 import "../globals.css";
+import { Toaster } from "@/components/ui/toaster"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +78,7 @@ export default function SettingsLayout({ children }) {
                 <SidebarNav items={sidebarNavItems} />
               </aside>
               <div className="flex-1 lg:max-w-2xl">{children}</div>
+              <Toaster />
             </div>
           </div>
         </body>

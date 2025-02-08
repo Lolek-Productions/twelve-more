@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
@@ -20,7 +19,7 @@ import {
   useReactTable
 } from "@tanstack/react-table";
 
-export function CommunityTable({ data }) {
+export function CommunityTable({ data, deleteEntity }) {
   const [sorting, setSorting] = useState([])
   const [columnFilters, setColumnFilters] = useState([])
 
@@ -54,13 +53,11 @@ export function CommunityTable({ data }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem
-                  onClick={() => console.log(community.id)}
+                  onClick={() => deleteEntity(community.id)}
                 >
                   Delete
                 </DropdownMenuItem>
-                {/*<DropdownMenuSeparator />*/}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
