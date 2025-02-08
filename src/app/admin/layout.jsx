@@ -37,6 +37,10 @@ const sidebarNavItems = [
     title: "Organizations",
     href: "/admin/organizations",
   },
+  {
+    title: "Prompts",
+    href: "/admin/prompts",
+  },
 ]
 
 export default function SettingsLayout({ children }) {

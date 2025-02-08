@@ -6,7 +6,7 @@ const communitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    user: {
+    organization: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Organization',
       required: true,
@@ -14,6 +14,14 @@ const communitySchema = new mongoose.Schema(
     members: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       default: [],
+    },
+    leader: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    nurturer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   { timestamps: true }

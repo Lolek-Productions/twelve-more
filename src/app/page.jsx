@@ -24,7 +24,7 @@ export default function Landing() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center bg-white rounded-lg">
+      <div className="max-w-4xl mx-auto px-12 py-10 text-center bg-white rounded-lg">
         <h1 className="text-4xl font-bold text-gray-800 leading-normal">
           Foster belonging, Promote growth,<br />
           Equip communities
