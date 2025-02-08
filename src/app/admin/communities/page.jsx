@@ -16,35 +16,63 @@ import {
 } from "@/components/ui/dialog";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {createOrUpdateCommunity} from "@/lib/actions/community";
+import {createOrUpdateCommunity, getCommunities} from "@/lib/actions/community";
 
 const communitySchema = z.object({
   name: z.string().min(1, "Community name is required"),
 });
 
-function getData() {
 
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "98769786",
-      amount: 150,
-      status: "active",
-      email: "merr@example.com",
-    },
-  ]
-}
+//
+// function getData() {
+//
+//   //Example
+//   // let data = null;
+//   // try {
+//   //   const result = await fetch(process.env.APP_URL + '/api/post/get', {
+//   //     method: 'POST',
+//   //     body: JSON.stringify({ postId: params.id }),
+//   //     cache: 'no-store',
+//   //   });
+//   //   data = await result.json();
+//   // } catch (error) {
+//   //   console.log('Error getting post:', error);
+//   //   data = { text: 'Failed to load post' };
+//   // }
+//
+//   return [];
+//
+//   //
+//   // // Fetch data from your API here.
+//   // return [
+//   //   {
+//   //     id: "728ed52f",
+//   //     amount: 100,
+//   //     status: "pending",
+//   //     email: "m@example.com",
+//   //   },
+//   //   {
+//   //     id: "98769786",
+//   //     amount: 150,
+//   //     status: "active",
+//   //     email: "merr@example.com",
+//   //   },
+//   // ]
+// }
 
 export default function AdminCommunitiesPage() {
-  const data = getData()
+  const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [serverResponse, setServerResponse] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const communities = await getCommunities();
+      console.log('communities:', communities);
+      setData(communities);
+    }
+    fetchData();
+  }, []);
 
   const {
     register,

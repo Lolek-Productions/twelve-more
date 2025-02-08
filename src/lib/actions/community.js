@@ -49,3 +49,19 @@ export const deleteCommunity = async (id) => {
     return { error: "Failed to delete community." };
   }
 };
+
+export const getCommunities = async function () {
+  try {
+    await connect(); // ✅ Ensure database connection
+
+    const communities = await Community.find().lean();
+
+    return communities.map(({ _id, ...rest }) => ({
+      ...rest,
+      id: _id?.toString() || "", // ✅ Convert ObjectId safely
+    }));
+  } catch (error) {
+    console.error("Error fetching communities:", error);
+    return []; // ✅ Return an empty array if an error occurs
+  }
+};
