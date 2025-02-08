@@ -1,10 +1,8 @@
 'use client'
 
-import { columns } from "./columns"
-import { DataTable } from "./data-table"
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import {useActionState, useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,48 +15,11 @@ import {
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {createOrUpdateCommunity, getCommunities} from "@/lib/actions/community";
+import {CommunityTable} from "@/app/admin/communities/community-table";
 
 const communitySchema = z.object({
   name: z.string().min(1, "Community name is required"),
 });
-
-
-//
-// function getData() {
-//
-//   //Example
-//   // let data = null;
-//   // try {
-//   //   const result = await fetch(process.env.APP_URL + '/api/post/get', {
-//   //     method: 'POST',
-//   //     body: JSON.stringify({ postId: params.id }),
-//   //     cache: 'no-store',
-//   //   });
-//   //   data = await result.json();
-//   // } catch (error) {
-//   //   console.log('Error getting post:', error);
-//   //   data = { text: 'Failed to load post' };
-//   // }
-//
-//   return [];
-//
-//   //
-//   // // Fetch data from your API here.
-//   // return [
-//   //   {
-//   //     id: "728ed52f",
-//   //     amount: 100,
-//   //     status: "pending",
-//   //     email: "m@example.com",
-//   //   },
-//   //   {
-//   //     id: "98769786",
-//   //     amount: 150,
-//   //     status: "active",
-//   //     email: "merr@example.com",
-//   //   },
-//   // ]
-// }
 
 export default function AdminCommunitiesPage() {
   const [data, setData] = useState([]);
@@ -68,7 +29,6 @@ export default function AdminCommunitiesPage() {
   useEffect(() => {
     async function fetchData() {
       const communities = await getCommunities();
-      console.log('communities:', communities);
       setData(communities);
     }
     fetchData();
@@ -141,7 +101,8 @@ export default function AdminCommunitiesPage() {
           </DialogContent>
         </Dialog>
 
-        <DataTable columns={columns} data={data}/>
+        <CommunityTable data={data} />
+
       </div>
     </div>
   )
