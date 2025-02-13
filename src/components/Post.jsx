@@ -4,15 +4,13 @@ import moment from 'moment';
 import Icons from './Icons';
 
 export default function Post({ post }) {
-  console.log('Post:', post);
-
   return (
     <div className='flex p-3 border-b border-gray-200 w-full hover:bg-gray-50'>
-      <Link href={`/users/${post?.user?.toString()}`}>
+      <Link href={`/users/${post?.user?.toString()}`} className='flex-shrink-0'>
         <img
           src={post?.profileImg}
           alt='user-img'
-          className='h-11 w-11 rounded-full mr-4'
+          className='h-11 w-11 rounded-full mr-4 flex-shrink-0'
         />
       </Link>
       <div className='flex-1'>
@@ -30,7 +28,7 @@ export default function Post({ post }) {
           <HiDotsHorizontal className='text-sm' />
         </div>
         <Link href={`/posts/${post?._id}`}>
-          <p className='text-gray-800 text-sm my-3 w-full'>{post?.text}</p>
+          <p className='text-gray-800 text-sm my-3 w-full break-all'>{post?.text}</p>
         </Link>
         <Link href={`/posts/${post?._id}`}>
           <img src={post?.image} className='rounded-2xl mr-2' />
