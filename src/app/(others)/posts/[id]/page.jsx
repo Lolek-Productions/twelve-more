@@ -13,8 +13,6 @@ export default async function PostPage({ params }) {
       cache: 'no-store',
     });
     data = await result.json();
-    // console.log('post', data);
-
   } catch (error) {
     console.log('Error getting post:', error);
     data = { text: 'Failed to load post' };
@@ -29,7 +27,7 @@ export default async function PostPage({ params }) {
         <h2 className='sm:text-lg'>Back</h2>
       </div>
       {!data && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
-      {data && <Post post={data} />}
+      {data && <Post post={data} clickableText={false} />}
       {data && <Comments comments={data.comments} />}
     </div>
   );

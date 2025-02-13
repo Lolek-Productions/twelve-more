@@ -3,7 +3,7 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 import moment from 'moment';
 import Icons from './Icons';
 
-export default function Post({ post }) {
+export default function Post({ post, clickableText = true }) {
   return (
     <div className='flex p-3 border-b border-gray-200 w-full hover:bg-gray-50'>
       <Link href={`/users/${post?.user?.toString()}`} className='flex-shrink-0'>
@@ -27,9 +27,17 @@ export default function Post({ post }) {
           </div>
           <HiDotsHorizontal className='text-sm' />
         </div>
-        <Link href={`/posts/${post?._id}`}>
-          <p className='text-gray-800 text-sm my-3 w-full break-all'>{post?.text}</p>
-        </Link>
+        {clickableText ? (
+          <Link href={`/posts/${post?._id}`} className="block">
+            <p className='text-gray-800 text-sm my-3 w-full break-all'>
+              {post?.text}
+            </p>
+          </Link>
+        ) : (
+          <p className='text-gray-800 text-sm my-3 w-full break-all'>
+            {post?.text}
+          </p>
+        )}
         <Link href={`/posts/${post?._id}`}>
           <img src={post?.image} className='rounded-2xl mr-2' />
         </Link>
