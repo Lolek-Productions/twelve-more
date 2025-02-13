@@ -81,7 +81,7 @@ export default function Icons({ post }) {
             }
           }}
         />
-        {post.comments.length > 0 && (
+        {post.comments?.length > 0 && (
           <span className='text-xs'>{post.comments.length}</span>
         )}
       </div>

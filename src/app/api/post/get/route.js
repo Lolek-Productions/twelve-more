@@ -3,14 +3,18 @@ import { connect } from '../../../../lib/mongodb/mongoose';
 import { currentUser } from '@clerk/nextjs/server';
 
 export const POST = async (req) => {
+  console.log(req);
+
   const user = await currentUser();
+
   try {
     await connect();
     const data = await req.json();
-    const post = await Post.findById(data.postId).populate({
-      path: "comments",
-      populate: { path: "user" }
-    });
+    const post = await Post.findById(data.postId);
+    // .populate({
+    //   path: "comments",
+    //   populate: { path: "user" }
+    // });
     return new Response(JSON.stringify(post), { status: 200 });
   } catch (error) {
     console.log('Error getting post:', error);

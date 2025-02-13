@@ -5,6 +5,7 @@ import { HiArrowLeft } from 'react-icons/hi';
 
 export default async function PostPage({ params }) {
   let data = null;
+
   try {
     const result = await fetch(process.env.APP_URL + '/api/post/get', {
       method: 'POST',
@@ -12,6 +13,8 @@ export default async function PostPage({ params }) {
       cache: 'no-store',
     });
     data = await result.json();
+    // console.log('post', data);
+
   } catch (error) {
     console.log('Error getting post:', error);
     data = { text: 'Failed to load post' };
