@@ -1,7 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/', 'terms', 'privacy']);
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/',             // Explicitly allow home page
+  '/terms',    // Matches "/terms" and any subroutes like "/terms-of-service"
+  '/privacy',  // Matches "/privacy" and potential subroutes
+  '/onboarding',
+]);
+
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 
 export default clerkMiddleware(async (auth, request) => {
@@ -26,8 +34,13 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
 
+  // ✅ Allow public routes to be accessed by anyone
+  if (isPublicRoute(request)) {
+    return NextResponse.next();
+  }
+
   // ✅ If user is NOT signed in and tries to access a private route, redirect to sign-in
-  if (!userId && !isPublicRoute(request)) {
+  if (!userId) {
     return redirectToSignIn({ returnBackUrl: request.url });
   }
 
