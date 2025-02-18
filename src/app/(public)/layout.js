@@ -25,12 +25,12 @@ export default function RootLayout({children}) {
       <footer className="bg-gray-800">
         <div className="container mx-auto px-6 py-4 text-center text-white">
           <p>&copy; {currentYear} TwelveMore. All rights reserved.</p>
-          <div className="mt-2">
-            <Link
-              href="/privacy"
-              className="text-gray-400 hover:text-white underline"
-            >
+          <div className="mt-2 space-x-4">
+            <Link href="/privacy" className="text-gray-400 hover:text-white underline">
               Privacy Policy
+            </Link>
+            <Link href="/terms" className="text-gray-400 hover:text-white underline">
+              Terms of Service
             </Link>
           </div>
         </div>

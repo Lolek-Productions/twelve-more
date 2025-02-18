@@ -1,7 +1,7 @@
 import Link from 'next/link';
+import {supportEmailAddress} from "@/lib/utils";
 
 export default function Privacy() {
-  const supportEmail = 'fr.josh@lolekproductions.org'
   return (
     <div className="container mx-auto p-6 max-w-3xl">
       <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
@@ -13,10 +13,17 @@ export default function Privacy() {
         We collect several types of information to provide and improve our services:
       </p>
       <ul className="list-disc list-inside text-gray-700">
-        <li><strong>Account Information:</strong> When you sign up, we collect your name, email, and other necessary details.</li>
-        <li><strong>Usage Data:</strong> We track how you interact with the platform, including pages visited and actions taken.</li>
-        <li><strong>Device Information:</strong> Your IP address, browser type, and device details may be logged automatically.</li>
-        <li><strong>Cookies & Tracking:</strong> We use cookies to enhance your experience and analyze user activity.</li>
+        <li><strong>Account Information:</strong> When you sign up, we collect your name, email, and other necessary
+          details.
+        </li>
+        <li><strong>Usage Data:</strong> We track how you interact with the platform, including pages visited and
+          actions taken.
+        </li>
+        <li><strong>Device Information:</strong> Your IP address, browser type, and device details may be logged
+          automatically.
+        </li>
+        <li><strong>Cookies & Tracking:</strong> We use cookies to enhance your experience and analyze user activity.
+        </li>
       </ul>
 
       <h2 className="text-2xl font-semibold mt-6">2. How We Use Your Information</h2>
@@ -36,7 +43,9 @@ export default function Privacy() {
         We <strong>do not sell</strong> your personal data. However, we may share information in the following cases:
       </p>
       <ul className="list-disc list-inside text-gray-700">
-        <li><strong>With Service Providers:</strong> We work with third-party vendors for hosting, analytics, and payments.</li>
+        <li><strong>With Service Providers:</strong> We work with third-party vendors for hosting, analytics, and
+          payments.
+        </li>
         <li><strong>For Legal Reasons:</strong> If required by law or to protect our rights and users.</li>
         <li><strong>With Your Consent:</strong> We will ask for your permission before sharing sensitive data.</li>
       </ul>
@@ -52,7 +61,7 @@ export default function Privacy() {
         <li>Opt out of marketing communications.</li>
       </ul>
       <p className="text-gray-700">
-        To exercise these rights, contact us at <Link href={`mailto:${supportEmail}`} className="text-blue-500">{supportEmail}</Link>.
+        To exercise these rights, contact us at <Link href={`mailto:${supportEmailAddress}`} className="text-blue-500">{supportEmailAddress}</Link>.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6">5. Data Security & Retention</h2>
@@ -63,23 +72,33 @@ export default function Privacy() {
 
       <h2 className="text-2xl font-semibold mt-6">6. Third-Party Links & Services</h2>
       <p className="text-gray-700">
-        TwelveMore may link to third-party websites. We are not responsible for their privacy policies, and we encourage you to review their terms separately.
+        TwelveMore may link to third-party websites. We are not responsible for their privacy policies, and we encourage
+        you to review their terms separately.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6">7. Updates to This Privacy Policy</h2>
       <p className="text-gray-700">
-        We may update this policy periodically. If significant changes occur, we will notify you via email or within the platform.
+        We may update this policy periodically. If significant changes occur, we will notify you via email or within the
+        platform.
       </p>
 
-      <h2 className="text-2xl font-semibold mt-6">8. Contact Us</h2>
+      <h2 className="text-2xl font-semibold mt-6">8. Mobile Information Protection</h2>
+      <p className="text-gray-700">
+        TwelveMore does not share, sell, or disclose end-user mobile information to third parties or affiliates
+        for marketing or promotional purposes.
+      </p>
+      <p className="text-gray-700">
+        Any mobile data collected (such as device identifiers, app usage, or location data) is used strictly for
+        essential app functionality, security, and user experience enhancements. We do not engage in data-sharing
+        agreements for targeted advertising or promotional campaigns.
+      </p>
+
+      <h2 className="text-2xl font-semibold mt-6">9. Contact Us</h2>
       <p className="text-gray-700">
         If you have any questions or concerns about this Privacy Policy, contact us at:
       </p>
       <p className="text-gray-700">
-        <Link href={`mailto:${supportEmail}`} className="text-blue-500">{supportEmail}</Link>
-      </p>
-      <p className="text-gray-700">
-        <Link target="_blank" href="https://twelvemore.social" className="text-blue-500">https://twelvemore.social</Link>
+        <Link href={`mailto:${supportEmailAddress}`} className="text-blue-500">{supportEmailAddress}</Link>
       </p>
     </div>
   );
