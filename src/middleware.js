@@ -21,16 +21,16 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
 
-  // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
-  if (isApiRoute(request)) {
-    // if (!userId) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
-    // }
-    return NextResponse.next(); // ✅ Allow API access if authenticated
-  }
-
   // ✅ Get user authentication info
   const { userId, sessionClaims, redirectToSignIn } = await auth();
+
+  // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
+  if (isApiRoute(request)) {
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
+    }
+    return NextResponse.next(); // ✅ Allow API access if authenticated
+  }
 
   // ✅ Allow users to access onboarding if they're signed in
   if (userId && isOnboardingRoute(request)) {
