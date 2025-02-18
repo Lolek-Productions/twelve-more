@@ -1,15 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// const isPublicRoute = createRouteMatcher(['/sign-in(.*)'])
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
 
-// export default clerkMiddleware(async (auth, request) => {
-//   if (!isPublicRoute(request)) {
-//     await auth.protect()
-//   }
-// })
+export default clerkMiddleware(async (auth, request) => {
+  const host = request.headers.get('host');
+  const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
 
-export default clerkMiddleware();
+  //Bypass if localhost
+  if(!isLocalhost) {
+    if (request.headers.get('origin') !== 'https://twelvemore.social') {
+      return new Response('Unauthorized', { status: 403 });
+    }
 
+    if (!isPublicRoute(request)) {
+      await auth.protect();
+    }
+  }
+});
 
 export const config = {
   matcher: [
