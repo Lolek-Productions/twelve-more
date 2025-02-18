@@ -4,9 +4,9 @@ import { NextResponse } from 'next/server';
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/',             // Explicitly allow home page
-  '/terms',    // Matches "/terms" and any subroutes like "/terms-of-service"
-  '/privacy',  // Matches "/privacy" and potential subroutes
+  '/',          // Home page
+  '/terms(.*)', // Match "/terms" and subroutes
+  '/privacy(.*)' // Match "/privacy" and subroutes
 ]);
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
@@ -26,10 +26,9 @@ export default clerkMiddleware(async (auth, request) => {
 
   // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
   if (isApiRoute(request)) {
-    if (!userId) {
-      console.log('no userId found:', userId);
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
-    }
+    // if (!userId) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
+    // }
     return NextResponse.next(); // ✅ Allow API access if authenticated
   }
 
