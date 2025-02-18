@@ -20,11 +20,11 @@ export default function LeftSidebar() {
       href: "/invite",
       icon: <HiOutlinePaperAirplane className='w-6 h-6'/>,
     },
-    {
-      title: "Tasks",
-      href: "/tasks",
-      icon: <HiCheckCircle className='w-6 h-6'/>,
-    },
+    // {
+    //   title: "Tasks",
+    //   href: "/tasks",
+    //   icon: <HiCheckCircle className='w-6 h-6'/>,
+    // },
     {
       title: "Settings",
       href: "/settings",

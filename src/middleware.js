@@ -23,9 +23,9 @@ export default clerkMiddleware(async (auth, request) => {
 
   // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
   if (isApiRoute(request)) {
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
-    }
+    // if (!userId) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
+    // }
     return NextResponse.next(); // ✅ Allow API access if authenticated
   }
 
