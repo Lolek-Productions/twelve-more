@@ -11,7 +11,13 @@ export default async function Home() {
       method: 'POST',
       cache: 'no-store',
     });
-    data = await result.json();
+    // Ensure the response is ok and has content before parsing JSON
+    if (result.ok && result.headers.get('content-length') !== '0') {
+      data = await result.json();
+    } else {
+      console.warn('Empty response or error:', result.status);
+      data = null; // Or set a fallback value
+    }
   } catch (error) {
     console.error('Error fetching posts:', error);
   }

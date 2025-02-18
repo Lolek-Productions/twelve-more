@@ -1,12 +1,7 @@
 import Post from '../../../../lib/models/post.model';
 import { connect } from '../../../../lib/mongodb/mongoose';
-import { currentUser } from '@clerk/nextjs/server';
 
 export const POST = async (req) => {
-  console.log(req);
-
-  const user = await currentUser();
-
   try {
     await connect();
     const data = await req.json();
