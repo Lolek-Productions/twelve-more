@@ -10,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
+const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
 
 export default clerkMiddleware(async (auth, request) => {
   const host = request.headers.get('host');
@@ -20,10 +21,13 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
 
-  // ✅ Restrict API access to trusted origins (Prevents unauthorized external requests)
-  // if (request.headers.get('origin') !== 'https://twelvemore.social/') {
-  //   return new Response('Unauthorized', { status: 403 });
-  // }
+  // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
+  if (isApiRoute(request)) {
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
+    }
+    return NextResponse.next(); // ✅ Allow API access if authenticated
+  }
 
   // ✅ Get user authentication info
   const { userId, sessionClaims, redirectToSignIn } = await auth();
