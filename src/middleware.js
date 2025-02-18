@@ -5,19 +5,23 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/',          // Home page
-  '/terms(.*)', // Match "/terms" and subroutes
-  '/privacy(.*)' // Match "/privacy" and subroutes
+  '/terms', // Match "/terms" and subroutes
+  '/privacy' // Match "/privacy" and subroutes
 ]);
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
 
 export default clerkMiddleware(async (auth, request) => {
-  const host = request.headers.get('host');
-  const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
-
   // ✅ Allow unrestricted access in local development
-  if (isLocalhost) {
+  // const host = request.headers.get('host');
+  // const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
+  // if (isLocalhost) {
+  //   return NextResponse.next();
+  // }
+
+  // ✅ Allow public routes to be accessed by anyone
+  if (isPublicRoute(request)) {
     return NextResponse.next();
   }
 
@@ -26,7 +30,9 @@ export default clerkMiddleware(async (auth, request) => {
 
   // ✅ Allow API routes to function properly (Do not redirect, just return JSON if unauthorized)
   if (isApiRoute(request)) {
+    //TODO: this should be implemented
     // if (!userId) {
+    //   console.log('userId from the API Request:', userId);
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); // ✅ Return JSON instead of redirect
     // }
     return NextResponse.next(); // ✅ Allow API access if authenticated
@@ -34,11 +40,6 @@ export default clerkMiddleware(async (auth, request) => {
 
   // ✅ Allow users to access onboarding if they're signed in
   if (userId && isOnboardingRoute(request)) {
-    return NextResponse.next();
-  }
-
-  // ✅ Allow public routes to be accessed by anyone
-  if (isPublicRoute(request)) {
     return NextResponse.next();
   }
 
