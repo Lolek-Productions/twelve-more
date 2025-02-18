@@ -7,7 +7,6 @@ const isPublicRoute = createRouteMatcher([
   '/',             // Explicitly allow home page
   '/terms',    // Matches "/terms" and any subroutes like "/terms-of-service"
   '/privacy',  // Matches "/privacy" and potential subroutes
-  '/onboarding',
 ]);
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
@@ -22,9 +21,9 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // ✅ Restrict API access to trusted origins (Prevents unauthorized external requests)
-  if (request.headers.get('origin') !== 'https://twelvemore.social') {
-    return new Response('Unauthorized', { status: 403 });
-  }
+  // if (request.headers.get('origin') !== 'https://twelvemore.social/') {
+  //   return new Response('Unauthorized', { status: 403 });
+  // }
 
   // ✅ Get user authentication info
   const { userId, sessionClaims, redirectToSignIn } = await auth();
