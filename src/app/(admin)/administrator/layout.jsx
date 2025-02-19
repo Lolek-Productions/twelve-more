@@ -1,24 +1,7 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/app/admin/components/sidebar-nav"
-import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs'
-import "../../globals.css";
+import { SidebarNav } from "@/app/(admin)/components/sidebar-nav"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata = {
-  title: process.env.APP_NAME,
-  description: process.env.APP_DESCRIPTION,
-};
 
 const sidebarNavItems = [
   {
@@ -45,9 +28,7 @@ const sidebarNavItems = [
 
 export default function SettingsLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <div>
       <div className="md:hidden">
         <Image
           src="/examples/forms-light.png"
@@ -79,8 +60,6 @@ export default function SettingsLayout({ children }) {
           <div className="flex-1 lg:max-w-2xl">{children}</div>
         </div>
       </div>
-      </body>
-      </html>
-    </ClerkProvider>
+    </div>
   )
 }
