@@ -4,12 +4,14 @@ import { currentUser } from '@clerk/nextjs/server';
 
 export const POST = async (req) => {
   const user = await currentUser();
-  console.warn(user);
-
 
   try {
     await connect();
     const data = await req.json();
+
+    if (!user?.publicMetadata?.userMongoId) {
+      console.error('⚠️ Warning: Missing userMongoId in publicMetadata');
+    }
 
     if (!user || user.publicMetadata.userMongoId !== data.userMongoId) {
       return new Response('Unauthorized', {
