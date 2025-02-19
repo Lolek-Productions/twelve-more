@@ -32,7 +32,7 @@ export default function LeftSidebar() {
     },
     {
       title: "Admin",
-      href: "/admin",
+      href: "/administrator",
       icon: <HiOutlineServer className='w-6 h-6'/>,
     },
   ];
