@@ -4,6 +4,9 @@ import { currentUser } from '@clerk/nextjs/server';
 
 export const POST = async (req) => {
   const user = await currentUser();
+  console.warn(user);
+
+
   try {
     await connect();
     const data = await req.json();
@@ -15,7 +18,6 @@ export const POST = async (req) => {
     }
     const newPost = await Post.create({
       user: data.userMongoId,
-      name: data.name,
       text: data.text,
       profileImg: data.profileImg,
       image: data.image,
