@@ -42,3 +42,7 @@ https://react-icons.github.io/react-icons/
 
 # Notes
 After changing the schema on the Post model, I had to restart the development server, before it would use the updated Post Model.
+
+# Source Video
+https://www.youtube.com/watch?v=gsysxSuTohA
+https://github.com/sahandghavidel/next-social-app/tree/main

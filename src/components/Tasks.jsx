@@ -2,6 +2,7 @@
 
 import tasks from "@/data/tasks";
 
+
 export default function Tasks() {
   return (
     <div className='mt-3 text-gray-700 space-y-3 bg-gray-100 rounded-xl pt-2'>

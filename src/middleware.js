@@ -13,6 +13,8 @@ const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
 
 export default clerkMiddleware(async (auth, request) => {
+  //This is a hot mess!!
+
   // ✅ Allow unrestricted access in local development
   // const host = request.headers.get('host');
   // const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
