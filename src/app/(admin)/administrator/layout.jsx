@@ -9,8 +9,8 @@ const sidebarNavItems = [
     href: "/home",
   },
   {
-    title: "Profile",
-    href: "/admin",
+    title: "Administrator",
+    href: "/administrator",
   },
   {
     title: "Communities",

@@ -15,16 +15,16 @@ export default function LeftSidebar() {
       href: "/home",
       icon: <HiHome className='w-6 h-6' />,
     },
-    {
-      title: "Invite",
-      href: "/invite",
-      icon: <HiOutlinePaperAirplane className='w-6 h-6'/>,
-    },
     // {
-    //   title: "Tasks",
-    //   href: "/tasks",
-    //   icon: <HiCheckCircle className='w-6 h-6'/>,
+    //   title: "Invite",
+    //   href: "/invite",
+    //   icon: <HiOutlinePaperAirplane className='w-6 h-6'/>,
     // },
+    {
+      title: "Tasks",
+      href: "/tasks",
+      icon: <HiCheckCircle className='w-6 h-6'/>,
+    },
     {
       title: "Settings",
       href: "/settings",
@@ -72,13 +72,11 @@ export default function LeftSidebar() {
         <div className="p-3 bg-gray-100 rounded-md mt-2">
           <div className="flex items-center">
             <div className="ml-2 font-semibold">
-              My Communities
+              Communities
             </div>
           </div>
           <div className="">
-
-            <Link href='#'
-                  className='flex items-center p-3 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
+            <Link href='#' className='flex items-center p-3 hover:bg-gray-100 rounded-full transition-all duration-200 gap-2 w-fit'>
               <span className=''>
                 <span className='text-xl mr-2'>·</span>
                 Lolek
