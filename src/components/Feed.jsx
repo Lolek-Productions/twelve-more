@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]); // Stores fetched posts
-  const [postNum, setPostNum] = useState(5); // Default number of posts to fetch
+  const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -43,7 +43,7 @@ export default function Feed() {
       <div>
         {posts.length > 0 && (
           <button
-            onClick={() => setPostNum(postNum + 5)}
+            onClick={() => setPostNum(postNum + 10)}
             className='text-blue-500 pl-4 pb-6 pt-3 hover:text-blue-700 text-sm'
           >
             Load more
