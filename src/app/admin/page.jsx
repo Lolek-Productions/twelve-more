@@ -1,5 +1,5 @@
 import { Separator } from "@/components/ui/separator"
-import { ProfileForm } from "@/app/(admin)/administrator/profile-form"
+import { ProfileForm } from "@/app/admin/profile-form"
 
 export default function SettingsProfilePage() {
   const sidebarNavItems = [

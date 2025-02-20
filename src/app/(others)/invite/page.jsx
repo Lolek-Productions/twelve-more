@@ -10,14 +10,14 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 
 const profileFormSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: "First Name must be at least 2 characters." })
-    .max(30, { message: "First Name must not be longer than 30 characters." }),
-  lastName: z
-    .string()
-    .min(2, { message: "Last Name must be at least 2 characters." })
-    .max(30, { message: "Last Name must not be longer than 30 characters." }),
+  // firstName: z
+  //   .string()
+  //   .min(2, { message: "First Name must be at least 2 characters." })
+  //   .max(30, { message: "First Name must not be longer than 30 characters." }),
+  // lastName: z
+  //   .string()
+  //   .min(2, { message: "Last Name must be at least 2 characters." })
+  //   .max(30, { message: "Last Name must not be longer than 30 characters." }),
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
@@ -26,8 +26,8 @@ const profileFormSchema = z.object({
 });
 
 const defaultValues = {
-  firstName: "Josh",
-  lastName: "McCarty",
+  // firstName: "Josh",
+  // lastName: "McCarty",
   phoneNumber: "12708831110", // Will need to be "+12709858824" with updated schema
 };
 
@@ -82,34 +82,34 @@ export default function Invite(props) {
       <div className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="First name" {...field} />
-                  </FormControl>
-                  <FormDescription>Add the first name</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Last name" {...field} />
-                  </FormControl>
-                  <FormDescription>Add the last name</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/*<FormField*/}
+            {/*  control={form.control}*/}
+            {/*  name="firstName"*/}
+            {/*  render={({ field }) => (*/}
+            {/*    <FormItem>*/}
+            {/*      <FormLabel>First Name</FormLabel>*/}
+            {/*      <FormControl>*/}
+            {/*        <Input placeholder="First name" {...field} />*/}
+            {/*      </FormControl>*/}
+            {/*      <FormDescription>Add the first name</FormDescription>*/}
+            {/*      <FormMessage />*/}
+            {/*    </FormItem>*/}
+            {/*  )}*/}
+            {/*/>*/}
+            {/*<FormField*/}
+            {/*  control={form.control}*/}
+            {/*  name="lastName"*/}
+            {/*  render={({ field }) => (*/}
+            {/*    <FormItem>*/}
+            {/*      <FormLabel>Last Name</FormLabel>*/}
+            {/*      <FormControl>*/}
+            {/*        <Input placeholder="Last name" {...field} />*/}
+            {/*      </FormControl>*/}
+            {/*      <FormDescription>Add the last name</FormDescription>*/}
+            {/*      <FormMessage />*/}
+            {/*    </FormItem>*/}
+            {/*  )}*/}
+            {/*/>*/}
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -117,10 +117,10 @@ export default function Invite(props) {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="+12345678901" {...field} />
+                    <Input placeholder="12345678901" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Add the mobile phone number (include country code, e.g., +1 for USA).
+                    Add the mobile phone number, e.g. 12708831110.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

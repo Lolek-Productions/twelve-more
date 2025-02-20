@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/app/(admin)/components/sidebar-nav"
+import { SidebarNav } from "@/app/admin/components/sidebar-nav"
 import {Toaster} from "@/components/ui/toaster";
 
 const sidebarNavItems = [

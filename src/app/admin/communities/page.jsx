@@ -15,7 +15,7 @@ import {
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {createOrUpdateCommunity, deleteCommunity, getCommunities} from "@/lib/actions/community";
-import {CommunityTable} from "@/app/(admin)/administrator/communities/community-table";
+import {CommunityTable} from "@/app/admin/communities/community-table";
 import { useToast } from "@/hooks/use-toast"
 import {error} from "next/dist/build/output/log";
 

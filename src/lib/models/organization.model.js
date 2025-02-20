@@ -11,10 +11,10 @@ const organizationSchema = new mongoose.Schema(
       ref: 'Organization',
       required: true,
     },
-    members: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-      default: [],
-    },
+    members: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
   },
   { timestamps: true }
 );

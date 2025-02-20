@@ -2,7 +2,9 @@
 
 import mongoose from "mongoose";
 import Community from '../models/community.model';
+import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
+import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
 export async function createOrUpdateCommunity(formData) {
   console.log('hello createOrUpdateCommunity:', formData);
@@ -80,3 +82,44 @@ export const getCommunities = async function () {
     return []; // ✅ Return an empty array if an error occurs
   }
 };
+
+
+export async function getUserCommunities() {
+  try {
+    // Connect to MongoDB
+    await connect();
+
+    // Get the current user from Clerk
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const clerkId = clerkUser.id;
+
+    // Find the user in your custom User table by clerkId
+    const dbUser = await User.findOne({ clerkId });
+    if (!dbUser) {
+      throw new Error('User not found in database');
+    }
+
+    const userId = dbUser._id; // Your custom MongoDB User ID
+
+    // Fetch communities where this user is a member
+    const communities = await Community.find({ members: userId }).select('name _id');
+
+    return {
+      success: true,
+      communities: communities.map((community) => ({
+        id: community._id.toString(),
+        name: community.name,
+      })),
+    };
+  } catch (error) {
+    console.error('Error fetching communities:', error.message);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}

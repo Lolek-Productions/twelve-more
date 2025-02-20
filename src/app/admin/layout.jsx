@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-import { SidebarNav } from "@/app/(admin)/components/sidebar-nav"
+import { SidebarNav } from "@/app/admin/components/sidebar-nav"
 
 
 const sidebarNavItems = [
@@ -10,7 +10,7 @@ const sidebarNavItems = [
   },
   {
     title: "Administrator",
-    href: "/administrator",
+    href: "/admin",
   },
   {
     title: "Communities",
