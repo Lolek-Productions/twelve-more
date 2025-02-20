@@ -1,10 +1,7 @@
 import mongoose from 'mongoose';
 
-let initialized = false;
-
 export const connect = async () => {
-  mongoose.set('strictQuery', true);
-  if (initialized) {
+  if (mongoose.connection.readyState >= 1) {
     console.log('Already connected to MongoDB');
     return;
   }
@@ -16,8 +13,8 @@ export const connect = async () => {
       useUnifiedTopology: true,
     });
     console.log('Connected to MongoDB');
-    initialized = true;
   } catch (error) {
-    console.log('Error connecting to MongoDB:', error);
+    console.error('Error connecting to MongoDB:', error);
+    throw error;
   }
 };

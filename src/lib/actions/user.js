@@ -1,3 +1,5 @@
+"use server";
+
 import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 
@@ -49,5 +51,29 @@ export const deleteUser = async (id) => {
     await User.findOneAndDelete({ clerkId: id });
   } catch (error) {
     console.error('Error deleting user:', error);
+  }
+};
+
+export const getAllUsers = async () => {
+  try {
+    await connect();
+
+    // Fetch all users from MongoDB as plain objects
+    const users = await User.find().select('firstName lastName username clerkId').lean();
+
+    return {
+      success: true,
+      users: users.map(user => ({
+        id: user._id.toString(), // Use MongoDB _id as the identifier
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || user.clerkId,
+      })),
+    };
+  } catch (error) {
+    console.error('Error fetching users from MongoDB:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    return { success: false, error: 'Failed to fetch users', details: error.message };
   }
 };

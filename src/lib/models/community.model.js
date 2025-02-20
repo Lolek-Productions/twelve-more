@@ -14,14 +14,10 @@ const communitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     }],
-    leader: {
+    leaders: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-    },
-    nurturer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
+    }],
   },
   { timestamps: true }
 );

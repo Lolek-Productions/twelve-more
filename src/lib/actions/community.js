@@ -2,7 +2,6 @@
 
 import mongoose from "mongoose";
 import Community from '../models/community.model';
-import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
@@ -72,11 +71,14 @@ export const getCommunities = async function () {
     await connect(); // ✅ Ensure database connection
 
     const communities = await Community.find().lean();
-
-    return communities.map(({ _id, ...rest }) => ({
-      ...rest,
-      id: _id?.toString() || "", // ✅ Convert ObjectId safely
+    return communities.map((community) => ({
+      id: community._id?.toString() || "",
+      name: community.name,
+      members: community.members?.map(member => member.toString()) || [],
+      leaders: community.leaders?.map(leader => leader.toString()) || [],
+      organization: community.organization?.toString() || null,
     }));
+
   } catch (error) {
     console.error("Error fetching communities:", error);
     return []; // ✅ Return an empty array if an error occurs
@@ -90,23 +92,16 @@ export async function getUserCommunities() {
     await connect();
 
     // Get the current user from Clerk
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
+    const user = await currentUser();
+    if (!user) {
       throw new Error('User not authenticated');
     }
-
-    const clerkId = clerkUser.id;
-
-    // Find the user in your custom User table by clerkId
-    const dbUser = await User.findOne({ clerkId });
-    if (!dbUser) {
-      throw new Error('User not found in database');
+    if (!user.publicMetadata.userMongoId) {
+      throw new Error('User missing userMongoId');
     }
 
-    const userId = dbUser._id; // Your custom MongoDB User ID
-
     // Fetch communities where this user is a member
-    const communities = await Community.find({ members: userId }).select('name _id');
+    const communities = await Community.find({ members: user.publicMetadata.userMongoId }).lean();
 
     return {
       success: true,
@@ -121,5 +116,48 @@ export async function getUserCommunities() {
       success: false,
       error: error.message,
     };
+  }
+}
+
+// ./lib/actions/community.js
+export async function addUserToCommunity(communityId, userId) {
+  // console.log(communityId, userId);
+
+  try {
+    await connect();
+
+    // Validate inputs
+    if (!mongoose.Types.ObjectId.isValid(communityId)) {
+      return { success: false, error: 'Invalid community ID' };
+    }
+    if (!userId || typeof userId !== 'string') {
+      return { success: false, error: 'Invalid user ID' };
+    }
+
+    const client = await clerkClient();
+
+    // Check if user exists in Clerk
+    // const users = await client.users.getUserList({ userId: [userId] });
+    // console.log(users);
+    //
+    // if (!users.data.length) {
+    //   return { success: false, error: 'User not found in Clerk' };
+    // }
+
+    // Update community by adding userId to members
+    const community = await Community.findByIdAndUpdate(
+      communityId,
+      { $addToSet: { members: userId } }, // $addToSet prevents duplicates
+      { new: true }
+    ).lean();
+
+    if (!community) {
+      return { success: false, error: 'Community not found' };
+    }
+
+    return { success: true, message: `User added to community` };
+  } catch (error) {
+    console.error('Error adding user to community:', error.message);
+    return { success: false, error: 'Failed to add user to community' };
   }
 }
