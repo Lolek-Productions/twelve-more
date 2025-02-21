@@ -8,10 +8,10 @@ const sidebarNavItems = [
     title: "Home",
     href: "/home",
   },
-  // {
-  //   title: "Administrator",
-  //   href: "/admin",
-  // },
+  {
+    title: "Administrator",
+    href: "/admin",
+  },
   {
     title: "Communities",
     href: "/admin/communities",
