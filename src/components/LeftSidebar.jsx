@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { HiCommandLine } from "react-icons/hi2";
 import { HiHome, HiCog, HiOutlineServer, HiCheckCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 import CommunityNav from './CommunityNav'; // Import the new component
@@ -37,6 +38,11 @@ export default function LeftSidebar() {
       title: 'Admin',
       href: '/admin',
       icon: <HiOutlineServer className="w-6 h-6" />,
+    },
+    {
+      title: 'Developer',
+      href: '/developer',
+      icon: <HiCommandLine className="w-6 h-6" />,
     },
   ];
 
