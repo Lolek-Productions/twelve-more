@@ -9,7 +9,7 @@ const isPublicRoute = createRouteMatcher([
   '/privacy' // Match "/privacy" and subroutes
 ]);
 
-const isOnboardingRoute = createRouteMatcher(['/onboarding']);
+// const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
 
 export default clerkMiddleware(async (auth, request) => {
@@ -41,9 +41,9 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // ✅ Allow users to access onboarding if they're signed in
-  if (userId && isOnboardingRoute(request)) {
-    return NextResponse.next();
-  }
+  // if (userId && isOnboardingRoute(request)) {
+  //   return NextResponse.next();
+  // }
 
   // ✅ If user is NOT signed in and tries to access a private route, redirect to sign-in
   if (!userId) {
@@ -51,9 +51,9 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // ✅ If user is signed in but hasn't completed onboarding, redirect to onboarding page
-  if (userId && !sessionClaims?.metadata?.onboardingComplete) {
-    return NextResponse.redirect(new URL('/onboarding', request.url));
-  }
+  // if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+  //   return NextResponse.redirect(new URL('/onboarding', request.url));
+  // }
 
   // ✅ Allow access to private routes if user is signed in
   return NextResponse.next();
