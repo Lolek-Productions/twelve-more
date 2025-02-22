@@ -5,24 +5,15 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/',          // Home page
-  '/terms', // Match "/terms" and subroutes
-  '/privacy' // Match "/privacy" and subroutes
+  '/terms', // Match "/terms"
+  '/privacy' // Match "/privacy"
 ]);
 
-// const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
 
 export default clerkMiddleware(async (auth, request) => {
   //This is a hot mess!!
 
-  // ✅ Allow unrestricted access in local development
-  // const host = request.headers.get('host');
-  // const isLocalhost = host?.includes('localhost') || host?.includes('127.0.0.1');
-  // if (isLocalhost) {
-  //   return NextResponse.next();
-  // }
-
-  // ✅ Allow public routes to be accessed by anyone
   if (isPublicRoute(request)) {
     return NextResponse.next();
   }
@@ -40,20 +31,10 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next(); // ✅ Allow API access if authenticated
   }
 
-  // ✅ Allow users to access onboarding if they're signed in
-  // if (userId && isOnboardingRoute(request)) {
-  //   return NextResponse.next();
-  // }
-
   // ✅ If user is NOT signed in and tries to access a private route, redirect to sign-in
   if (!userId) {
     return redirectToSignIn({ returnBackUrl: request.url });
   }
-
-  // ✅ If user is signed in but hasn't completed onboarding, redirect to onboarding page
-  // if (userId && !sessionClaims?.metadata?.onboardingComplete) {
-  //   return NextResponse.redirect(new URL('/onboarding', request.url));
-  // }
 
   // ✅ Allow access to private routes if user is signed in
   return NextResponse.next();
