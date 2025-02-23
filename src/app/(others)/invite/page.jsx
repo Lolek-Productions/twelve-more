@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,30 +8,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
+// Define the schema with smsOptIn as a required field
 const profileFormSchema = z.object({
-  // firstName: z
-  //   .string()
-  //   .min(2, { message: "First Name must be at least 2 characters." })
-  //   .max(30, { message: "First Name must not be longer than 30 characters." }),
-  // lastName: z
-  //   .string()
-  //   .min(2, { message: "Last Name must be at least 2 characters." })
-  //   .max(30, { message: "Last Name must not be longer than 30 characters." }),
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
     .min(10, { message: "Phone Number must be at least 10 digits." })
     .max(15, { message: "Phone Number must not exceed 15 characters." }),
+  smsOptIn: z
+    .boolean()
+    .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
 });
 
 const defaultValues = {
-  // firstName: "Josh",
-  // lastName: "McCarty",
-  phoneNumber: "12708831110", // Will need to be "+12709858824" with updated schema
+  phoneNumber: "",
+  smsOptIn: false,
 };
 
-export default function Invite(props) {
+export default function Invite() {
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -44,13 +42,13 @@ export default function Invite(props) {
       const res = await fetch('/api/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: data.phoneNumber, firstName: data.firstName, lastName: data.lastName }),
+        body: JSON.stringify({ phoneNumber: data.phoneNumber }),
       });
 
-      const text = await res.text(); // Get raw text first
+      const text = await res.text();
       console.log('Raw response:', text); // Debug
 
-      const result = JSON.parse(text); // Manually parse
+      const result = JSON.parse(text);
       if (!res.ok) {
         throw new Error(result.error || 'Failed to send invitation');
       }
@@ -70,9 +68,9 @@ export default function Invite(props) {
     }
   };
 
-  function onSubmit(data) {
-    sendInvite(data); // Call sendInvite with form data
-  }
+  const onSubmit = (data) => {
+    sendInvite(data);
+  };
 
   return (
     <div className="min-h-screen max-w-xl mx-auto border-r border-l">
@@ -82,34 +80,6 @@ export default function Invite(props) {
       <div className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/*<FormField*/}
-            {/*  control={form.control}*/}
-            {/*  name="firstName"*/}
-            {/*  render={({ field }) => (*/}
-            {/*    <FormItem>*/}
-            {/*      <FormLabel>First Name</FormLabel>*/}
-            {/*      <FormControl>*/}
-            {/*        <Input placeholder="First name" {...field} />*/}
-            {/*      </FormControl>*/}
-            {/*      <FormDescription>Add the first name</FormDescription>*/}
-            {/*      <FormMessage />*/}
-            {/*    </FormItem>*/}
-            {/*  )}*/}
-            {/*/>*/}
-            {/*<FormField*/}
-            {/*  control={form.control}*/}
-            {/*  name="lastName"*/}
-            {/*  render={({ field }) => (*/}
-            {/*    <FormItem>*/}
-            {/*      <FormLabel>Last Name</FormLabel>*/}
-            {/*      <FormControl>*/}
-            {/*        <Input placeholder="Last name" {...field} />*/}
-            {/*      </FormControl>*/}
-            {/*      <FormDescription>Add the last name</FormDescription>*/}
-            {/*      <FormMessage />*/}
-            {/*    </FormItem>*/}
-            {/*  )}*/}
-            {/*/>*/}
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -117,18 +87,49 @@ export default function Invite(props) {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="12345678901" {...field} />
+                    <Input placeholder="e.g., 2025550123" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Add the mobile phone number, e.g. 12708831110.
+                    Enter your 10-digit US phone number (no +1 needed).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Sending..." : "Invite"}
-            </Button>
+
+            <FormField
+              control={form.control}
+              name="smsOptIn"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-4">
+                  <FormControl>
+                    <Checkbox
+                      id="smsOptIn"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div>
+                    <FormLabel htmlFor="smsOptIn" className="text-sm">
+                      User agrees to receive SMS notifications from TwelveMore. Message & data rates may apply. Reply STOP to unsubscribe. See our Privacy Policy.
+                    </FormLabel>
+                    <FormDescription className="text-sm">
+                      Message & data rates may apply. Reply <strong>STOP</strong> to unsubscribe. See our{" "}
+                      <Link target="_blank" href="/privacy" className="text-blue-500 hover:underline">
+                        Privacy Policy
+                      </Link>.
+                    </FormDescription>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <div >
+              <Button className="mt-5" type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Sending..." : "Invite"}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>
