@@ -111,7 +111,7 @@ export default function Invite() {
                   </FormControl>
                   <div>
                     <FormLabel htmlFor="smsOptIn" className="text-sm">
-                      User agrees to receive SMS notifications from TwelveMore. Message & data rates may apply. Reply STOP to unsubscribe. See our Privacy Policy.
+                      I agree to receive SMS notifications from TwelveMore. Message & data rates may apply. Reply STOP to unsubscribe. See our Privacy Policy.
                     </FormLabel>
                     <FormDescription className="text-sm">
                       Message & data rates may apply. Reply <strong>STOP</strong> to unsubscribe. See our{" "}
