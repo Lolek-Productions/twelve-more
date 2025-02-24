@@ -9,49 +9,28 @@ import CommunityNav from './CommunityNav';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
-import {DEV_PHONE_NUMBERS} from '@/lib/constants';
+import { DEV_PHONE_NUMBERS } from '@/lib/constants';
 
 export default function LeftSidebar() {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
 
   const sidebarNavItems = [
-    {
-      title: 'Home',
-      href: '/home',
-      icon: <HiHome className="w-6 h-6" />,
-    },
-    {
-      title: 'Invite',
-      href: '/invite',
-      icon: <HiOutlinePaperAirplane className="w-6 h-6" />,
-    },
-    {
-      title: 'Tasks',
-      href: '/tasks',
-      icon: <HiCheckCircle className="w-6 h-6" />,
-    },
-    {
-      title: 'Settings',
-      href: '/settings',
-      icon: <HiCog className="w-6 h-6" />,
-    },
+    { title: 'Home', href: '/home', icon: <HiHome className="w-6 h-6" /> },
+    { title: 'Invite', href: '/invite', icon: <HiOutlinePaperAirplane className="w-6 h-6" /> },
+    { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
+    { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
     {
       title: 'Admin',
       href: '/admin',
       icon: <HiOutlineServer className="w-6 h-6" />,
-      isVisible: user?.phoneNumbers?.some(phone =>
-        DEV_PHONE_NUMBERS.includes(phone.phoneNumber)
-      ),
+      isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
     },
     {
       title: 'Developer',
       href: '/developer',
       icon: <HiCommandLine className="w-6 h-6" />,
-      // Check if any user phone number matches any DEV_PHONE_NUMBERS
-      isVisible: user?.phoneNumbers?.some(phone =>
-        DEV_PHONE_NUMBERS.includes(phone.phoneNumber)
-      ),
+      isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
     },
   ];
 
@@ -59,14 +38,14 @@ export default function LeftSidebar() {
     item.isVisible === undefined || item.isVisible === true
   );
 
-  if (!isLoaded) {
-    return <div>Loading...</div>;
+  if (!isLoaded || !user) {
+    return <div className="p-3">Loading...</div>;
   }
 
   return (
-    <div className="flex flex-col p-3 justify-between h-screen items-center">
-      <div className="flex flex-col gap-3 p-3 w-48">
-        <Link href="/home" className="flex items-center gap-2">
+    <div className="flex h-full flex-col p-3">
+      <div className="flex flex-col gap-3">
+        <Link href="/home" className="flex items-center gap-2 mb-4">
           <Image
             src="/logo.png"
             alt="TwelveMore"
@@ -77,25 +56,29 @@ export default function LeftSidebar() {
           <div className="font-semibold text-xl">TwelveMore</div>
         </Link>
 
-        <div className="space-y-1 mt-2">
+        <nav className="space-y-2">
           {visibleNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                pathname === item.href ? 'bg-muted' : 'hover:bg-transparent',
-                'flex items-center p-2 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit'
+                pathname === item.href ? 'bg-muted' : 'hover:bg-muted/50',
+                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
               )}
             >
               {item.icon}
-              <span className="font-bold hidden xl:inline">{item.title}</span>
+              {/* Always show title on mobile, hide on xl+ unless needed */}
+              <span className="font-bold">{item.title}</span>
             </Link>
           ))}
-        </div>
+        </nav>
 
         <CommunityNav />
       </div>
-      <MiniProfile />
+
+      <div className="mt-auto">
+        <MiniProfile />
+      </div>
     </div>
   );
 }
