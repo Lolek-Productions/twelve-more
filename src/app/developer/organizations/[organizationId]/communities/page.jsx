@@ -33,6 +33,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Breadcrumb } from "@/components/ui/breadcrumb"; // Import the new component
 
 const communitySchema = z.object({
   name: z.string().min(1, "Community name is required"),
@@ -183,11 +184,15 @@ export default function AdminCommunitiesPage({ params }) {
     return <div>Loading...</div>;
   }
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Organizations", href: "/developer/organizations" },
+    { label: organizationName, href: `/developer/organizations/${organizationId} Communities` },
+  ];
+
   return (
     <div>
-      <div className="text-2xl font-bold p-6 mb-3 text-white bg-gray-700 w-full">
-        Showing Communities for {organizationName} organization
-      </div>
+      <Breadcrumb items={breadcrumbItems} />
       <div className="flex flex-row items-center justify-between p-6">
         <div>
           <h3 className="text-lg font-medium">Communities</h3>
