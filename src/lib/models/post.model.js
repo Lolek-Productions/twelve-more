@@ -17,6 +17,16 @@ const postSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    community: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Community',
+      // required: true,
+    },
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Organization',
+      // required: true,
+    },
     name: {
       type: String,
     },
