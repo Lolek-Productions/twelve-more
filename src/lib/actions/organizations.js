@@ -2,6 +2,7 @@
 
 import Organization from "@/lib/models/organization.model"; // Define this model
 import { connect } from "@/lib/mongodb/mongoose";
+import Community from "@/lib/models/community.model";
 
 export async function createOrganization({ name }) {
   try {
@@ -43,6 +44,46 @@ export async function getOrganizations() {
     throw error;
   }
 }
+
+export const getOrganizationById = async function (organizationId) {
+  try {
+    await connect(); // Ensure database connection
+
+    const organization = await Organization.findById(organizationId)
+      .populate({
+        path: "members",
+        select: "firstName lastName",
+      })
+      .populate({
+        path: "leaders",
+        select: "firstName lastName",
+      })
+      .lean();
+
+    if (!organization) {
+      console.error("No organization found for ID:", organizationId);
+      return null;
+    }
+
+    return {
+      id: organization._id?.toString() || "",
+      name: organization.name,
+      members: organization.members?.map((member) => ({
+        userId: member._id.toString(),
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+      leaders: organization.leaders?.map((member) => ({
+        userId: member._id.toString(),
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+    };
+  } catch (error) {
+    console.error("Error fetching organization by ID:", error);
+    return null;
+  }
+};
 
 export async function addUserToOrganization(organizationId, userId) {
   try {

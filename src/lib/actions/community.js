@@ -5,45 +5,36 @@ import Community from '../models/community.model';
 import { connect } from '../mongodb/mongoose';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
-export async function createOrUpdateCommunity(formData) {
-  const { id, name } = formData;
-  const organization = 1;
-
+export async function createCommunity({ name, organizationId }) {
   if (!name) {
     return { error: "Community name is required." };
   }
 
+  if (!organizationId) {
+    return { error: "Organization ID is required." };
+  }
+
   try {
-    await connect();
+    await connect(); // Ensure database connection
 
-    if (id) {
-      // ✅ If `id` exists, update the existing community
-      const community = await Community.findByIdAndUpdate(
-        id,
-        { $set: {
-          name,
-          // organization,
-        } },
-        { new: true }
-      );
+    console.log("Creating a new community:", name);
 
-      if (!community) {
-        return { error: "Community not found." };
-      }
+    const newCommunity = await Community.create({
+      name: name.trim(), // Clean up whitespace
+      organization: organizationId, // Use organizationId instead of hardcoded value
+    });
 
-      return { success: "Community updated successfully!" };
-    } else {
-      console.log('Creating a new community');
-
-      const newCommunity = await Community.create({
-        name,
-        // organization,
-      });
-      return { success: "Community created successfully!" };
-    }
+    return {
+      success: "Community created successfully!",
+      community: {
+        id: newCommunity._id.toString(),
+        name: newCommunity.name,
+        organization: newCommunity.organization.toString(),
+      },
+    };
   } catch (error) {
-    console.log(error);
-    return { error: "Failed to save community." };
+    console.error("Error creating community:", error);
+    return { error: "Failed to create community." };
   }
 }
 
@@ -89,6 +80,86 @@ export const getCommunities = async function () {
   } catch (error) {
     console.error("Error fetching communities:", error);
     return []; // ✅ Return an empty array if an error occurs
+  }
+};
+
+export const getCommunitiesByOrganization = async function (organizationId) {
+  try {
+    console.log(organizationId);
+    await connect(); // Ensure database connection (assuming this is your MongoDB connection function)
+
+    const communities = await Community.find({ organization: organizationId })
+      .populate({
+        path: "members", // Field to populate
+        select: "firstName lastName", // Only fetch firstName and lastName
+      })
+      .populate({
+        path: "organization", // Field to populate
+        select: "name", // Only fetch firstName and lastName
+      })
+      .lean();
+
+    return communities.map((community) => ({
+      id: community._id?.toString() || "",
+      name: community.name,
+      members: community.members?.map((member) => ({
+        userId: member._id.toString(), // Convert ObjectId to string
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+      leaders: community.leaders?.map((member) => ({
+        userId: member._id.toString(), // Convert ObjectId to string
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+      // organization: community.organization?.toString() || null,
+      organization: { name: community.organization?.name || "Unknown Organization" }, // Optional: Include organizationName if available in your schema
+    }));
+  } catch (error) {
+    console.error("Error fetching communities by organization:", error);
+    return []; // Return an empty array if an error occurs
+  }
+};
+
+export const getCommunityById = async function (communityId) {
+  try {
+    await connect(); // Ensure database connection
+
+    const community = await Community.findById(communityId)
+      .populate({
+        path: "members",
+        select: "firstName lastName",
+      })
+      .populate({
+        path: "leaders",
+        select: "firstName lastName",
+      })
+      .lean();
+
+    if (!community) {
+      console.error("No community found for ID:", communityId);
+      return null;
+    }
+
+    return {
+      id: community._id?.toString() || "",
+      name: community.name,
+      members: community.members?.map((member) => ({
+        userId: member._id.toString(),
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+      leaders: community.leaders?.map((member) => ({
+        userId: member._id.toString(),
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
+      organization: community.organization?.toString() || null,
+      organizationName: community.organizationName || "Unknown Organization",
+    };
+  } catch (error) {
+    console.error("Error fetching community by ID:", error);
+    return null;
   }
 };
 
