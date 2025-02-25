@@ -124,7 +124,7 @@ export default function AdminCommunitiesPage() {
         <div>
           <h3 className="text-lg font-medium">Communities</h3>
           <p className="text-sm text-muted-foreground">
-            Manage your TwelveMore communities.
+            Globally manage the TwelveMore communities.
           </p>
         </div>
         <Button onClick={() => setModalOpen(true)}>New Community</Button>
