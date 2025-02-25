@@ -1,6 +1,7 @@
 "use server";
 
 import {clerkClient} from "@clerk/nextjs/server";
+import twilioService from "@/lib/twilioService";
 
 export async function runCommand(commandName) {
   try {
@@ -40,6 +41,18 @@ export async function runCommand(commandName) {
         return {
           success: true,
           message: `Deleted Josh in Clerk (ID: ${userId}, Phone: ${phoneNumber})`,
+        };
+      }
+
+      case "Send Test SMS": {
+        const result = await twilioService.sendSMS(
+          '+12708831110',
+          'This is a test SMS from TwelveMore! Enjoy your day!'
+        );
+
+        return {
+          success: result.success,
+          message: result.message,
         };
       }
 

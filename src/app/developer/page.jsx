@@ -7,7 +7,7 @@ export default function DeveloperPage() {
   const [data, setData] = useState([
     { id: "1", name: "Create Josh in Clerk" },
     { id: "2", name: "Delete Josh in Clerk" },
-    { id: "3", name: "Send Test Email" },
+    { id: "3", name: "Send Test SMS" },
   ]);
 
   useEffect(() => {

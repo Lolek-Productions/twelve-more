@@ -11,6 +11,10 @@ const sidebarNavItems = [
     title: "Developer",
     href: "/developer",
   },
+  {
+    title: "Send SMS",
+    href: "/developer/send-sms", // New route for the SMS page
+  },
 ]
 
 export default function SettingsLayout({ children }) {

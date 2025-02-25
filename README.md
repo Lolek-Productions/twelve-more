@@ -46,3 +46,6 @@ After changing the schema on the Post model, I had to restart the development se
 # Source Video
 https://www.youtube.com/watch?v=gsysxSuTohA
 https://github.com/sahandghavidel/next-social-app/tree/main
+
+# copy everything in directory for AI
+find . -type f -exec sh -c 'echo "--- File: {} ---"; cat "{}"; echo ""' \; | pbcopy
