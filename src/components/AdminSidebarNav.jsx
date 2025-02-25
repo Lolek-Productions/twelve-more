@@ -5,33 +5,47 @@ import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import Image from "next/image";
 
 export function AdminSidebarNav({ className, items, ...props }) {
   const pathname = usePathname()
 
   return (
-    <nav
-      className={cn(
-        "flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1",
-        className
-      )}
-      {...props}
-    >
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={cn(
-            buttonVariants({ variant: "ghost" }),
-            pathname === item.href
-              ? "bg-muted hover:bg-muted"
-              : "hover:bg-transparent hover:underline",
-            "justify-start"
-          )}
-        >
-          {item.title}
-        </Link>
-      ))}
-    </nav>
-  )
-}
+    <div className="flex flex-col gap-3">
+      <Link href="/home" className="flex items-center gap-2 mb-4">
+        <Image
+          src="/logo.png"
+          alt="TwelveMore"
+          width={45}
+          height={45}
+          priority
+        />
+        <div className="font-semibold text-xl">TwelveMore</div>
+      </Link>
+
+      <nav
+        className={cn(
+          "flex flex-col",
+          className
+        )}
+        {...props}
+      >
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              buttonVariants({variant: "ghost"}),
+              pathname === item.href
+                ? "bg-muted hover:bg-muted"
+                : "hover:bg-transparent hover:underline",
+              "justify-start"
+            )}
+          >
+            {item.title}
+          </Link>
+        ))}
+      </nav>
+    </div>
+      )
+      }

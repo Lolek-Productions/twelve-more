@@ -50,6 +50,7 @@ export default function SettingsLayout({
           </div>
           <Separator className="my-6" />
           <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+          {/*<div className="flex flex-col space-y-8">*/}
             <aside className="-mx-4 lg:w-1/5">
               <AdminSidebarNav items={sidebarNavItems} />
             </aside>
@@ -61,23 +62,6 @@ export default function SettingsLayout({
         <main className="md:hidden flex-1 p-4">{children}</main>
       </div>
 
-      {/* Mobile Fallback Images (optional) */}
-      <div className="md:hidden">
-        <Image
-          src="/examples/forms-light.png"
-          width={1280}
-          height={791}
-          alt="Forms"
-          className="block dark:hidden"
-        />
-        <Image
-          src="/examples/forms-dark.png"
-          width={1280}
-          height={791}
-          alt="Forms"
-          className="hidden dark:block"
-        />
-      </div>
     </div>
   );
 }
