@@ -6,8 +6,6 @@ import { connect } from '../mongodb/mongoose';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
 export async function createOrUpdateCommunity(formData) {
-  console.log('hello createOrUpdateCommunity:', formData);
-
   const { id, name } = formData;
   const organization = 1;
 
@@ -70,11 +68,20 @@ export const getCommunities = async function () {
   try {
     await connect(); // ✅ Ensure database connection
 
-    const communities = await Community.find().lean();
+    const communities = await Community.find()
+      .populate({
+        path: "members", // Field to populate
+        select: "firstName lastName", // Only fetch firstName and lastName
+      })
+      .lean();
     return communities.map((community) => ({
       id: community._id?.toString() || "",
       name: community.name,
-      members: community.members?.map(member => member.toString()) || [],
+      members: community.members?.map((member) => ({
+        userId: member._id.toString(), // Convert ObjectId to string
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+      })) || [],
       leaders: community.leaders?.map(leader => leader.toString()) || [],
       organization: community.organization?.toString() || null,
     }));
@@ -85,6 +92,57 @@ export const getCommunities = async function () {
   }
 };
 
+export async function removeUserFromCommunity(communityId, userId) {
+  console.log(communityId, userId);
+  return;
+
+  try {
+    // Input validation
+    if (!communityId || !mongoose.isValidObjectId(communityId)) {
+      return {
+        success: false,
+        error: "Invalid or missing community ID",
+      };
+    }
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return {
+        success: false,
+        error: "Invalid or missing user ID",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Convert string IDs to ObjectId
+    const communityObjectId = new mongoose.Types.ObjectId(communityId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Update the community by pulling the userId from members array
+    const result = await Community.updateOne(
+      { _id: communityObjectId },
+      { $pull: { members: userObjectId } }
+    );
+
+    // Check if the operation modified anything
+    if (result.modifiedCount === 0) {
+      return {
+        success: false,
+        error: "User not found in community or community does not exist",
+      };
+    }
+
+    return {
+      success: true,
+      message: "User removed from community",
+    };
+  } catch (error) {
+    console.error("Error removing user from community:", error);
+    return {
+      success: false,
+      error: "Failed to remove user from community",
+    };
+  }
+}
 
 export async function getUserCommunities() {
   try {
@@ -119,7 +177,6 @@ export async function getUserCommunities() {
   }
 }
 
-// ./lib/actions/community.js
 export async function addUserToCommunity(communityId, userId) {
   // console.log(communityId, userId);
 
@@ -135,14 +192,6 @@ export async function addUserToCommunity(communityId, userId) {
     }
 
     const client = await clerkClient();
-
-    // Check if user exists in Clerk
-    // const users = await client.users.getUserList({ userId: [userId] });
-    // console.log(users);
-    //
-    // if (!users.data.length) {
-    //   return { success: false, error: 'User not found in Clerk' };
-    // }
 
     // Update community by adding userId to members
     const community = await Community.findByIdAndUpdate(

@@ -19,7 +19,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export function CommunityTable({ data, deleteEntity, onAddUser }) {
+export function CommunityTable({ data, deleteEntity, onManageMembers }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
 
@@ -56,7 +56,6 @@ export function CommunityTable({ data, deleteEntity, onAddUser }) {
       id: "actions",
       cell: ({ row }) => {
         const community = row.original;
-
         return (
           <div className="justify-end flex">
             <DropdownMenu>
@@ -67,7 +66,7 @@ export function CommunityTable({ data, deleteEntity, onAddUser }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onAddUser(community.id)}>
+                <DropdownMenuItem onClick={() => onManageMembers(community)}>
                   Manage Members
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => deleteEntity(community.id)}>

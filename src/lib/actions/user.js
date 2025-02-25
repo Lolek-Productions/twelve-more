@@ -3,6 +3,7 @@
 import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 
+//Used by the webhook from Clerk
 export const createOrUpdateUser = async (
   id,
   first_name,
@@ -78,7 +79,6 @@ export const getAllUsers = async () => {
   }
 };
 
-
 export const getUserByPhoneNumber = async (phoneNumber) => {
   try {
     await connect();
@@ -117,3 +117,47 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
   }
 };
 
+export async function searchUsers(query) {
+  try {
+    // Input validation
+    if (!query || typeof query !== "string" || query.trim().length < 2) {
+      return {
+        success: false,
+        error: "Query must be a string with at least 2 characters",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Create a case-insensitive regex for the query
+    const regex = new RegExp(query.trim(), "i");
+
+    // Search users by firstName or lastName
+    const users = await User.find({
+      $or: [
+        { firstName: { $regex: regex } },
+        { lastName: { $regex: regex } },
+      ],
+    })
+      .select("firstName lastName") // Fetch only needed fields
+      .limit(10) // Limit results for performance
+      .lean(); // Return plain JS objects
+
+    // Map results to the expected format
+    const formattedUsers = users.map((user) => ({
+      id: user._id.toString(),
+      name: `${user.firstName} ${user.lastName}`.trim(),
+    }));
+
+    return {
+      success: true,
+      users: formattedUsers,
+    };
+  } catch (error) {
+    console.error("Error searching users:", error);
+    return {
+      success: false,
+      error: "Failed to search users",
+    };
+  }
+}

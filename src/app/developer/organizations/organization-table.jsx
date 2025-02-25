@@ -19,6 +19,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
 
 export function OrganizationTable({ data, deleteEntity }) {
   const [sorting, setSorting] = useState([]);
@@ -36,6 +37,14 @@ export function OrganizationTable({ data, deleteEntity }) {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+      cell: ({ row }) => {
+        const organizationId = row.original.id; // Get the id from row.original
+        return (
+          <Link href={`/developer/organizations/${organizationId}/communities`}>
+            {row.getValue("name")}
+          </Link>
+        )
+      },
     },
     {
       accessorKey: "members",

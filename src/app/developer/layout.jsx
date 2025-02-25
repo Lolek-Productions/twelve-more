@@ -1,6 +1,4 @@
-// app/developer/layout.jsx
 import SettingsLayout from "@/components/SettingsLayout";
-import { Toaster } from "@/components/ui/toaster";
 
 const sidebarNavItems = [
   {
@@ -14,10 +12,6 @@ const sidebarNavItems = [
   {
     title: "Organizations",
     href: "/developer/organizations",
-  },
-  {
-    title: "Communities",
-    href: "/developer/communities",
   },
   {
     title: "Send SMS",
