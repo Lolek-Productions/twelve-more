@@ -77,3 +77,43 @@ export const getAllUsers = async () => {
     return { success: false, error: 'Failed to fetch users', details: error.message };
   }
 };
+
+
+export const getUserByPhoneNumber = async (phoneNumber) => {
+  try {
+    await connect();
+
+    // Fetch a single user by phoneNumber
+    const user = await User.findOne({ phoneNumber }).lean();
+
+    if (!user) {
+      return {
+        success: false,
+        error: "User not found with this phone number",
+      };
+    }
+
+    // Return the user data in a simplified format
+    return {
+      success: true,
+      data: {
+        id: user._id.toString(),
+        clerkId: user.clerkId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        avatar: user.avatar,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching user by phone number:', error);
+    return {
+      success: false,
+      error: "Failed to fetch user",
+      details: error.message,
+    };
+  }
+};
+

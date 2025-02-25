@@ -151,6 +151,8 @@ export default function Input() {
         profileImg: user.imageUrl,
         image: imageFileUrl,
         audio: recordedURL,
+        communityId: '???',
+        organizationId: '???',
       }),
     });
     setPostLoading(false);

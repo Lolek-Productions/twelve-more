@@ -6,12 +6,11 @@ const organizationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
-      required: true,
-    },
     members: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
+    leaders: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     }],
