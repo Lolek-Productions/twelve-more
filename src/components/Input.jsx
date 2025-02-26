@@ -7,7 +7,8 @@ import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
 
-export default function Input() {
+
+export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
 
   //Image
@@ -69,7 +70,6 @@ export default function Input() {
     );
   };
 
-  //Audio
   const startRecording = async () => {
     console.log('startRecording')
     setIsRecording(true)
@@ -147,11 +147,11 @@ export default function Input() {
       },
       body: JSON.stringify({
         userMongoId: user.publicMetadata.userMongoId,
+        communityId: communityId,
         text,
         profileImg: user.imageUrl,
         image: imageFileUrl,
         audio: recordedURL,
-        communityId: '???',
         organizationId: '???',
       }),
     });

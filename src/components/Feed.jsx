@@ -2,42 +2,35 @@
 
 import Post from './Post';
 import {useEffect, useState} from "react";
+import {getPostsByCommunityId} from "@/lib/actions/post";
 
-export default function Feed() {
+export default function Feed({communityId}) {
   const [posts, setPosts] = useState([]); // Stores fetched posts
   const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const result = await fetch(`/api/post/all?limit=${postNum}`, {
-          method: 'POST',
-          cache: 'no-store',
-        });
-
-        if (result.ok) {
-          const data = await result.json();
-          setPosts(data);
-        } else {
-          console.warn('Empty response or error:', result.status);
-        }
+        const data = await getPostsByCommunityId({ limit: postNum, communityId });
+        // console.log(data);
+        setPosts(data);
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
     };
 
     fetchPosts();
-  }, [postNum]); // ✅ Fetch data when `postNum` changes
+  }, [postNum, communityId]); // ✅ Re-fetch when postNum or communityId changes
 
   return (
     <div>
       <div>
         {posts.length > 0 ? (
           posts.map((post) =>
-            post && post._id ? <Post key={post._id} post={post} /> : null
+            post && post.id ? <Post key={post.id} post={post} /> : null
           )
         ) : (
-          <div className={'p-5'}>Create a post above!</div> // Gracefully handle empty posts
+          <div className={'p-5 w-full'}>Create a post above!</div> // Gracefully handle empty posts
         )}
       </div>
       <div>

@@ -29,7 +29,7 @@ export default function Icons({ post }) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ postId: post._id }),
+      body: JSON.stringify({ postId: post.id }),
     });
     if (like && isLiked) {
       setLikes(
@@ -40,8 +40,11 @@ export default function Icons({ post }) {
       setLikes([...likes, user.publicMetadata.userMongoId]);
     }
   };
+
   useEffect(() => {
-    if (user && likes?.includes(user.publicMetadata.userMongoId)) {
+    const userHasLiked = likes?.some((like) => like.id === user.publicMetadata.userMongoId);
+
+    if (user && userHasLiked) {
       setIsLiked(true);
     } else {
       setIsLiked(false);
@@ -50,13 +53,13 @@ export default function Icons({ post }) {
 
   const deletePost = async () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      if (user && user.publicMetadata.userMongoId === post.user) {
+      if (user && user.publicMetadata.userMongoId === post.user.id) {
         const res = await fetch('/api/post/delete', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ postId: post._id }),
+          body: JSON.stringify({ postId: post.id }),
         });
         if (res.status === 200) {
           location.reload();
@@ -77,7 +80,7 @@ export default function Icons({ post }) {
               router.push('/sign-in');
             } else {
               setOpen(!open);
-              setPostId(post._id);
+              setPostId(post.id);
             }
           }}
         />
@@ -103,7 +106,7 @@ export default function Icons({ post }) {
           </span>
         )}
       </div>
-      {user && user.publicMetadata.userMongoId === post.user && (
+      {user && user.publicMetadata.userMongoId === post.user.id && (
         <HiOutlineTrash
           onClick={deletePost}
           className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'

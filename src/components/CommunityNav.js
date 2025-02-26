@@ -1,4 +1,3 @@
-// components/CommunityNav.js
 'use client';
 
 import Link from 'next/link';
@@ -36,7 +35,7 @@ export default function CommunityNav() {
           communities.map((community) => (
             <Link
               key={community.id}
-              href={`/community/${community.id}`} // Adjust href as needed
+              href={`/communities/${community.id}`} // Adjust href as needed
               className="flex items-center p-3 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
             >
               <span className="text-xl mr-2">·</span>

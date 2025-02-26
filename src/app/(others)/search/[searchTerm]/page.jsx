@@ -35,7 +35,7 @@ export default async function SearchPage({ params }) {
         <h1 className='text-center pt-6 text-2xl'>No results found</h1>
       )}
 
-      {data && data.map((post) => <Post key={post._id} post={post}></Post>)}
+      {data && data.map((post) => <Post key={post.id} post={post}></Post>)}
     </div>
   );
 }

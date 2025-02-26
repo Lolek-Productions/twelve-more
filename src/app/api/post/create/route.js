@@ -18,12 +18,14 @@ export const POST = async (req) => {
         status: 401,
       });
     }
+
     const newPost = await Post.create({
       user: data.userMongoId,
       text: data.text,
       profileImg: data.profileImg,
       image: data.image,
       audio: data.audio,
+      community: data.communityId,
     });
 
     await newPost.save();
