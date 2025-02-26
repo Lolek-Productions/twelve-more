@@ -1,6 +1,6 @@
 "use server";
 
-import twilioService from '@/lib/twilioService';
+import twilioService from '@/lib/services/twilioService';
 
 export async function sendSMS({ phoneNumber, message }) {
   try {

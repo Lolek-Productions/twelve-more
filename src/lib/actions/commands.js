@@ -1,7 +1,7 @@
 "use server";
 
 import {clerkClient} from "@clerk/nextjs/server";
-import twilioService from "@/lib/twilioService";
+import twilioService from "@/lib/services/twilioService";
 
 export async function runCommand(commandName) {
   try {
