@@ -113,8 +113,8 @@ export default function DevelopersPage() {
       </div>
       <p className="text-muted-foreground mt-2">
         Note: In production the first two strings should be the same and the second two should be the same. In local
-        development, since we are using separate instances in Clerk, still both instances point to the same user
-        document in mongoDb.
+        development, the clerkId will differ since we are using separate instances in Clerk.  Still both instances point to the same user
+        document in the production database.
       </p>
 
     </div>
