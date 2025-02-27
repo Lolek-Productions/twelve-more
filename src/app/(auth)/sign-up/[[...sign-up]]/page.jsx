@@ -13,55 +13,12 @@ import * as React from "react";
 export default function SignUpPage() {
   const { signUp } = useSignUp();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [submissionState, setSubmissionState] = useState("idle"); // idle, submitting, success, error
   const [errorMessage, setErrorMessage] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null); // Store CAPTCHA token
-
-  // const handleSignUp = async () => {
-  //   if (phoneNumber.length !== 10) {
-  //     setErrorMessage("Please enter a valid 10-digit US phone number.");
-  //     setSubmissionState("error");
-  //     return;
-  //   }
-  //   if (!smsOptIn) {
-  //     setErrorMessage("Please agree to receive SMS notifications.");
-  //     setSubmissionState("error");
-  //     return;
-  //   }
-  //   if (!captchaToken) {
-  //     setErrorMessage("Please complete the CAPTCHA verification.");
-  //     setSubmissionState("error");
-  //     return;
-  //   }
-  //
-  //   const formattedPhone = `+1${phoneNumber}`;
-  //   setSubmissionState("submitting");
-  //   setErrorMessage("");
-  //
-  //   try {
-  //     await signUp.create({
-  //       phoneNumber: formattedPhone, // Clerk expects phoneNumber field
-  //       strategy: "phone_code", // Use phone_code strategy for OTP
-  //       publicMetadata: {
-  //         smsOptIn:true,
-  //         onboardingComplete:true,
-  //       },
-  //       captchaToken: captchaToken,
-  //     });
-  //     console.log("Sign-up initiated with phone:", formattedPhone);
-  //     setSubmissionState("success"); // Transitions to verifications step
-  //   } catch (err) {
-  //     console.error("Sign-up error:", err.errors);
-  //     const errorDetail = err.errors?.[0]?.message || "An unknown error occurred.";
-  //     setErrorMessage(errorDetail);
-  //     setSubmissionState("error");
-  //     if (err.errors?.[0]?.code === "captcha_token_invalid") {
-  //       setCaptchaToken(null);
-  //       window.Clerk?.reloadCaptcha();
-  //     }
-  //   }
-  // };
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   return (
     <div className="min-h-screen grid w-full flex-grow items-center bg-zinc-100 px-4 sm:justify-center">
@@ -89,6 +46,45 @@ export default function SignUpPage() {
           )}
 
           <div className="space-y-4">
+            {/* First Name Field */}
+            <Clerk.Field name="firstName" className="space-y-2">
+              <Clerk.Label className="text-sm font-medium text-zinc-950">
+                First Name
+              </Clerk.Label>
+              <Clerk.Input
+                type="text"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="e.g., John"
+                className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
+                  submissionState === "error" ? "ring-red-400" : ""
+                } ${submissionState === "submitting" ? "opacity-50" : ""}`}
+                disabled={submissionState === "submitting"}
+              />
+              <Clerk.FieldError className="block text-sm text-red-400"/>
+            </Clerk.Field>
+
+            {/* Last Name Field */}
+            <Clerk.Field name="lastName" className="space-y-2">
+              <Clerk.Label className="text-sm font-medium text-zinc-950">
+                Last Name
+              </Clerk.Label>
+              <Clerk.Input
+                type="text"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="e.g., Smith"
+                className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
+                  submissionState === "error" ? "ring-red-400" : ""
+                } ${submissionState === "submitting" ? "opacity-50" : ""}`}
+                disabled={submissionState === "submitting"}
+              />
+              <Clerk.FieldError className="block text-sm text-red-400"/>
+            </Clerk.Field>
+
+            {/* Existing Phone Number Field */}
             <Clerk.Field name="phoneNumber" className="space-y-2">
               <Clerk.Label className="text-sm font-medium text-zinc-950">
                 Mobile Phone Number
@@ -115,7 +111,7 @@ export default function SignUpPage() {
               <Checkbox
                 id="smsOptIn"
                 checked={smsOptIn}
-                onCheckedChange={(checked) => setSmsOptIn(checked)} // Controlled checkbox
+                onCheckedChange={(checked) => setSmsOptIn(checked)}
               />
               <Label htmlFor="smsOptIn" className="text-sm">
                 I agree to receive SMS notifications from TwelveMore. Message & data rates may apply.
@@ -127,9 +123,13 @@ export default function SignUpPage() {
             <div id="clerk-captcha" className="mt-4"></div>
 
             <button
-              // type="button"
-              // onClick={handleSignUp}
-              disabled={phoneNumber.length !== 10 || !smsOptIn || submissionState === "submitting"}
+              disabled={
+                phoneNumber.length !== 10 ||
+                !firstName ||
+                !lastName ||
+                !smsOptIn ||
+                submissionState === "submitting"
+              }
               className="w-full rounded-md bg-zinc-950 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 active:text-white/70 disabled:bg-zinc-500 disabled:cursor-not-allowed"
             >
               {submissionState === "submitting" ? "Submitting..." : "Sign Up"}
@@ -147,13 +147,14 @@ export default function SignUpPage() {
           </p>
         </SignUp.Step>
 
+        {/* Verification step remains unchanged */}
         <SignUp.Step
           name="verifications"
           className="w-full space-y-6 rounded-2xl bg-white px-4 py-10 shadow-md ring-1 ring-black/5 sm:w-96 sm:px-8"
         >
           <header className="text-center">
             <Image
-              src="/logo.png" // Use the path from the public folder
+              src="/logo.png"
               alt="TwelveMore"
               className={'mx-auto'}
               width={45}

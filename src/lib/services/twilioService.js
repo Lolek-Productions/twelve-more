@@ -38,6 +38,7 @@ class TwilioService {
         console.log(`[DEV] Simulated SMS to ${to}: "${body}"`);
         return { success: true, message: `Simulated SMS to ${to} (dev mode)` };
       }
+
     } catch (error) {
       console.error('Twilio SMS Error:', error.message);
       return { success: false, message: `Failed to send SMS: ${error.message}` };

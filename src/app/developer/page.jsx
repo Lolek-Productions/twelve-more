@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { DEV_PHONE_NUMBERS } from "@/lib/constants"; // Import developer phone numbers
+import { useUser } from "@clerk/nextjs"; // Clerk hook to get current user
 import { getUserByPhoneNumber } from "@/lib/actions/user"; // Import server action
 
 export default function DevelopersPage() {
   const [developers, setDevelopers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useUser();
+  const [dbUser, setDbUser] = useState(null);
 
   useEffect(() => {
     async function fetchDevelopers() {
@@ -36,6 +39,33 @@ export default function DevelopersPage() {
     fetchDevelopers();
   }, []);
 
+  useEffect(() => {
+    const fetchDbUser = async () => {
+      try {
+        const response = await fetch("/api/user/get", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId: user.id }),
+        });
+
+        if (response.ok) {
+          const dbUserData = await response.json();
+          setDbUser(dbUserData);
+          console.log("Fetched DB User:", dbUserData);
+
+        }
+      } catch (error) {
+        console.error("Error fetching DB user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDbUser();
+  }, []);
+
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -50,6 +80,7 @@ export default function DevelopersPage() {
       <p className="text-muted-foreground mb-4">
         User documents for developers identified by phone numbers from constants.
       </p>
+
       {developers.length === 0 ? (
         <p>No developers found matching the phone numbers.</p>
       ) : (
@@ -73,6 +104,20 @@ export default function DevelopersPage() {
           ))}
         </ul>
       )}
+
+      <h2 className="text-xl font-semibold mt-7">Current Logged In User (you)</h2>
+      <div className={'mt-1'}>
+        <div>Your UserId from Mongo: {dbUser._id}</div>
+        <div>Your userMongoId from Clerk: {user.publicMetadata.userMongoId}</div>
+        <div>Your ClerkId from Mongo: {dbUser.clerkId}</div>
+        <div>Your ClerkId from Clerk: {user.id}</div>
+      </div>
+      <p className="text-muted-foreground mt-2">
+        Note: In production the first two strings should be the same and the second two should be the same. In local
+        development, since we are using separate instances in Clerk, still both instances point to the same user
+        document in mongoDb.
+      </p>
+
     </div>
   );
 }

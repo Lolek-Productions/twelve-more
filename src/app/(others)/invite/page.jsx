@@ -12,8 +12,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
-// Define the schema with smsOptIn as a required field
+// Updated schema to include firstName and lastName
 const profileFormSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, { message: "First name is required." })
+    .max(50, { message: "First name must not exceed 50 characters." }),
+  lastName: z
+    .string()
+    .min(1, { message: "Last name is required." })
+    .max(50, { message: "Last name must not exceed 50 characters." }),
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
@@ -25,6 +33,8 @@ const profileFormSchema = z.object({
 });
 
 const defaultValues = {
+  firstName: "",
+  lastName: "",
   phoneNumber: "",
   smsOptIn: false,
 };
@@ -42,7 +52,12 @@ export default function Invite() {
       const res = await fetch('/api/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: data.phoneNumber }),
+        // Include all fields in the API call
+        body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phoneNumber: data.phoneNumber
+        }),
       });
 
       const text = await res.text();
@@ -80,6 +95,37 @@ export default function Invite() {
       <div className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* First Name Field */}
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Last Name Field */}
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Smith" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Phone Number Field */}
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -97,6 +143,7 @@ export default function Invite() {
               )}
             />
 
+            {/* SMS Opt-in Checkbox */}
             <FormField
               control={form.control}
               name="smsOptIn"
@@ -125,7 +172,7 @@ export default function Invite() {
               )}
             />
 
-            <div >
+            <div>
               <Button className="mt-5" type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Sending..." : "Invite"}
               </Button>

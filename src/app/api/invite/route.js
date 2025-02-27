@@ -3,11 +3,19 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
-    const { phoneNumber } = await req.json();
+    const { firstName, lastName, phoneNumber } = await req.json();
 
-    if (!phoneNumber) {
+    // Validate required fields
+    if (!firstName || !lastName || !phoneNumber) {
       return NextResponse.json(
-        { error: 'Phone number is required' },
+        {
+          error: 'Missing required fields',
+          details: {
+            firstName: !firstName ? 'First name is required' : undefined,
+            lastName: !lastName ? 'Last name is required' : undefined,
+            phoneNumber: !phoneNumber ? 'Phone number is required' : undefined
+          }
+        },
         { status: 400 }
       );
     }
@@ -16,14 +24,21 @@ export async function POST(req) {
 
     const client = await clerkClient();
 
-    // Create the user
+    // Create the user with firstName and lastName
     const user = await client.users.createUser({
-      phoneNumber: [normalizedPhone], // Use dynamic phoneNumber
-      publicMetadata: { invitationOrganizationId: 'sup9er coool organization'},
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: [normalizedPhone],
       skipLegalChecks: true,
     });
 
     console.log('User created:', JSON.stringify(user, null, 2));
+
+    //Need to add user to community
+
+    //Need to send text message to new user
+
+
 
     return NextResponse.json({ success: true, userId: user.id });
   } catch (error) {
