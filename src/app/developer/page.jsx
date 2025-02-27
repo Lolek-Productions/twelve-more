@@ -23,7 +23,6 @@ export default function DevelopersPage() {
           return result.success ? result.data : null;
         });
 
-        // Resolve all promises and filter out null results (users not found)
         const resolvedDevelopers = await Promise.all(developerPromises);
         const validDevelopers = resolvedDevelopers.filter(dev => dev !== null);
 
@@ -42,19 +41,19 @@ export default function DevelopersPage() {
   useEffect(() => {
     const fetchDbUser = async () => {
       try {
+        // console.log('userId to fetch:', user.publicMetadata.userMongoId)
         const response = await fetch("/api/user/get", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId: user.id }),
+          body: JSON.stringify({ userId: user.publicMetadata.userMongoId }),
         });
 
         if (response.ok) {
           const dbUserData = await response.json();
           setDbUser(dbUserData);
           console.log("Fetched DB User:", dbUserData);
-
         }
       } catch (error) {
         console.error("Error fetching DB user:", error);
