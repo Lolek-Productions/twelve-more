@@ -1,11 +1,18 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { AdminSidebarNav } from "@/components/AdminSidebarNav";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import {Toaster} from "@/components/ui/toaster";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function SettingsLayout({
                                          title = "TwelveMore",
@@ -13,13 +20,18 @@ export default function SettingsLayout({
                                          sidebarNavItems = [],
                                          children,
                                        }) {
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // State to control Sheet
+
+  // Function to close the Sheet
+  const closeSheet = () => setIsSheetOpen(false);
+
   return (
     <div>
       <Toaster />
 
       {/* Mobile Header with Menu Trigger */}
       <header className="sticky top-0 z-50 flex h-16 items-center border-b bg-background px-4 md:hidden">
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <div className="w-full">
               <div className="flex items-center justify-between">
@@ -35,7 +47,7 @@ export default function SettingsLayout({
             <VisuallyHidden>
               <SheetTitle>{title} Navigation</SheetTitle>
             </VisuallyHidden>
-            <AdminSidebarNav items={sidebarNavItems} />
+            <AdminSidebarNav items={sidebarNavItems} onLinkClick={closeSheet} /> {/* Pass close function */}
           </SheetContent>
         </Sheet>
       </header>
@@ -50,9 +62,8 @@ export default function SettingsLayout({
           </div>
           <Separator className="my-6" />
           <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-          {/*<div className="flex flex-col space-y-8">*/}
             <aside className="-mx-4 lg:w-1/5">
-              <AdminSidebarNav items={sidebarNavItems} />
+              <AdminSidebarNav items={sidebarNavItems} /> {/* No onLinkClick on desktop */}
             </aside>
             <div className="flex-1 lg:max-w-2xl">{children}</div>
           </div>
@@ -61,7 +72,6 @@ export default function SettingsLayout({
         {/* Mobile Content - Visible on mobile, hidden on md+ */}
         <main className="md:hidden flex-1 p-4">{children}</main>
       </div>
-
     </div>
   );
 }

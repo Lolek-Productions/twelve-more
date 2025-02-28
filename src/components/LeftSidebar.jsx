@@ -10,22 +10,26 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { DEV_PHONE_NUMBERS } from '@/lib/constants';
 
-export default function LeftSidebar() {
+export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
+
+  // Wrap Link clicks to close the Sheet
+  const handleLinkClick = () => {
+    if (onLinkClick) onLinkClick(); // Only call if provided (mobile case)
+  };
 
   const sidebarNavItems = [
     { title: 'Home', href: '/home', icon: <HiHome className="w-6 h-6" /> },
     { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
-    // { title: 'Invite', href: '/invite', icon: <HiOutlinePaperAirplane className="w-6 h-6" /> },
-    { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
-    { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
-    {
-      title: 'Admin',
-      href: '/admin',
-      icon: <HiOutlineServer className="w-6 h-6" />,
-      isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
-    },
+    // { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
+    // { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
+    // {
+    //   title: 'Admin',
+    //   href: '/admin',
+    //   icon: <HiOutlineServer className="w-6 h-6" />,
+    //   isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
+    // },
     {
       title: 'Developer',
       href: '/developer',
@@ -45,7 +49,7 @@ export default function LeftSidebar() {
   return (
     <div className="flex h-full flex-col p-3">
       <div className="flex flex-col gap-3">
-        <Link href="/home" className="flex items-center gap-2 mb-4">
+        <Link href="/home" className="flex items-center gap-2 mb-4" onClick={handleLinkClick}>
           <Image
             src="/logo.png"
             alt="TwelveMore"
@@ -65,6 +69,7 @@ export default function LeftSidebar() {
                 pathname === item.href ? 'bg-muted' : 'hover:bg-muted/50',
                 'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
               )}
+              onClick={handleLinkClick}
             >
               {item.icon}
               {/* Always show title on mobile, hide on xl+ unless needed */}
