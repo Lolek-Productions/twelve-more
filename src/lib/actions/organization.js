@@ -21,6 +21,8 @@ export async function createOrganization({ name }) {
 }
 
 export async function deleteOrganization(id) {
+  console.log('organization Id:', id)
+
   try {
     await connect();
     await Organization.findByIdAndDelete(id);
@@ -50,14 +52,6 @@ export const getOrganizationById = async function (organizationId) {
     await connect(); // Ensure database connection
 
     const organization = await Organization.findById(organizationId)
-      .populate({
-        path: "members",
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "leaders",
-        select: "firstName lastName",
-      })
       .lean();
 
     if (!organization) {
@@ -68,16 +62,7 @@ export const getOrganizationById = async function (organizationId) {
     return {
       id: organization._id?.toString() || "",
       name: organization.name,
-      members: organization.members?.map((member) => ({
-        userId: member._id.toString(),
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      leaders: organization.leaders?.map((member) => ({
-        userId: member._id.toString(),
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
+      description: organization.description,
     };
   } catch (error) {
     console.error("Error fetching organization by ID:", error);

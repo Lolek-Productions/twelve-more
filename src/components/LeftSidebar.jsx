@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine } from "react-icons/hi2";
-import { HiHome, HiCog, HiOutlineServer, HiCheckCircle, HiOutlinePaperAirplane } from 'react-icons/hi';
+import { HiHome, HiCog, HiOutlineServer, HiCheckCircle, HiUserGroup } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
-import CommunityNav from './CommunityNav';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
@@ -17,7 +16,8 @@ export default function LeftSidebar() {
 
   const sidebarNavItems = [
     { title: 'Home', href: '/home', icon: <HiHome className="w-6 h-6" /> },
-    { title: 'Invite', href: '/invite', icon: <HiOutlinePaperAirplane className="w-6 h-6" /> },
+    { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
+    // { title: 'Invite', href: '/invite', icon: <HiOutlinePaperAirplane className="w-6 h-6" /> },
     { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
     { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
     {
@@ -72,8 +72,6 @@ export default function LeftSidebar() {
             </Link>
           ))}
         </nav>
-
-        <CommunityNav />
       </div>
 
       <div className="mt-auto">

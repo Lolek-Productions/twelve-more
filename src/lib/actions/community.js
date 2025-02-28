@@ -2,6 +2,7 @@
 
 import mongoose from "mongoose";
 import Community from '../models/community.model';
+import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
@@ -55,44 +56,12 @@ export const deleteCommunity = async (id) => {
   }
 };
 
-export const getCommunities = async function () {
-  try {
-    await connect(); // ✅ Ensure database connection
-
-    const communities = await Community.find()
-      .populate({
-        path: "members", // Field to populate
-        select: "firstName lastName", // Only fetch firstName and lastName
-      })
-      .lean();
-    return communities.map((community) => ({
-      id: community._id?.toString() || "",
-      name: community.name,
-      members: community.members?.map((member) => ({
-        userId: member._id.toString(), // Convert ObjectId to string
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      leaders: community.leaders?.map(leader => leader.toString()) || [],
-      organization: community.organization?.toString() || null,
-    }));
-
-  } catch (error) {
-    console.error("Error fetching communities:", error);
-    return []; // ✅ Return an empty array if an error occurs
-  }
-};
-
 export const getCommunitiesByOrganization = async function (organizationId) {
   try {
     console.log(organizationId);
     await connect(); // Ensure database connection (assuming this is your MongoDB connection function)
 
     const communities = await Community.find({ organization: organizationId })
-      .populate({
-        path: "members", // Field to populate
-        select: "firstName lastName", // Only fetch firstName and lastName
-      })
       .populate({
         path: "organization", // Field to populate
         select: "name", // Only fetch firstName and lastName
@@ -102,17 +71,7 @@ export const getCommunitiesByOrganization = async function (organizationId) {
     return communities.map((community) => ({
       id: community._id?.toString() || "",
       name: community.name,
-      members: community.members?.map((member) => ({
-        userId: member._id.toString(), // Convert ObjectId to string
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      leaders: community.leaders?.map((member) => ({
-        userId: member._id.toString(), // Convert ObjectId to string
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      // organization: community.organization?.toString() || null,
+      description: community.description,
       organization: { name: community.organization?.name || "Unknown Organization" }, // Optional: Include organizationName if available in your schema
     }));
   } catch (error) {
@@ -123,17 +82,11 @@ export const getCommunitiesByOrganization = async function (organizationId) {
 
 export const getCommunityById = async function (communityId) {
   try {
+    console.log('communityId', communityId);
+
     await connect(); // Ensure database connection
 
     const community = await Community.findById(communityId)
-      .populate({
-        path: "members",
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "leaders",
-        select: "firstName lastName",
-      })
       .lean();
 
     if (!community) {
@@ -144,18 +97,11 @@ export const getCommunityById = async function (communityId) {
     return {
       id: community._id?.toString() || "",
       name: community.name,
-      members: community.members?.map((member) => ({
-        userId: member._id.toString(),
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      leaders: community.leaders?.map((member) => ({
-        userId: member._id.toString(),
-        firstName: member.firstName || "",
-        lastName: member.lastName || "",
-      })) || [],
-      organization: community.organization?.toString() || null,
-      organizationName: community.organizationName || "Unknown Organization",
+      description: community.description,
+      organization: {
+        name: community.organization?.name || "Unknown Organization",
+        id: community.organization?._id?.toString() || "",
+      },
     };
   } catch (error) {
     console.error("Error fetching community by ID:", error);

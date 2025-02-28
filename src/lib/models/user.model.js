@@ -36,6 +36,40 @@ const userSchema = new mongoose.Schema(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       default: [],
     },
+    communities: {
+      type: [
+        {
+          communityId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Community',
+            required: true,
+          },
+          role: {
+            type: String,
+            required: true, // e.g., "member", "admin", "moderator"
+            default: 'member',
+          },
+        },
+      ],
+      default: [],
+    },
+    organizations: {
+      type: [
+        {
+          organizationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Organization',
+            required: true,
+          },
+          role: {
+            type: String,
+            required: true,
+            default: 'member',
+          },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

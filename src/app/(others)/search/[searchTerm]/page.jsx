@@ -2,7 +2,6 @@ import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
 
-
 export default async function SearchPage({ params }) {
   let data = null;
   try {

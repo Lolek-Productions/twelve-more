@@ -9,12 +9,12 @@ const BreadcrumbItem = ({ href, label, isLast = false }) => (
   <div className="flex items-center">
     {href && !isLast ? (
       <Link href={href}>
-        <Button variant="link" className="p-0 h-auto text-gray-600 hover:text-gray-900">
+        <Button variant="link" className="text-sm p-0 h-auto text-gray-500 hover:text-gray-800">
           {label}
         </Button>
       </Link>
     ) : (
-      <span className={cn("text-gray-900 font-medium", isLast && "text-gray-500")}>
+      <span className={cn("text-sm  text-gray-900 font-medium", isLast && "text-gray-500")}>
         {label}
       </span>
     )}
@@ -23,7 +23,7 @@ const BreadcrumbItem = ({ href, label, isLast = false }) => (
 );
 
 export const Breadcrumb = ({ items }) => (
-  <nav className="flex items-center  px-6 ">
+  <nav className="flex items-center py-3">
     {items.map((item, index) => (
       <BreadcrumbItem
         key={item.label}

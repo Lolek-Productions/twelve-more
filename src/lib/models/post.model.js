@@ -32,15 +32,10 @@ const postSchema = new mongoose.Schema(
     },
     profileImg: {
       type: String,
-      required: true,
+      // required: true,
     },
     likes: {
-      type: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User'
-        }
-      ],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       default: [],
     },
     comments: {

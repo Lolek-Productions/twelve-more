@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useToast } from "@/hooks/use-toast";
-import { runCommand } from "@/lib/actions/commands"; // Import action
+import { runCommand } from "@/lib/actions/command"; // Import action
 
 export function CommandsTable({ data }) {
   const [sorting, setSorting] = useState([]);

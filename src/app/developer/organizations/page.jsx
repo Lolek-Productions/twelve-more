@@ -16,7 +16,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { OrganizationTable } from "./organization-table";
-import { createOrganization, deleteOrganization, getOrganizations } from "@/lib/actions/organizations";
+import { createOrganization, deleteOrganization, getOrganizations } from "@/lib/actions/organization";
+import {Breadcrumb} from "@/components/ui/breadcrumb";
 
 const organizationSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
@@ -72,8 +73,14 @@ export default function AdminOrganizationsPage() {
     setIsSaving(false);
   };
 
+  const breadcrumbItems = [
+    { href: "/developer", label: "Developer" },
+    { label: `Organizations` }, // Last item, no href
+  ];
+
   return (
     <div>
+      <Breadcrumb items={breadcrumbItems} />
       <div className="flex flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Organizations</h3>

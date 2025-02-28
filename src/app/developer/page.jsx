@@ -53,7 +53,7 @@ export default function DevelopersPage() {
         if (response.ok) {
           const dbUserData = await response.json();
           setDbUser(dbUserData);
-          console.log("Fetched DB User:", dbUserData);
+          // console.log("Fetched DB User:", dbUserData);
         }
       } catch (error) {
         console.error("Error fetching DB user:", error);
@@ -116,7 +116,6 @@ export default function DevelopersPage() {
         development, the clerkId will differ since we are using separate instances in Clerk.  Still both instances point to the same user
         document in the production database.
       </p>
-
     </div>
   );
 }

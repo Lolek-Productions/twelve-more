@@ -36,9 +36,11 @@ export default function MiniProfile() {
         </div>
         {/* Developer badge */}
         {isDeveloper && (
-          <span className='text-xs bg-blue-500 text-white px-2 py-1 rounded-full mt-1'>
-            Developer
-          </span>
+          <div className='w-fit'>
+            <span className='text-xs bg-blue-500 text-white px-2 py-1 rounded-full mt-1'>
+              Developer
+            </span>
+          </div>
         )}
       </div>
     </div>

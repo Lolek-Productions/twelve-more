@@ -6,14 +6,9 @@ const organizationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    members: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    leaders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
+    description: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

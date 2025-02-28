@@ -4,7 +4,7 @@ import {
 } from "@tanstack/react-table";
 import {Button} from "@/components/ui/button";
 
-function PaginatedTable({table, columns}) {
+function PaginatedTable({table, columns, onRowClick}) {
   return (
     <div>
       <div className="rounded-md border mt-4">
@@ -32,7 +32,9 @@ function PaginatedTable({table, columns}) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  className={'cursor-pointer'}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick && onRowClick(row.original)} // Call onRowClick with row data
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
