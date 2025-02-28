@@ -5,7 +5,6 @@ import Community from '../models/community.model';
 import { connect } from '../mongodb/mongoose';
 import mongoose from "mongoose";
 
-//Used by the webhook from Clerk
 export const createOrUpdateUser = async (
   id,
   first_name,
