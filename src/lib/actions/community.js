@@ -163,7 +163,6 @@ export async function removeUserFromCommunity(communityId, userId) {
 
 export async function getUserCommunities() {
   try {
-    // Connect to MongoDB
     await connect();
 
     // Get the current user from Clerk
@@ -225,5 +224,49 @@ export async function addUserToCommunity(communityId, userId) {
   } catch (error) {
     console.error('Error adding user to community:', error.message);
     return { success: false, error: 'Failed to add user to community' };
+  }
+}
+
+export async function searchCommunities(query) {
+  try {
+    // Input validation
+    if (!query || typeof query !== "string" || query.trim().length < 2) {
+      return {
+        success: false,
+        error: "Query must be a string with at least 2 characters",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Create a case-insensitive regex for the query
+    const regex = new RegExp(query.trim(), "i");
+
+    // Search users by firstName or lastName
+    const communities = await Community.find({
+        $or: [
+          { name: { $regex: regex } },
+        ],
+      })
+      .select("name") // Fetch only needed fields
+      .limit(10) // Limit results for performance
+      .lean(); // Return plain JS objects
+
+    // Map results to the expected format
+    const formattedCommunities = communities.map((community) => ({
+      id: community._id.toString(),
+      name: `${community.name}`.trim(),
+    }));
+
+    return {
+      success: true,
+      data: formattedCommunities,
+    };
+  } catch (error) {
+    console.error("Error searching communities:", error);
+    return {
+      success: false,
+      error: "Failed to search communities",
+    };
   }
 }

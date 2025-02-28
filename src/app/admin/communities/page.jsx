@@ -20,7 +20,7 @@ import {
   getCommunities,
   addUserToCommunity,
 } from "@/lib/actions/community";
-import { getAllUsers } from "@/lib/actions/user";
+import { getUsers } from "@/lib/actions/user";
 import { CommunityTable } from "@/app/admin/communities/community-table";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -59,7 +59,7 @@ export default function AdminCommunitiesPage() {
   }
 
   async function fetchUsers() {
-    const response = await getAllUsers();
+    const response = await getUsers();
     if (response.success) {
       setUsers(response.users); // Expects [{ id, name }, ...]
     } else {

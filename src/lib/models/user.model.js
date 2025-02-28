@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     communities: {
       type: [
         {
-          communityId: {
+          community: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Community',
             required: true,
@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema(
     organizations: {
       type: [
         {
-          organizationId: {
+          organization: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Organization',
             required: true,

@@ -2,6 +2,7 @@
 
 import User from '../models/user.model';
 import Community from '../models/community.model';
+import Organization from '../models/organization.model';
 import { connect } from '../mongodb/mongoose';
 import mongoose from "mongoose";
 
@@ -47,6 +48,68 @@ export const createOrUpdateUser = async (
   }
 };
 
+export async function getUserById(userId) {
+  try {
+    await connect();
+
+    const user = await User.findById(userId)
+      .populate('organizations', 'name')
+      .populate('communities.community', 'name')
+      .lean();
+
+    console.log('user', user.communities);
+
+    return {
+      success: true,
+      user: {
+        id: user._id?.toString() || "",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        // organizations: user.organizations
+        //   ? user.organizations.map((org) => ({
+        //     id: org.organizationId.toString(),
+        //     name: org.name || "Missing Organization",
+        //   }))
+        //   : [],
+        communities: user.communities
+          ? user.communities.map((community) => ({
+            id: community.community._id.toString(),       // Populated _id
+            name: community.community.name || "Missing Community", // Populated name
+            role: community.role || "member",
+          }))
+          : [],
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching user from MongoDB:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    return { success: false, error: 'Failed to fetch users', details: error.message };
+  }
+}
+
+export async function updateUser(userId, updates) {
+  await dbConnect();
+  const user = await User.findByIdAndUpdate(userId, updates, { new: true });
+  return { success: !!user };
+}
+
+export async function addOrganizationToUser(userId, organizationId) {
+  await dbConnect();
+  const Organization = mongoose.models.Organization;
+  await User.findByIdAndUpdate(userId, { $addToSet: { organizations: organizationId } });
+  await Organization.findByIdAndUpdate(organizationId, { $addToSet: { members: userId } });
+}
+
+export async function removeOrganizationFromUser(userId, organizationId) {
+  await dbConnect();
+  const Organization = mongoose.models.Organization;
+  await User.findByIdAndUpdate(userId, { $pull: { organizations: organizationId } });
+  await Organization.findByIdAndUpdate(organizationId, { $pull: { members: userId } });
+}
+
 export const deleteUser = async (id) => {
   try {
     await connect();
@@ -56,7 +119,7 @@ export const deleteUser = async (id) => {
   }
 };
 
-export const getAllUsers = async () => {
+export const getUsers = async () => {
   try {
     await connect();
 
@@ -206,7 +269,7 @@ export async function addCommunityToUser(communityId, userId) {
     // Update user by adding communityId to communities array
     const user = await User.findByIdAndUpdate(
       userId,
-      { $addToSet: { communities: { communityId, role: "member" } } }, // Add community with default role
+      { $addToSet: { communities: { community: communityId, role: "member" } } }, // Updated to 'community'
       { new: true }
     ).lean();
 
@@ -248,6 +311,8 @@ export async function removeCommunityFromUser(communityId, userId) {
       { _id: userId },
       { $pull: { communities: { communityId } } }
     );
+
+    // console.log(result);
 
     // Check if the operation modified anything
     if (result.modifiedCount === 0) {

@@ -3,8 +3,7 @@
 import PaginatedTable from "@/components/DataTable/PaginatedTable";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -12,12 +11,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {Input} from "@/components/ui/input";
 
-export function OrganizationTable({ data, deleteEntity }) {
+export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-  const router = useRouter(); // Initialize useRouter
 
   const columns = [
     {
@@ -27,22 +31,44 @@ export function OrganizationTable({ data, deleteEntity }) {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          First Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+    },
+    {
+      accessorKey: "id",
+      header: ({ column }) => (
+        <div>ID</div>
+      ),
+    },
+    {
+      id: "actions",
       cell: ({ row }) => {
+        const community = row.original;
         return (
-          <div>
-            {row.getValue("name")}
+          <div className="justify-end flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onCommunityRemoved(community.id)}>
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )
+        );
       },
     },
   ];
 
   const table = useReactTable({
-    data,
+    data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -53,22 +79,18 @@ export function OrganizationTable({ data, deleteEntity }) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const handleRowClick = (organization) => {
-    // console.log(organization.id);
-    router.push(`/developer/organizations/${organization.id}`);
-  };
-
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <Input
-          placeholder="Filter organizations by name..."
+          placeholder="Search communities..."
           value={table.getColumn("name")?.getFilterValue() ?? ""}
           onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
           className="max-w-sm"
         />
       </div>
-      <PaginatedTable table={table} columns={columns} onRowClick={handleRowClick} />
+
+      <PaginatedTable table={table} columns={columns}/>
     </div>
   );
 }

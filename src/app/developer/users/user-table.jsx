@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 
-export function OrganizationTable({ data, deleteEntity }) {
+export function UserTable({ data, deleteEntity }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const router = useRouter(); // Initialize useRouter
@@ -39,6 +39,16 @@ export function OrganizationTable({ data, deleteEntity }) {
         )
       },
     },
+    {
+      accessorKey: "id",
+      cell: ({ row }) => {
+        return (
+          <div>
+            {row.getValue("id")}
+          </div>
+        )
+      },
+    },
   ];
 
   const table = useReactTable({
@@ -53,16 +63,15 @@ export function OrganizationTable({ data, deleteEntity }) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const handleRowClick = (organization) => {
-    // console.log(organization.id);
-    router.push(`/developer/organizations/${organization.id}`);
+  const handleRowClick = (user) => {
+    router.push(`/developer/users/${user.id}`);
   };
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <Input
-          placeholder="Filter organizations by name..."
+          placeholder="Filter users by name..."
           value={table.getColumn("name")?.getFilterValue() ?? ""}
           onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
           className="max-w-sm"
