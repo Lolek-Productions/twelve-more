@@ -29,13 +29,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {searchCommunities} from "@/lib/actions/community"
+import {handleApiResponse} from "@/lib/utils";
 
-export default function UsesrsPage() {
+export default function UsersPage() {
   const params = useParams();
   const { userId} = params;
   const [user, setUser] = useState(null);
   const [communities, setCommunities] = useState([]);
-  const [organization, setOrganizations] = useState([]);
+  // const [organization, setOrganizations] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -78,26 +79,15 @@ export default function UsesrsPage() {
   }
 
   const handleDeleteUser = async () => {
-    try {
-      const response = await deleteUser(communityId);
+    // console.log('hello handleDeleteUser');
+    // return;
 
-      if (response?.success) {
-        router.push(`/developer/organizations/${organizationId}`); // Redirect after deletion
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: response?.error || "Failed to delete organization",
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete organization",
-      });
-    }
+    await handleApiResponse({
+      apiCall: deleteUser(userId),
+      successDescription: "User deleted successfully",
+      defaultErrorDescription: "Failed to delete user",
+      onSuccess: () => router.push(`/developer/users`),
+    });
   };
 
   if (!userId) {
@@ -106,30 +96,14 @@ export default function UsesrsPage() {
 
   const handleCommunityRemoved = async (communityId) => {
     // console.log(communityId, userId);
+      // return;
 
-    try {
-      const response = await removeCommunityFromUser(communityId, userId);
-      if (response?.success) {
-        fetchUser();
-        toast({
-          title: "Success",
-          description: "User removed from community",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: response?.error || "Failed to remove community",
-        });
-      }
-    } catch (error) {
-      console.error("Error removing community:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to remove community",
-      });
-    }
+    return await handleApiResponse({
+      apiCall: removeCommunityFromUser(communityId, userId),
+      successDescription: "User removed from community",
+      defaultErrorDescription: "Failed to remove community",
+      onSuccess: () => fetchUser(),
+    });
   };
 
   const handleSearch = async (query) => {
@@ -185,7 +159,8 @@ export default function UsesrsPage() {
 
   const breadcrumbItems = [
     { href: "/developer", label: "Developer" },
-    { label: "Users" },
+    { href: "/developer/users", label: "Users" },
+    { label: `${user?.firstName} ${user?.lastName}` },
   ];
 
   return (
@@ -197,7 +172,13 @@ export default function UsesrsPage() {
             User: {user?.firstName}
           </h3>
           <p className="text-sm text-muted-foreground">
-            User Bio: {user?.bio}
+            Id: {user?.id}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            ClerkId: {user?.clerkId}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Bio: {user?.bio}
           </p>
         </div>
 
@@ -207,8 +188,8 @@ export default function UsesrsPage() {
               <Button variant="outline">Actions</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
-                Delete User
+              <DropdownMenuItem onClick={() => handleDeleteUser()}>
+                Force Delete User
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -262,25 +243,6 @@ export default function UsesrsPage() {
         onCommunityRemoved={handleCommunityRemoved}
       />
 
-      {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Remove From Community</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove this community from {user?.firstName}? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

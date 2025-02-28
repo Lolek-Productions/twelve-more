@@ -5,6 +5,7 @@ import Community from '../models/community.model';
 import Organization from '../models/organization.model';
 import { connect } from '../mongodb/mongoose';
 import mongoose from "mongoose";
+import Post from "@/lib/models/post.model";
 
 export const createOrUpdateUser = async (
   id,
@@ -57,7 +58,7 @@ export async function getUserById(userId) {
       .populate('communities.community', 'name')
       .lean();
 
-    console.log('user', user.communities);
+    // console.log('user', user.communities);
 
     return {
       success: true,
@@ -65,6 +66,7 @@ export async function getUserById(userId) {
         id: user._id?.toString() || "",
         firstName: user.firstName,
         lastName: user.lastName,
+        clerkId: user.clerkId,
         // organizations: user.organizations
         //   ? user.organizations.map((org) => ({
         //     id: org.organizationId.toString(),
@@ -110,12 +112,41 @@ export async function removeOrganizationFromUser(userId, organizationId) {
   await Organization.findByIdAndUpdate(organizationId, { $pull: { members: userId } });
 }
 
-export const deleteUser = async (id) => {
+export const deleteUserByClerkId = async (id) => {
   try {
     await connect();
     await User.findOneAndDelete({ clerkId: id });
   } catch (error) {
     console.error('Error deleting user:', error);
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    // Validate input
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid or missing user ID" };
+    }
+
+    await connect();
+
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return { success: false, error: "User not found" };
+    }
+
+    return {
+      success: true,
+      message: "User deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return {
+      success: false,
+      error: "Failed to delete user",
+      details: error.message,
+    };
   }
 };
 
@@ -287,7 +318,7 @@ export async function addCommunityToUser(communityId, userId) {
 }
 
 export async function removeCommunityFromUser(communityId, userId) {
-  // console.log(communityId, userId); // Uncomment for debugging if needed
+  //console.log(communityId, userId); // Uncomment for debugging if needed
 
   try {
     // Input validation
@@ -309,7 +340,7 @@ export async function removeCommunityFromUser(communityId, userId) {
     // Update the user by pulling the communityId from communities array
     const result = await User.updateOne(
       { _id: userId },
-      { $pull: { communities: { communityId } } }
+      { $pull: { communities: { community: communityId } } }
     );
 
     // console.log(result);
