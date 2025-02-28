@@ -73,7 +73,7 @@ export default function UsersPage() {
           <h3 className="text-lg font-medium">Users</h3>
           <p className="text-sm text-muted-foreground">Globally manage the TwelveMore users.</p>
         </div>
-        <Button onClick={() => setModalOpen(true)}>New User</Button>
+        {/*<Button onClick={() => setModalOpen(true)}>New User</Button>*/}
       </div>
       <div className="mt-3">
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
