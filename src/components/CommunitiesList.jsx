@@ -23,7 +23,7 @@ export default function CommunitiesList() {
       <h3 className="text-xl font-semibold mb-4">Your Communities</h3>
       {appUser?.communities?.length === 0 ? (
         <div>
-          <p>You don’t belong to any communities yet.</p>
+          <p>You don’t belong to any communities...yet.</p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -31,7 +31,7 @@ export default function CommunitiesList() {
             <li key={community.id} className="border p-4 rounded-md">
               <Link href={`/communities/${community.id}`}>
                 <h4 className="text-lg font-medium">{community.name}</h4>
-                <p className="text-muted-foreground">{community.id}</p>
+                {/*<p className="text-muted-foreground">{community.id}</p>*/}
                 <p className="text-muted-foreground">{community.description}</p>
               </Link>
               <Button
@@ -40,7 +40,7 @@ export default function CommunitiesList() {
                 variant="outline"
               >
                 <Link href={`/communities/${community.id}/invite`}>
-                  Invite
+                  Invite others to community
                 </Link>
               </Button>
             </li>
