@@ -24,7 +24,7 @@ export default function LeftSidebar({ onLinkClick }) {
     { title: 'Home', href: '/home', icon: <HiHome className="w-6 h-6" /> },
     { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
     // { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
-    // { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
+    { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
     // {
     //   title: 'Admin',
     //   href: '/admin',

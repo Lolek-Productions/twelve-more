@@ -140,9 +140,9 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="First Name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your first name
-              </FormDescription>
+              {/*<FormDescription>*/}
+              {/*  This is your first name*/}
+              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -156,9 +156,9 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="Last Name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your last name
-              </FormDescription>
+              {/*<FormDescription>*/}
+              {/*  This is your last name*/}
+              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -172,9 +172,9 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="Email Addresss" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your emial address
-              </FormDescription>
+              {/*<FormDescription>*/}
+              {/*  This is your emial address*/}
+              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -194,7 +194,7 @@ export function UserProfileForm() {
                 />
               </FormControl>
               <FormDescription>
-                Tell us about yourself
+                Take a minute to tell a story about your life for others to know you a little more.
               </FormDescription>
               <FormMessage />
             </FormItem>
