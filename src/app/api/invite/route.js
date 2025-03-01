@@ -70,7 +70,7 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 5, delayMs = 1000) =>
 
 // Send SMS invitation
 const sendCommunityInvitation = async (firstName, phoneNumber, communityId) => {
-  const communityLink = `${process.env.NEXT_PUBLIC_BASE_URL}/communities/${communityId}`;
+  const communityLink = `https://twelvemore.social/communities/${communityId}`;
   const messageBody = `Hi ${firstName}, you've been invited to join a community! Click here to check it out: ${communityLink}`;
 
   const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);
