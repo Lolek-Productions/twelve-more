@@ -68,8 +68,9 @@ export const handleApiResponse = async ({
   }
 };
 
-// Utility to normalize phone number
 export const normalizePhoneNumber = (phoneNumber) => {
+  console.log(phoneNumber);
+
   // Convert to string and remove non-digit characters
   const digitsOnly = String(phoneNumber).replace(/\D/g, '');
 
@@ -85,6 +86,8 @@ export const normalizePhoneNumber = (phoneNumber) => {
   if (digitsOnly.startsWith('+1') && digitsOnly.length === 12) {
     return digitsOnly; // e.g., +12708831110 -> +12708831110
   }
+
+  console.log('digitsOnly',digitsOnly)
 
   // Throw an error for invalid formats
   throw new Error('Invalid phone number format. Please provide a 10-digit US number (e.g., 2708831110)');

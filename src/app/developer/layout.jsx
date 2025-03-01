@@ -22,6 +22,10 @@ const sidebarNavItems = [
     href: "/developer/commands",
   },
   {
+    title: "Phone Lookup",
+    href: "/developer/phone-lookup",
+  },
+  {
     title: "Send SMS",
     href: "/developer/send-sms",
   },

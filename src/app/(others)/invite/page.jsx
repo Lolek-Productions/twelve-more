@@ -24,7 +24,7 @@ const profileFormSchema = z.object({
     .max(50, { message: "Last name must not exceed 50 characters." }),
   phoneNumber: z
     .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., 2345678901)." })
     .min(10, { message: "Phone Number must be at least 10 digits." })
     .max(15, { message: "Phone Number must not exceed 15 characters." }),
   smsOptIn: z
