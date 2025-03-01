@@ -3,13 +3,17 @@
 import { useState, useEffect } from "react";
 import { getUserCommunities } from "@/lib/actions/community"; // Import server action
 import { Button } from "@/components/ui/button"; // Assuming you're using a UI library like shadcn/ui
+import { useAppUser } from '@/hooks/useAppUser';
+import Link from "next/link";
 
 export default function CommunitiesList() {
   const [communities, setCommunities] = useState([]); // Already initialized as empty array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { appUser } = useAppUser();
 
   useEffect(() => {
+
     async function fetchCommunities() {
       try {
         setLoading(true);
@@ -41,7 +45,7 @@ export default function CommunitiesList() {
   };
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return <div className="p-4 w-[30rem]">Loading...</div>;
   }
 
   if (error) {
@@ -49,16 +53,21 @@ export default function CommunitiesList() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-[30rem]">
       <h3 className="text-xl font-semibold mb-4">Your Communities</h3>
-      {communities.length === 0 ? (
-        <p>You don’t belong to any communities yet.</p>
+      {appUser.communities.length === 0 ? (
+        <div>
+          <p>You don’t belong to any communities yet.</p>
+        </div>
       ) : (
         <ul className="space-y-4">
-          {communities.map((community) => (
+          {appUser.communities.map((community) => (
             <li key={community.id} className="border p-4 rounded-md">
-              <h4 className="text-lg font-medium">{community.name}</h4>
-              <p className="text-muted-foreground">{community.description || "No description available"}</p>
+              <Link href={`/communities/${community.id}`}>
+                <h4 className="text-lg font-medium">{community.name}</h4>
+                <p className="text-muted-foreground">{community.id}</p>
+                <p className="text-muted-foreground">{community.description}</p>
+              </Link>
               <Button
                 onClick={() => handleInvite(community.id)}
                 className="mt-2"

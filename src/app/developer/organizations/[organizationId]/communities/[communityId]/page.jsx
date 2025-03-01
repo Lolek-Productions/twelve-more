@@ -120,8 +120,8 @@ export default function CommunityMembersPage() {
     }
   };
 
-  if (!organizationId || !communityId) {
-    return <div>Loading...</div>;
+  if (!communityId) {
+    return <div className={'w-[30rem]'}>Loading...</div>;
   }
 
   const handleMemberRemoved = async (memberId) => {

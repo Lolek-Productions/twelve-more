@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { DEV_PHONE_NUMBERS } from '@/lib/constants';
+import CommunityNav from "@/components/CommunityNav";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
@@ -77,6 +78,9 @@ export default function LeftSidebar({ onLinkClick }) {
             </Link>
           ))}
         </nav>
+
+        {/*<CommunityNav />*/}
+
       </div>
 
       <div className="mt-auto">

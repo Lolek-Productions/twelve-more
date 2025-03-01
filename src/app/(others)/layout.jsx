@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import SessionWrapper from "@/components/SessionWrapper";
 
 export default function RootLayout({ children }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false); // State to control Sheet
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
         <RedirectToSignIn />
       </SignedOut>
       <SignedIn>
+        <SessionWrapper>
         <div className="flex min-h-screen w-full flex-col">
           {/* Mobile Header with Menu Trigger */}
           <header className="sticky top-0 z-50 flex h-16 items-center border-b bg-background px-4 md:hidden">
@@ -72,6 +74,7 @@ export default function RootLayout({ children }) {
           <CommentModal />
           <Toaster />
         </div>
+        </SessionWrapper>
       </SignedIn>
     </div>
   );
