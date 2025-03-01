@@ -54,7 +54,6 @@ export function OrganizationTable({ data, deleteEntity }) {
   });
 
   const handleRowClick = (organization) => {
-    // console.log(organization.id);
     router.push(`/developer/organizations/${organization.id}`);
   };
 
