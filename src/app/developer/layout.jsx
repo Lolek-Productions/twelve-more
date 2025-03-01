@@ -18,6 +18,10 @@ const sidebarNavItems = [
     href: "/developer/users",
   },
   {
+    title: "Commands",
+    href: "/developer/commands",
+  },
+  {
     title: "Send SMS",
     href: "/developer/send-sms",
   },

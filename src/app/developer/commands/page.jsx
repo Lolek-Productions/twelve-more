@@ -1,5 +1,4 @@
 "use client";
-
 import PaginatedTable from "@/components/DataTable/PaginatedTable";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
@@ -13,12 +12,20 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useToast } from "@/hooks/use-toast";
-import { runCommand } from "@/lib/actions/command"; // Import action
+import { runCommand } from "@/lib/actions/command";
 
-export function CommandsTable({ data }) {
+function CommandsPage() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+
   const { toast } = useToast();
+
+  const commands = [
+    { id: "1", name: "Log Hello" },
+    { id: "2", name: "Create Josh in Clerk" },
+    { id: "3", name: "Delete Josh in Clerk" },
+    { id: "4", name: "Send Test SMS" },
+  ];
 
   const columns = [
     {
@@ -32,9 +39,11 @@ export function CommandsTable({ data }) {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
     {
       id: "actions",
+      header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => {
         const command = row.original;
 
@@ -63,12 +72,8 @@ export function CommandsTable({ data }) {
         };
 
         return (
-          <div className="justify-end flex">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRunCommand}
-            >
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleRunCommand}>
               Run
             </Button>
           </div>
@@ -78,24 +83,41 @@ export function CommandsTable({ data }) {
   ];
 
   const table = useReactTable({
-    data,
+    data: commands,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: { sorting, columnFilters },
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting,
+      columnFilters,
+      pagination: {
+        pageIndex: 0, // Explicitly set initial page
+        pageSize: 10,
+      },
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    // debugTable: true, // Keep for debugging
   });
 
+  // Debug logging
+  // console.log("Data:", commands);
+  // console.log("Columns:", columns.length, columns);
+  // console.log("State:", table.getState());
+  // console.log("Core Row Model:", table.getCoreRowModel());
+  // console.log("Rows:", table.getRowModel().rows);
+
   return (
-    <div>
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Input
           placeholder="Filter commands by name..."
           value={table.getColumn("name")?.getFilterValue() ?? ""}
-          onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
           className="max-w-sm"
         />
       </div>
@@ -103,3 +125,5 @@ export function CommandsTable({ data }) {
     </div>
   );
 }
+
+export default CommandsPage;
