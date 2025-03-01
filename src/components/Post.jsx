@@ -17,7 +17,9 @@ export default function Post({ post, clickableText = true }) {
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-1 whitespace-nowrap'>
             <h4 className='font-bold text-xs truncate max-w-32'>
-              {post?.community?.name}
+              <Link href={`/communities/${post?.community?.id}`} className='flex-shrink-0'>
+                {post?.community?.name}
+              </Link>
             </h4>
             {/* add dot space here */}
             <span className='text-xl text-gray-500'>·</span>
