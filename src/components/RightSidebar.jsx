@@ -39,7 +39,7 @@ export default function RightSidebar() {
             <div className='space-y-0.5'>
               <h6 className='text-sm font-bold'>Gratitude</h6>
               <p className='text-xs font-medium text-gray-500'>
-                Take a minute to tell your community 5 things you are gratefulf for.
+                Take a minute to tell your community 5 things you are grateful for.
               </p>
             </div>
             {/*<img src={task.urlToImage} width={70} className='rounded-xl' />*/}

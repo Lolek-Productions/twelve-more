@@ -14,7 +14,7 @@ export default function CommunityNav() {
   return (
     <div className="p-3 bg-gray-100 rounded-md mt-2">
       <div className="flex items-center">
-        <div className="ml-2 font-semibold">My Communities</div>
+        <div className="ml-2 text-xl font-semibold mb-1">My Communities</div>
       </div>
       <div>
         {
