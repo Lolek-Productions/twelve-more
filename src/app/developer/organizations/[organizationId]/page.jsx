@@ -146,7 +146,7 @@ export default function DeveloperCommunitiesPage() {
         <div>
           <h3 className="text-lg font-medium">Communities in {organizationName}</h3>
           <p className="text-sm text-muted-foreground">
-            Manage communities for organization ID: {organizationId}.
+            Organization ID: {organizationId}
           </p>
         </div>
         <div className="space-x-2 flex justify-between items-center">

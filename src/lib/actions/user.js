@@ -54,8 +54,9 @@ export async function getUserById(userId) {
     await connect();
 
     const user = await User.findById(userId)
-      .populate('organizations', 'name')
-      .populate('communities.community', 'name')
+      .populate('organizations.organization')
+      .populate('communities.community')
+      .populate('selectedOrganization')
       .lean();
     // console.log('user', user.communities);
 
@@ -69,13 +70,19 @@ export async function getUserById(userId) {
         // organizations: user.organizations
         //   ? user.organizations.map((org) => ({
         //     id: org.organizationId.toString(),
-        //     name: org.name || "Missing Organization",
+        //     name: org.name || "Empty Organization",
         //   }))
         //   : [],
+        selectedOrganization: {
+          id: user.selectedOrganization._id.toString(),
+          name: user.selectedOrganization.name,
+          description: user.selectedOrganization.description,
+          role: user.selectedOrganization.role,
+        },
         communities: user.communities
           ? user.communities.map((community) => ({
             id: community.community._id.toString(),       // Populated _id
-            name: community.community.name || "Missing Community", // Populated name
+            name: community.community.name || "Empth Community", // Populated name
             role: community.role || "member",
           }))
           : [],

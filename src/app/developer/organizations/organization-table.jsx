@@ -39,6 +39,25 @@ export function OrganizationTable({ data, deleteEntity }) {
         )
       },
     },
+    {
+      accessorKey: "id",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        return (
+          <div>
+            {row.getValue("id")}
+          </div>
+        )
+      },
+    },
   ];
 
   const table = useReactTable({

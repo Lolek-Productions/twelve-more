@@ -18,3 +18,6 @@ After changing the schema on the Post model, I had to restart the development se
 
 # copy everything in directory for AI
 find . -type f -exec sh -c 'echo "--- File: {} ---"; cat "{}"; echo ""' \; | pbcopy
+
+# Git Summary
+git log --since="7 days ago" --pretty=tformat: --numstat | awk '{ add += $1; rem += $2 } END { print "Lines added: " add "\nLines removed: " rem "\nTotal changes: " (add + rem) }'

@@ -70,6 +70,11 @@ const userSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    selectedOrganization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -79,7 +79,7 @@ export default function LeftSidebar({ onLinkClick }) {
           ))}
         </nav>
 
-        {/*<CommunityNav />*/}
+        <CommunityNav />
 
       </div>
 
