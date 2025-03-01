@@ -31,6 +31,7 @@ export default function CommunitiesList() {
             <li key={community.id} className="border p-4 rounded-md">
               <Link href={`/communities/${community.id}`}>
                 <h4 className="text-lg font-medium">{community.name}</h4>
+                <h4 className="text-gray-800 text-sm">Role: {community.role}</h4>
                 {/*<p className="text-muted-foreground">{community.id}</p>*/}
                 <p className="text-muted-foreground">{community.description}</p>
               </Link>
