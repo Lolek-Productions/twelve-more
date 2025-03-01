@@ -1,6 +1,6 @@
 import { clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import twilioService from '@/lib/twilioService';
+import twilioService from '@/lib/services/twilioService';
 import { addCommunityToUser, getUserByClerkId } from '@/lib/actions/user';
 import {handleClerkError, normalizePhoneNumber} from "@/lib/utils";
 
