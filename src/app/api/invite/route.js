@@ -39,6 +39,35 @@ const getOrCreateClerkUser = async (client, { firstName, lastName, phoneNumber }
   return user;
 };
 
+// Utility function to poll for MongoDB user
+const pollForMongoUser = async (clerkUserId, maxAttempts = 5, delayMs = 1000) => {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const mongoUserResult = await getUserByClerkId(clerkUserId);
+
+      if (mongoUserResult.success) {
+        console.log(`MongoDB user found on attempt ${attempt}:`, mongoUserResult.user.id);
+        return { success: true, user: mongoUserResult.user };
+      }
+
+      console.log(`Attempt ${attempt}: MongoDB user not found yet`);
+
+      // Wait before next attempt if not the last one
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+      if (attempt === maxAttempts) {
+        return { success: false, error: `Failed to find MongoDB user after ${maxAttempts} attempts: ${error.message}` };
+      }
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return { success: false, error: `MongoDB user not found after ${maxAttempts} attempts` };
+};
+
 // Send SMS invitation
 const sendCommunityInvitation = async (firstName, phoneNumber, communityId) => {
   const communityLink = `${process.env.NEXT_PUBLIC_BASE_URL}/communities/${communityId}`;
@@ -72,19 +101,20 @@ export async function POST(req) {
     // 1. Fetch or create Clerk user
     const clerkUser = await getOrCreateClerkUser(client, { firstName, lastName, phoneNumber });
 
-    // 2. Fetch MongoDB user and add community
-    const mongoUserResult = await getUserByClerkId(clerkUser.id);
-    if (!mongoUserResult.success) {
-      console.error('Failed to get MongoDB user:', mongoUserResult.error);
+    // 2. Poll MongoDB until user is found
+    const pollResult = await pollForMongoUser(clerkUser.id);
+    if (!pollResult.success) {
+      console.error('Polling failed:', pollResult.error);
       return NextResponse.json(
-        { error: 'Failed to retrieve user from database', details: mongoUserResult.error },
+        { error: 'Failed to sync user with database', details: pollResult.error },
         { status: 500 }
       );
     }
 
-    await addCommunityToUser(communityId, mongoUserResult.user.id);
+    // 3. Add community to user
+    await addCommunityToUser(communityId, pollResult.user.id);
 
-    // 3. Send SMS invitation
+    // 4. Send SMS invitation
     await sendCommunityInvitation(firstName, phoneNumber, communityId);
 
     return NextResponse.json({ success: true, userId: clerkUser.id });
