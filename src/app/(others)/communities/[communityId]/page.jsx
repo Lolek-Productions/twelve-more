@@ -7,10 +7,9 @@ export const dynamic = 'force-dynamic'; // ✅ Ensures Next.js treats this as a 
 
 export default async function CommunitiesHome({params}) {
   const resolvedParams = await params; // Await params to resolve the promise
-  const { id } = resolvedParams; // Now safely destructure
+  const { communityId } = resolvedParams; // Now safely destructure
 
-  const community = await Community.findById(id).lean();
-  const communityId = community._id.toString();
+  const community = await Community.findById(communityId).lean();
 
   return (
     <div className='min-h-screen max-w-xl mx-auto border-r border-l'>

@@ -1,74 +1,94 @@
 import { clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import twilioService from '@/lib/twilioService';
+import { addCommunityToUser, getUserByClerkId } from '@/lib/actions/user';
+import {handleClerkError, normalizePhoneNumber} from "@/lib/utils";
+
+// Utility to validate request body
+const validateRequestBody = ({ firstName, lastName, phoneNumber, communityId }) => {
+  const missingFields = {};
+  if (!firstName) missingFields.firstName = 'First name is required';
+  if (!lastName) missingFields.lastName = 'Last name is required';
+  if (!phoneNumber) missingFields.phoneNumber = 'Phone number is required';
+  if (!communityId) missingFields.communityId = 'CommunityId is required';
+
+  if (Object.keys(missingFields).length > 0) {
+    return { isValid: false, error: 'Missing required fields', details: missingFields };
+  }
+  return { isValid: true };
+};
+
+// Fetch or create Clerk user
+const getOrCreateClerkUser = async (client, { firstName, lastName, phoneNumber }) => {
+  const normalizedPhone = normalizePhoneNumber(phoneNumber);
+  const existingUsers = await client.users.getUserList({ phoneNumber: [normalizedPhone] });
+
+  if (existingUsers.data.length > 0) {
+    const user = existingUsers.data[0];
+    console.log('Existing user found:', JSON.stringify(user, null, 2));
+    return user;
+  }
+
+  const user = await client.users.createUser({
+    firstName,
+    lastName,
+    phoneNumber: [normalizedPhone],
+    publicMetadata: { smsOptIn: true },
+  });
+  console.log('User created:', JSON.stringify(user, null, 2));
+  return user;
+};
+
+// Send SMS invitation
+const sendCommunityInvitation = async (firstName, phoneNumber, communityId) => {
+  const communityLink = `${process.env.NEXT_PUBLIC_BASE_URL}/communities/${communityId}`;
+  const messageBody = `Hi ${firstName}, you've been invited to join a community! Click here to check it out: ${communityLink}`;
+
+  const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);
+  if (!smsResult.success) {
+    console.error('SMS failed:', smsResult.message);
+  } else {
+    console.log('SMS result:', smsResult.message);
+  }
+  return smsResult.success;
+};
 
 export async function POST(req) {
   try {
-    const { firstName, lastName, phoneNumber } = await req.json();
+    const body = await req.json();
+    const { firstName, lastName, phoneNumber, communityId } = body;
 
-    // Validate required fields
-    if (!firstName || !lastName || !phoneNumber) {
+    // Validate request body
+    const validation = validateRequestBody(body);
+    if (!validation.isValid) {
       return NextResponse.json(
-        {
-          error: 'Missing required fields',
-          details: {
-            firstName: !firstName ? 'First name is required' : undefined,
-            lastName: !lastName ? 'Last name is required' : undefined,
-            phoneNumber: !phoneNumber ? 'Phone number is required' : undefined
-          }
-        },
+        { error: validation.error, details: validation.details },
         { status: 400 }
       );
     }
 
-    const normalizedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-
     const client = await clerkClient();
 
-    // Create the user with firstName and lastName
-    const user = await client.users.createUser({
-      firstName: firstName,
-      lastName: lastName,
-      phoneNumber: [normalizedPhone],
-      skipLegalChecks: true,
-    });
+    // 1. Fetch or create Clerk user
+    const clerkUser = await getOrCreateClerkUser(client, { firstName, lastName, phoneNumber });
 
-    console.log('User created:', JSON.stringify(user, null, 2));
+    // 2. Fetch MongoDB user and add community
+    const mongoUserResult = await getUserByClerkId(clerkUser.id);
+    if (!mongoUserResult.success) {
+      console.error('Failed to get MongoDB user:', mongoUserResult.error);
+      return NextResponse.json(
+        { error: 'Failed to retrieve user from database', details: mongoUserResult.error },
+        { status: 500 }
+      );
+    }
 
-    //Need to add user to community
+    await addCommunityToUser(communityId, mongoUserResult.user.id);
 
-    //Need to send text message to new user
+    // 3. Send SMS invitation
+    await sendCommunityInvitation(firstName, phoneNumber, communityId);
 
-
-
-    return NextResponse.json({ success: true, userId: user.id });
+    return NextResponse.json({ success: true, userId: clerkUser.id });
   } catch (error) {
-    // Log the full error details
-    console.error(
-      'Clerk error:',
-      JSON.stringify(
-        {
-          status: error.status,
-          message: error.message,
-          errors: error.errors,
-          clerkTraceId: error.clerkTraceId,
-        },
-        null,
-        2
-      )
-    );
-
-    const errorDetails = error.errors?.map(err => ({
-      code: err.code,
-      message: err.message,
-      longMessage: err.longMessage || err.message,
-    })) || [{ message: error.message || 'Unknown error' }];
-
-    return NextResponse.json(
-      {
-        error: 'Failed to create user',
-        details: errorDetails,
-      },
-      { status: error.status || 500 }
-    );
+    return handleClerkError(error);
   }
 }

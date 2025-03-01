@@ -13,11 +13,11 @@ export async function runCommand(commandName) {
         return { success: true, message: "Logged 'Hello' to server console" };
 
       case "Create Josh in Clerk": {
-        // Create a user named "Josh" with minimal required fields
         const user = await client.users.createUser({
-          phoneNumber: ['+12708831110'], // Use dynamic phoneNumber
-          publicMetadata: { invitationOrganizationId: 'sup9er coool organization ID'},
-          skipLegalChecks: true,
+          phoneNumber: ['+12708831110'],
+          firstName: "TESTJOSH",
+          lastName: "TESTMCCARTY",
+          publicMetadata: { smsOptIn:true },
         });
 
         return {

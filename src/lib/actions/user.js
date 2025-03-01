@@ -57,7 +57,6 @@ export async function getUserById(userId) {
       .populate('organizations', 'name')
       .populate('communities.community', 'name')
       .lean();
-
     // console.log('user', user.communities);
 
     return {
@@ -91,6 +90,36 @@ export async function getUserById(userId) {
     return { success: false, error: 'Failed to fetch users', details: error.message };
   }
 }
+
+export const getUserByClerkId = async (clerkId) => {
+  try {
+    await connect();
+
+    const user = await User.findOne({ clerkId })
+      .lean();
+
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    return {
+      success: true,
+      user: {
+        id: user._id?.toString() || "",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        clerkId: user.clerkId,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching user by Clerk ID from MongoDB:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    return { success: false, error: 'Failed to fetch user', details: error.message };
+  }
+};
 
 export async function updateUser(userId, updates) {
   await dbConnect();
