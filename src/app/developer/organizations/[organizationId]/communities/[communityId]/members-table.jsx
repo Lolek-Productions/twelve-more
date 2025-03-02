@@ -63,7 +63,7 @@ export function MembersTable({ communityId, members, organizationId, onMemberRem
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onMemberRemoved(member.id)}>
-                  Delete
+                  Force Remove Membership to this Community
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
