@@ -49,6 +49,16 @@ export function UserTable({ data, deleteEntity }) {
         )
       },
     },
+    {
+      accessorKey: "clerkId",
+      cell: ({ row }) => {
+        return (
+          <div>
+            {row.getValue("clerkId")}
+          </div>
+        )
+      },
+    },
   ];
 
   const table = useReactTable({

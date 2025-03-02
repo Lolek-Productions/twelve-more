@@ -232,7 +232,10 @@ export const getUsers = async () => {
       success: true,
       users: users.map(user => ({
         id: user._id.toString(), // Use MongoDB _id as the identifier
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || user.clerkId,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        clerkId: user.clerkId
       })),
     };
   } catch (error) {
