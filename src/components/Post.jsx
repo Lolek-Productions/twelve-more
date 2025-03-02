@@ -6,20 +6,21 @@ import Icons from './Icons';
 export default function Post({ post, clickableText = true }) {
   return (
     <div className='flex p-3 border-b border-gray-200 w-full hover:bg-gray-50'>
-      {/*<Link href={`/users/${post?.user?.toString()}`} className='flex-shrink-0'>*/}
+      <Link href={`/users/${post?.user?.id}`} className='flex-shrink-0'>
         <img
           src={post?.profileImg}
           alt='img'
           className='h-11 w-11 rounded-full mr-4 flex-shrink-0'
         />
-      {/*</Link>*/}
+      </Link>
       <div className='flex-1'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-1 whitespace-nowrap'>
             <h4 className='font-bold text-xs truncate max-w-32'>
-              <Link href={`/communities/${post?.community?.id}`} className='flex-shrink-0'>
-                {post?.community?.name}
+              <Link href={`/users/${post?.user?.id}`} className='flex-shrink-0'>
+                {post?.user?.firstName} {post?.user?.lastName}
               </Link>
+
             </h4>
             {/* add dot space here */}
             <span className='text-xl text-gray-500'>·</span>
