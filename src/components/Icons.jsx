@@ -81,7 +81,7 @@ export default function Icons({ post }) {
             } else {
               setOpen(!open);
               setPostId(post.id);
-              console.log('setting postId', post)
+              // console.log('setting postId', post)
             }
           }}
         />
