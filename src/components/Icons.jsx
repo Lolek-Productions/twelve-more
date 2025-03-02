@@ -80,7 +80,8 @@ export default function Icons({ post }) {
               router.push('/sign-in');
             } else {
               setOpen(!open);
-              setPostId(post.id);
+              setPostId(post._id);
+              // console.log('post id from icons:',post);
             }
           }}
         />

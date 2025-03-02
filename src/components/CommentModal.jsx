@@ -2,7 +2,6 @@
 
 import { modalState, postIdState } from '../modalState/modalStateDefinition';
 import { useAtom } from 'jotai'
-
 import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
@@ -12,16 +11,16 @@ import { useRouter } from 'next/navigation';
 export default function CommentModal() {
   const [open, setOpen] = useAtom(modalState);
   const [postId, setPostId] = useAtom(postIdState);
-
   const [post, setPost] = useState({});
-
   const [postLoading, setPostLoading] = useState(false);
   const [input, setInput] = useState('');
   const { user } = useUser();
   const router = useRouter();
 
   useEffect(() => {
+
     const fetchPost = async () => {
+      // console.log('trying from Atom', postId)
       if (postId !== '') {
         setPostLoading(true);
         setInput('');
@@ -105,11 +104,8 @@ export default function CommentModal() {
                 className='h-11 w-11 rounded-full mr-4'
               />
               <h4 className='font-bold sm:text-[16px] text-[15px] hover:underline truncate'>
-                {postLoading ? 'Name' : post?.name}
+                {postLoading ? 'Name' : `${post.user?.firstName} ${post.user?.lastName}`}
               </h4>
-              <span className='text-sm sm:text-[15px] truncate'>
-                @{postLoading ? 'username' : post?.username}
-              </span>
             </div>
             <p className='text-gray-500 text-[15px] sm:text-[16px] ml-16 mb-2'>
               {postLoading ? 'Loading...' : post?.text}
