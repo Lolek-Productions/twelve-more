@@ -28,7 +28,7 @@ export default function Post({ post, clickableText = true }) {
               {moment(post?.createdAt).fromNow()}
             </span>
           </div>
-          <HiDotsHorizontal className='text-sm' />
+          {/*<HiDotsHorizontal className='text-sm' />*/}
         </div>
         {clickableText ? (
           <Link href={`/posts/${post?.id}`} className="block">

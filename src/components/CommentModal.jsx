@@ -104,7 +104,7 @@ export default function CommentModal() {
                 className='h-11 w-11 rounded-full mr-4'
               />
               <h4 className='font-bold sm:text-[16px] text-[15px] hover:underline truncate'>
-                {postLoading ? 'Name' : `${post.user?.firstName} ${post.user?.lastName}`}
+                {postLoading ? 'Name' : `${post?.user?.firstName} ${post?.user?.lastName}`}
               </h4>
             </div>
             <p className='text-gray-500 text-[15px] sm:text-[16px] ml-16 mb-2'>
