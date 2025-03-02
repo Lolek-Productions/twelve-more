@@ -100,6 +100,8 @@ export async function POST(req) {
           const response = await client.users.updateUserMetadata(id, {
             publicMetadata: {
               userMongoId: mongoUserId,
+              smsOptIn:true,
+              onboardingComplete:true,
             },
           });
 
