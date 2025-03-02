@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 
 export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
+  const {appUser} = useUser();
+  const selectedOrganizationId = appUser?.selectedOrganization?.id;
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -152,7 +154,7 @@ export default function Input({communityId}) {
         profileImg: user.imageUrl,
         image: imageFileUrl,
         audio: recordedURL,
-        organizationId: '???',
+        organizationId: selectedOrganizationId,
       }),
     });
     setPostLoading(false);

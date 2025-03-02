@@ -2,29 +2,37 @@
 
 import Post from './Post';
 import { useEffect, useState } from "react";
-import { getPostsByCommunityId } from "@/lib/actions/post";
+import { getPosts } from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton"
+import {useAppUser} from "@/hooks/useAppUser.js";
 
 export default function Feed({ communityId }) {
   const [posts, setPosts] = useState([]); // Stores fetched posts
   const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const {appUser} = useAppUser();
+  const selectedOrganizationId = appUser?.selectedOrganization?.id;
 
   useEffect(() => {
+    if (!appUser) {
+      setIsLoading(true); // Keep loading state until appUser is available
+      return;
+    }
+
     const fetchPosts = async () => {
-      setIsLoading(true); // Set loading to true when fetch starts
+      setIsLoading(true);
       try {
-        const data = await getPostsByCommunityId({ limit: postNum, communityId });
+        const data = await getPosts({ limit: postNum, selectedOrganizationId, communityId });
         setPosts(data);
       } catch (error) {
         console.error('Error fetching posts:', error);
       } finally {
-        setIsLoading(false); // Set loading to false when fetch completes (success or fail)
+        setIsLoading(false);
       }
     };
 
     fetchPosts();
-  }, [postNum, communityId]);
+  }, [appUser, postNum, communityId]);
 
   // Skeleton loading component
   const LoadingSkeleton = () => (

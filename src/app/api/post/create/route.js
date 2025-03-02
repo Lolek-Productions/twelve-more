@@ -1,4 +1,5 @@
 import Post from '@/lib/models/post.model.js';
+import Community from '@/lib/models/community.model.js';
 import { connect } from '@/lib/mongodb/mongoose.js';
 import { currentUser } from '@clerk/nextjs/server';
 import twilioService from '@/lib/services/twilioService.js'; // Import your Twilio service
@@ -28,6 +29,7 @@ export const POST = async (req) => {
       image: data.image,
       audio: data.audio,
       community: data.communityId,
+      organization: data.organizationId,
     });
 
     await newPost.save();
@@ -45,7 +47,6 @@ export const POST = async (req) => {
         const otherMembers = community.members.filter(
           (member) => member._id.toString() !== data.userMongoId
         );
-
 
         const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
         const messageBody = `A new post was added to your community! Check it out: ${communityLink}`;
