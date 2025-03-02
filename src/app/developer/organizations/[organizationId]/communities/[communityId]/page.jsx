@@ -217,7 +217,7 @@ export default function CommunityMembersPage() {
             Members of {community?.name || "Community"}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Manage members for community ID: {communityId}.
+            Manage members for community ID: {communityId}
           </p>
         </div>
 
