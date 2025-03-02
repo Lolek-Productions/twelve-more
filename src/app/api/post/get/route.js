@@ -28,10 +28,43 @@ export const POST = async (req) => {
       });
 
 
-    console.log('postid:', data.postId);
+    const formattedPost = {
+      id: post._id.toString(),
+      text: post.text,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
+      },
+      profileImg: post.profileImg,
+      comments: post.comments?.map((comment) => ({
+        id: comment._id.toString(),
+        comment: comment.comment,
+        profileImg: comment.profileImg,
+        createdAt: comment.createdAt,
+        user: {
+          id: comment.user?._id.toString(),
+          firstName: comment.user?.firstName,
+          lastName: comment.user?.lastName,
+        },
+      })) || [],
+      likes: post.likes?.map((like) => ({
+        id: like._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    };
 
+    // console.log('postid:', data.postId);
 
-    return new Response(JSON.stringify(post), { status: 200 });
+    return new Response(JSON.stringify(formattedPost), { status: 200 });
   } catch (error) {
     console.log('Error getting post:', error);
     return new Response('Error getting post', { status: 500 });
