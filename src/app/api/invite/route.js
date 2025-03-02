@@ -1,7 +1,12 @@
 import { clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import twilioService from '@/lib/services/twilioService';
-import { addCommunityToUser, getUserByClerkId } from '@/lib/actions/user';
+import {
+  addCommunityToUser,
+  addOrganizationToUser,
+  getUserByClerkId,
+  setSelectedOrganizationOnUser
+} from '@/lib/actions/user';
 import {handleClerkError, normalizePhoneNumber} from "@/lib/utils";
 
 // Utility to validate request body
@@ -111,8 +116,14 @@ export async function POST(req) {
       );
     }
 
-    // 3. Add community to user
-    await addCommunityToUser(communityId, pollResult.user.id);
+    const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a'; // Hardcoded for St. Leo at this point!
+
+    // 3. Add community, organization, and set selected organization
+    await Promise.all([
+      addCommunityToUser(communityId, pollResult.user.id),
+      addOrganizationToUser(DEFAULT_ORGANIZATION_ID, pollResult.user.id),
+      setSelectedOrganizationOnUser(DEFAULT_ORGANIZATION_ID, pollResult.user.id),
+    ]);
 
     // 4. Send SMS invitation
     await sendCommunityInvitation(firstName, phoneNumber, communityId);

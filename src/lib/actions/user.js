@@ -27,6 +27,8 @@ export const createOrUpdateUser = async (
       ? phone_numbers[0]?.phone_number
       : null; // Fallback to null if empty
 
+    const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a'; // Hardcoded for St. Leo at this point!
+
     const user = await User.findOneAndUpdate(
       { clerkId: id },
       {
@@ -37,6 +39,13 @@ export const createOrUpdateUser = async (
           email,
           username,
           phoneNumber,
+          selectedOrganization: DEFAULT_ORGANIZATION_ID
+        },
+        $addToSet: {
+          organizations: {
+            organization: DEFAULT_ORGANIZATION_ID,
+            role: 'member',
+          },
         },
       },
       { new: true, upsert: true }
@@ -58,7 +67,6 @@ export async function getUserById(userId) {
       .populate('communities.community')
       .populate('selectedOrganization')
       .lean();
-    // console.log('user', user.communities);
 
     return {
       success: true,
@@ -134,7 +142,9 @@ export async function updateUser(userId, updates) {
   return { success: !!user };
 }
 
-export async function addOrganizationToUser(userId, organizationId) {
+
+
+export async function addOrganizationToUser(organizationId, userId) {
   await dbConnect();
   const Organization = mongoose.models.Organization;
   await User.findByIdAndUpdate(userId, { $addToSet: { organizations: organizationId } });
@@ -445,5 +455,33 @@ export async function getCommunityMembers(communityId) {
       success: false,
       error: "Failed to fetch community members",
     };
+  }
+}
+
+export async function setSelectedOrganizationOnUser(organizationId, userId) {
+  try {
+    await connect();
+
+    if (!mongoose.Types.ObjectId.isValid(organizationId)) {
+      return { success: false, error: "Invalid organization ID" };
+    }
+    if (!userId || typeof userId !== "string") {
+      return { success: false, error: "Invalid user ID" };
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: { selectedOrganization: organizationId } },
+      { new: true }
+    ).lean();
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    return { success: true, message: "Selected organization updated" };
+  } catch (error) {
+    console.error("Error setting selected organization:", error.message);
+    return { success: false, error: "Failed to set selected organization" };
   }
 }

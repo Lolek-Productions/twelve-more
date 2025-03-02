@@ -59,6 +59,9 @@ export async function POST(req) {
   if (eventType === 'user.created' || eventType === 'user.updated') {
     const { id, first_name, last_name, image_url, email_addresses, phone_numbers, username } = evt?.data;
 
+    //todo: Add their Organization and selectedOrganization here
+
+
     try {
       const user = await createOrUpdateUser(
         id,

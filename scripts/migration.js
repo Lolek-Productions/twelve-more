@@ -89,7 +89,7 @@ const ORGANIZATION_ID = '67c3776011f461e755fab65a';
 // }
 
 
-//Didn't work
+//Didn't work because I had already removed selectedOrganizationId from the model
 // async function runMigration() {
 //   try {
 //     await connect();
