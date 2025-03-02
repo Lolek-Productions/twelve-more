@@ -2,12 +2,9 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { getUserCommunities } from '@/lib/actions/community';
-import {useUser} from "@clerk/nextjs";
 import {useAppUser} from "@/hooks/useAppUser";
 
 export default function CommunityNav() {
-  const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(false);
   const { appUser } = useAppUser();
 
@@ -18,6 +15,8 @@ export default function CommunityNav() {
       </div>
       <div>
         {
+          appUser?.communities?.length > 0
+            ?
           appUser?.communities?.map((community) => (
             <Link
               key={community.id}
@@ -28,6 +27,16 @@ export default function CommunityNav() {
               <span>{community.name}</span>
             </Link>
           ))
+            :
+            (
+              <Link
+                href={`/communities/`} // Adjust href as needed
+                className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
+              >
+                <span className="text-xl mr-2">·</span>
+                <span>Join a Community</span>
+              </Link>
+            )
         }
       </div>
     </div>
