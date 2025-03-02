@@ -109,9 +109,9 @@ export function PostTable({ data }) {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  // const handleRowClick = (post) => {
-  //   router.push(`/developer/posts/${post.id}`);
-  // };
+  const handleRowClick = (post) => {
+    router.push(`/developer/posts/${post.id}`);
+  };
 
   return (
     <div>
@@ -123,7 +123,7 @@ export function PostTable({ data }) {
           className="max-w-sm"
         />
       </div>
-      <PaginatedTable table={table} columns={columns} />
+      <PaginatedTable table={table} columns={columns} onRowClick={handleRowClick} />
     </div>
   );
 }

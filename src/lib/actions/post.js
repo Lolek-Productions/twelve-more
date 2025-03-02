@@ -8,15 +8,15 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
   try {
     console.log(selectedOrganizationId);
 
-    await connect(); // Ensure MongoDB connection
+    await connect();
     const query = {
       ...(communityId && { community: communityId }),
       ...(selectedOrganizationId && { organization: selectedOrganizationId })
     };
-    const posts = await Post.find(query) // Query posts by communityId
+    const posts = await Post.find(query)
       .populate({
-        path: "comments", // Assuming comments is a ref field
-        select: "text author createdAt", // Adjust fields as needed
+        path: "comments",
+        select: "text author createdAt",
       })
       .populate({
         path: 'community',
@@ -54,7 +54,7 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
       comments: post.comments?.map((comment) => ({
         id: comment._id.toString(),
         text: comment.text,
-        author: comment.author, // Adjust based on your schema
+        author: comment.author,
         createdAt: comment.createdAt,
         user: {
           id: comment.user?._id.toString(),
@@ -76,12 +76,12 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
 
 export async function getAllPosts({limit = 10}) {
   try {
-    await connect(); // Ensure MongoDB connection
+    await connect();
 
     const posts = await Post.find() // Query posts by communityId
       .populate({
-        path: "comments", // Assuming comments is a ref field
-        select: "text author createdAt", // Adjust fields as needed
+        path: "comments",
+        select: "text author createdAt",
       })
       .populate({
         path: 'community',
@@ -127,7 +127,7 @@ export async function getAllPosts({limit = 10}) {
       comments: post.comments?.map((comment) => ({
         id: comment._id.toString(),
         text: comment.text,
-        author: comment.author, // Adjust based on your schema
+        author: comment.author,
         createdAt: comment.createdAt,
         user: {
           id: comment.user?._id.toString(),
@@ -144,5 +144,83 @@ export async function getAllPosts({limit = 10}) {
   } catch (error) {
     console.error("Error fetching posts by community ID:", error);
     return []; // Return empty array on error
+  }
+}
+
+export async function getPostById(postId) {
+  try {
+    await connect();
+
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+
+    const post = await Post.findById(postId)
+      .populate({
+        path: "comments",
+        select: "comment profileImg createdAt",
+        populate: {
+          path: "user",
+          select: "firstName lastName",
+        },
+      })
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+        select: 'firstName lastName',
+      })
+      .lean();
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    return {
+      id: post._id.toString(),
+      text: post.text,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
+      },
+      profileImg: post.profileImg,
+      comments: post.comments?.map((comment) => ({
+        id: comment._id.toString(),
+        comment: comment.comment,
+        profileImg: comment.profileImg,
+        createdAt: comment.createdAt,
+        user: {
+          id: comment.user?._id.toString(),
+          firstName: comment.user?.firstName,
+          lastName: comment.user?.lastName,
+        },
+      })) || [],
+      likes: post.likes?.map((like) => ({
+        id: like._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    };
+  } catch (error) {
+    console.error("Error fetching post:", error.message);
+    return null;
   }
 }
