@@ -6,11 +6,12 @@ import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
+import {useAppUser} from "@/hooks/useAppUser.js";
 
 
 export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
-  const {appUser} = useUser();
+  const {appUser} = useAppUser();
   const selectedOrganizationId = appUser?.selectedOrganization?.id;
 
   //Image
@@ -141,6 +142,9 @@ export default function Input({communityId}) {
   }
 
   const handleSubmit = async () => {
+    // console.log(selectedOrganizationId, 'selectedOrganizationId');
+    // return;
+
     setPostLoading(true);
     const response = await fetch('/api/post/create', {
       method: 'POST',
