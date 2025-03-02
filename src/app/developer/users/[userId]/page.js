@@ -2,15 +2,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser, getUserById } from "@/lib/actions/user";
 import { CommunitiesTable } from "./communities-table";
 import { OrganizationsTable } from "./organizations-table"; // Add this new import
 import { Button } from "@/components/ui/button";
 import {
+  deleteUser,
+  getUserById,
   addCommunityToUser,
-  removeCommunityFromUser,
+  removeCommunityFromUserByMembershipId,
   addOrganizationToUser,
-  removeOrganizationFromUser,
+  removeOrganizationFromUserByMembershipId,
 } from "@/lib/actions/user";
 import { Input } from "@/components/ui/input";
 import {
@@ -95,7 +96,7 @@ export default function UsersPage() {
 
   const handleCommunityRemoved = async (communityMembershipId) => {
     return await handleApiResponse({
-      apiCall: removeCommunityFromUser(communityMembershipId, userId),
+      apiCall: removeCommunityFromUserByMembershipId(communityMembershipId, userId),
       successDescription: "User removed from community",
       errorDescription: "Failed to remove community",
       onSuccess: () => fetchUser(),
@@ -104,7 +105,7 @@ export default function UsersPage() {
 
   const handleOrganizationRemoved = async (organizationMembershipId) => {
     return await handleApiResponse({
-      apiCall: removeOrganizationFromUser(organizationMembershipId, userId),
+      apiCall: removeOrganizationFromUserByMembershipId(organizationMembershipId, userId),
       successDescription: "User removed from organization",
       errorDescription: "Failed to remove organization",
       onSuccess: () => fetchUser(),

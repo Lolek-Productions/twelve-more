@@ -37,7 +37,7 @@ export default function Feed({ communityId }) {
   // Skeleton loading component
   const LoadingSkeleton = () => (
     <div className="space-y-4 p-5 w-[30rem]">
-      {[...Array(3)].map((_, index) => (
+      {[...Array(1)].map((_, index) => (
         <Skeleton key={index} className="h-24 w-full" />
       ))}
     </div>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   addCommunityToUser,
   getCommunityMembers,
-  removeCommunityFromUser,
+  removeCommunityFromUserByMembershipId,
   searchUsersInOrganization
 } from "@/lib/actions/user";
 import {Input} from "@/components/ui/input";
@@ -126,7 +126,7 @@ export default function CommunityMembersPage() {
 
   const handleMemberRemoved = async (memberId) => {
     try {
-      const response = await removeCommunityFromUser(communityId, memberId);
+      const response = await removeCommunityFromUserByMembershipId(communityId, memberId);
       if (response?.success) {
         fetchMembers();
         toast({

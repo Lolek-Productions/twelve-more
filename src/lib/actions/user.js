@@ -162,7 +162,7 @@ export async function addOrganizationToUser(organizationId, userId) {
   }
 }
 
-export async function removeOrganizationFromUser(organizationMembershipId, userId) {
+export async function removeOrganizationFromUserByMembershipId(organizationMembershipId, userId) {
   try {
     await connect();
 
@@ -357,31 +357,36 @@ export async function searchUsersInOrganization(organizationId, query) {
 }
 
 export async function addCommunityToUser(communityId, userId) {
-  // console.log('addCommunityToUser', communityId, userId); // Uncomment for debugging if needed
-
   try {
     await connect();
 
     // Validate inputs
-    if (!mongoose.Types.ObjectId.isValid(communityId)) { // Fixed validation logic
+    if (!mongoose.Types.ObjectId.isValid(communityId)) {
       return { success: false, error: "Invalid community ID" };
     }
     if (!userId || typeof userId !== "string") {
       return { success: false, error: "Invalid user ID" };
     }
 
-    // Update user by adding communityId to communities array
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $addToSet: { communities: { community: communityId, role: "member" } } }, // Updated to 'community'
-      { new: true }
-    ).lean();
-
-    console.log('updated user', user);
-
+    // Check if user is already a member of the community
+    const user = await User.findById(userId).lean();
     if (!user) {
       return { success: false, error: "User not found" };
     }
+
+    const isAlreadyMember = user.communities.some(c => c.community.toString() === communityId);
+    if (isAlreadyMember) {
+      return { success: false, error: "User is already a member of this community" };
+    }
+
+    // Update user by adding communityId to communities array
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { communities: { community: communityId, role: "member" } } },
+      { new: true }
+    ).lean();
+
+    console.log('updated user', updatedUser);
 
     return { success: true, message: `Community added to user` };
   } catch (error) {
@@ -390,9 +395,8 @@ export async function addCommunityToUser(communityId, userId) {
   }
 }
 
-export async function removeCommunityFromUser(communityMembershipId, userId) {
-  //console.log(communityMembershipId, userId); // Uncomment for debugging if needed
 
+export async function removeCommunityFromUserByMembershipId(communityMembershipId, userId) {
   try {
     // Input validation
     if (!communityMembershipId || !mongoose.isValidObjectId(communityMembershipId)) {
@@ -413,10 +417,55 @@ export async function removeCommunityFromUser(communityMembershipId, userId) {
     // Update the user by pulling the communityId from communities array
     const result = await User.updateOne(
       { _id: userId },
-    { $pull: { communities: { _id: communityMembershipId } } }
+      { $pull: { communities: { _id: communityMembershipId } } }
     );
 
     // console.log(result);
+
+    // Check if the operation modified anything
+    if (result.modifiedCount === 0) {
+      return {
+        success: false,
+        error: "Community not found in user's communities or user does not exist",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Community removed from user",
+    };
+  } catch (error) {
+    console.error("Error removing community from user:", error);
+    return {
+      success: false,
+      error: "Failed to remove community from user",
+    };
+  }
+}
+
+export async function removeCommunityFromUser(communityId, userId) {
+  try {
+    // Input validation
+    if (!communityId || !mongoose.isValidObjectId(communityId)) {
+      return {
+        success: false,
+        error: "Invalid or missing community ID",
+      };
+    }
+    if (!userId || typeof userId !== "string") { // Adjusted for Clerk ID string
+      return {
+        success: false,
+        error: "Invalid or missing user ID",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Update the user by pulling the communityId from communities array
+    const result = await User.updateOne(
+      { _id: userId },
+      { $pull: { communities: { community: communityId } } }
+    );
 
     // Check if the operation modified anything
     if (result.modifiedCount === 0) {
