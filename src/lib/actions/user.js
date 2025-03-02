@@ -27,8 +27,6 @@ export const createOrUpdateUser = async (
       ? phone_numbers[0]?.phone_number
       : null; // Fallback to null if empty
 
-    const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a'; // Hardcoded for St. Leo at this point!
-
     const user = await User.findOneAndUpdate(
       { clerkId: id },
       {
@@ -39,13 +37,6 @@ export const createOrUpdateUser = async (
           email,
           username,
           phoneNumber,
-          selectedOrganization: DEFAULT_ORGANIZATION_ID
-        },
-        $addToSet: {
-          organizations: {
-            organization: DEFAULT_ORGANIZATION_ID,
-            role: 'member',
-          },
         },
       },
       { new: true, upsert: true }

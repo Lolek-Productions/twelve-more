@@ -2,6 +2,7 @@ import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { clerkClient } from '@clerk/nextjs/server';
 import { createOrUpdateUser, deleteUserByClerkId } from '@/lib/actions/user';
+import User from '@/lib/models/user.model.js';
 
 export async function POST(req) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -59,9 +60,6 @@ export async function POST(req) {
   if (eventType === 'user.created' || eventType === 'user.updated') {
     const { id, first_name, last_name, image_url, email_addresses, phone_numbers, username } = evt?.data;
 
-    //todo: Add their Organization and selectedOrganization here
-
-
     try {
       const user = await createOrUpdateUser(
         id,
@@ -80,8 +78,25 @@ export async function POST(req) {
           const mongoUserId = user._id.toString();
           console.log('mongoUserId:', mongoUserId);
 
-          const client = await clerkClient()
+          const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a';
+          const updatedUser = await User.findByIdAndUpdate(
+            mongoUserId,
+            {
+              $addToSet: {
+                organizations: {
+                  organization: DEFAULT_ORGANIZATION_ID,
+                  role: 'member',
+                },
+              },
+              $set: {
+                selectedOrganization: DEFAULT_ORGANIZATION_ID,
+              },
+            },
+            { new: true }
+          );
+          console.log('User updated with organization:', updatedUser);
 
+          const client = await clerkClient()
           const response = await client.users.updateUserMetadata(id, {
             publicMetadata: {
               userMongoId: mongoUserId,
