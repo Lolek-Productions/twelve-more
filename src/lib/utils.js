@@ -18,7 +18,7 @@ import {NextResponse} from "next/server";
  * @param {string} [options.successTitle="Success"] - Title for success toast
  * @param {string} options.successDescription - Description for success toast
  * @param {string} [options.errorTitle="Error"] - Title for error toast
- * @param {string} options.defaultErrorDescription - Default error description if no specific error
+ * @param {string} options.errorDescription - Default error description if no specific error
  * @param {Function} [options.onSuccess] - Optional callback on success
  * @param {Function} [options.onError] - Optional callback on error
  * @returns {Promise} - Resolves with the API response or throws an error
@@ -28,7 +28,7 @@ export const handleApiResponse = async ({
                                           successTitle = "Success",
                                           successDescription,
                                           errorTitle = "Error",
-                                          defaultErrorDescription = "An error occurred",
+                                          errorDescription = "An error occurred",
                                           onSuccess,
                                           onError,
                                         }) => {
@@ -51,20 +51,20 @@ export const handleApiResponse = async ({
       toast({
         variant: "destructive",
         title: errorTitle,
-        description: response?.error || defaultErrorDescription,
+        description: response?.error || errorDescription,
       });
       if (onError) onError(response?.error);
-      return { success: false, error: response?.error || defaultErrorDescription };
+      return { success: false, error: response?.error || errorDescription };
     }
   } catch (error) {
     console.error(`${errorTitle}:`, error);
     toast({
       variant: "destructive",
       title: errorTitle,
-      description: defaultErrorDescription,
+      description: errorDescription,
     });
     if (onError) onError(error);
-    return { success: false, error: defaultErrorDescription, details: error.message };
+    return { success: false, error: errorDescription, details: error.message };
   }
 };
 

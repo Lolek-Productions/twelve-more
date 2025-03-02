@@ -6,7 +6,7 @@ const handleCommunityRemoved = async (communityId) => {
     return await handleApiResponse({
       apiCall: removeCommunityFromUser(communityId, userId),
       successDescription: "User removed from community",
-      defaultErrorDescription: "Failed to remove community",
+      errorDescription: "Failed to remove community",
       onSuccess: () => fetchUser(),
     });
 };

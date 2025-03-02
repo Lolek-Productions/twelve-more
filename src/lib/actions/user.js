@@ -1,10 +1,10 @@
 "use server";
 
 import User from '../models/user.model';
-import Community from '../models/community.model';
 import Organization from '../models/organization.model';
 import { connect } from '../mongodb/mongoose';
 import mongoose from "mongoose";
+import Community from '../models/community.model';
 import Post from "@/lib/models/post.model";
 
 export const createOrUpdateUser = async (
@@ -66,12 +66,14 @@ export async function getUserById(userId) {
         firstName: user.firstName,
         lastName: user.lastName,
         clerkId: user.clerkId,
-        // organizations: user.organizations
-        //   ? user.organizations.map((org) => ({
-        //     id: org.organizationId.toString(),
-        //     name: org.name || "Empty Organization",
-        //   }))
-        //   : [],
+        organizations: user.organizations
+          ? user.organizations.map((org) => ({
+            id: org.organization?._id.toString(),        // Populated _id from organization ref
+            name: org.organization?.name || "Empty Organization", // Populated name
+            role: org.role || "",                 // Role in the organization
+            membershipId: org._id.toString(),
+          }))
+          : [],
         selectedOrganization: {
           id: user.selectedOrganization._id.toString(),
           name: user.selectedOrganization.name,
@@ -79,10 +81,11 @@ export async function getUserById(userId) {
           role: user.selectedOrganization.role,
         },
         communities: user.communities
-          ? user.communities.map((community) => ({
-            id: community.community._id.toString(),       // Populated _id
-            name: community.community.name || "Empth Community", // Populated name
-            role: community.role || "member",
+          ? user.communities.map((com) => ({
+            id: com.community?._id.toString(),       // Populated _id
+            name: com.community?.name || "Empty Community", // Populated name
+            role: com.role || "",
+            membershipId: com._id.toString(),
           }))
           : [],
       }
@@ -127,26 +130,57 @@ export const getUserByClerkId = async (clerkId) => {
   }
 };
 
-export async function updateUser(userId, updates) {
-  await dbConnect();
-  const user = await User.findByIdAndUpdate(userId, updates, { new: true });
-  return { success: !!user };
-}
-
-
+// export async function updateUser(userId, updates) {
+//   await dbConnect();
+//   const user = await User.findByIdAndUpdate(userId, updates, { new: true });
+//   return { success: !!user };
+// }
 
 export async function addOrganizationToUser(organizationId, userId) {
-  await dbConnect();
-  const Organization = mongoose.models.Organization;
-  await User.findByIdAndUpdate(userId, { $addToSet: { organizations: organizationId } });
-  await Organization.findByIdAndUpdate(organizationId, { $addToSet: { members: userId } });
+  try {
+    await connect();
+
+    const org = await Organization.findById(organizationId);
+
+    if(!org) {
+      return { success: false, error: 'Organization not found' };
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { organizations: { organization: organizationId } } }, // Add organizationId to user's organizations
+      { new: true } // Return the updated document
+    );
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    return { success: true, message: "User added to organization" };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
-export async function removeOrganizationFromUser(userId, organizationId) {
-  await dbConnect();
-  const Organization = mongoose.models.Organization;
-  await User.findByIdAndUpdate(userId, { $pull: { organizations: organizationId } });
-  await Organization.findByIdAndUpdate(organizationId, { $pull: { members: userId } });
+export async function removeOrganizationFromUser(organizationMembershipId, userId) {
+  try {
+    await connect();
+
+    // Update User's organizations array
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { organizations: { _id: organizationMembershipId } } },
+      { new: true } // Return the updated document
+    );
+
+    if (!user) {
+      return { success: false, error: "User or organization not found" };
+    }
+
+    return { success: true, message: "User removed from organization" };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
 export const deleteUserByClerkId = async (id) => {
@@ -266,16 +300,15 @@ export async function searchUsers(query) {
 
     // Search users by firstName or lastName
     const users = await User.find({
-      $or: [
-        { firstName: { $regex: regex } },
-        { lastName: { $regex: regex } },
-      ],
-    })
+        $or: [
+          { firstName: { $regex: regex } },
+          { lastName: { $regex: regex } },
+        ],
+      })
       .select("firstName lastName") // Fetch only needed fields
       .limit(10) // Limit results for performance
       .lean(); // Return plain JS objects
 
-    // Map results to the expected format
     const formattedUsers = users.map((user) => ({
       id: user._id.toString(),
       name: `${user.firstName} ${user.lastName}`.trim(),
@@ -354,12 +387,12 @@ export async function addCommunityToUser(communityId, userId) {
   }
 }
 
-export async function removeCommunityFromUser(communityId, userId) {
-  //console.log(communityId, userId); // Uncomment for debugging if needed
+export async function removeCommunityFromUser(communityMembershipId, userId) {
+  //console.log(communityMembershipId, userId); // Uncomment for debugging if needed
 
   try {
     // Input validation
-    if (!communityId || !mongoose.isValidObjectId(communityId)) {
+    if (!communityMembershipId || !mongoose.isValidObjectId(communityMembershipId)) {
       return {
         success: false,
         error: "Invalid or missing community ID",
@@ -377,7 +410,7 @@ export async function removeCommunityFromUser(communityId, userId) {
     // Update the user by pulling the communityId from communities array
     const result = await User.updateOne(
       { _id: userId },
-      { $pull: { communities: { community: communityId } } }
+    { $pull: { communities: { _id: communityMembershipId } } }
     );
 
     // console.log(result);

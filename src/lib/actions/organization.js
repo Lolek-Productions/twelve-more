@@ -70,16 +70,48 @@ export const getOrganizationById = async function (organizationId) {
   }
 };
 
-export async function addUserToOrganization(organizationId, userId) {
+export async function searchOrganizations(query) {
   try {
-    await connect();
-    const org = await Organization.findByIdAndUpdate(
-      organizationId,
-      { $addToSet: { members: userId } }, // Assuming members is an array of user IDs
-      { new: true }
-    );
-    return { success: true, message: "User added to organization" };
+    // Input validation
+    if (!query || typeof query !== "string" || query.trim().length < 2) {
+      return {
+        success: false,
+        error: "Query must be a string with at least 2 characters",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Create a case-insensitive regex for the query
+    const regex = new RegExp(query.trim(), "i");
+
+    // Search users by firstName or lastName
+    const organizations = await Organization.find({
+        $or: [
+          { name: { $regex: regex } },
+        ],
+      })
+      .select("name") // Fetch only needed fields
+      .limit(10) // Limit results for performance
+      .lean(); // Return plain JS objects
+
+    // Map results to the expected format
+    const formattedOrganizations = organizations.map((organization) => ({
+      id: organization._id.toString(),
+      name: `${organization.name}`.trim(),
+    }));
+
+    console.log(formattedOrganizations);
+
+    return {
+      success: true,
+      data: formattedOrganizations,
+    };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error("Error searching organizations:", error);
+    return {
+      success: false,
+      error: "Failed to search organizations",
+    };
   }
 }

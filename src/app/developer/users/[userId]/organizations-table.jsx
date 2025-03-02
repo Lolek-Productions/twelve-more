@@ -17,9 +17,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Input} from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 
-export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
+export function OrganizationsTable({ userId, data, onOrganizationRemoved }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
 
@@ -31,7 +31,7 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          First Name
+          Organization Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -45,7 +45,7 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
     {
       id: "actions",
       cell: ({ row }) => {
-        const community = row.original;
+        const organization = row.original;
         return (
           <div className="justify-end flex">
             <DropdownMenu>
@@ -56,8 +56,8 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onCommunityRemoved(community.membershipId)}>
-                  Force Delete Membership to Community
+                <DropdownMenuItem onClick={() => onOrganizationRemoved(organization.membershipId)}>
+                  Force Delete Membership to Organization
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -80,10 +80,10 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
   });
 
   return (
-    <div>
+    <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
         <Input
-          placeholder="Search communities..."
+          placeholder="Search organizations..."
           value={table.getColumn("name")?.getFilterValue() ?? ""}
           onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
           className="max-w-sm"
