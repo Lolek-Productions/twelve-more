@@ -5,11 +5,13 @@ import { HiArrowLeft } from 'react-icons/hi';
 
 export default async function PostPage({ params }) {
   let data = null;
+  const resolvedParams = await params;
+  const { postId } = resolvedParams;
 
   try {
     const result = await fetch(process.env.APP_URL + '/api/post/get', {
       method: 'POST',
-      body: JSON.stringify({ postId: params.postId }),
+      body: JSON.stringify({ postId: postId }),
       cache: 'no-store',
     });
     data = await result.json();
