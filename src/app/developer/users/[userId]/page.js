@@ -221,6 +221,7 @@ export default function UsersPage() {
           <h3 className="text-lg font-medium">User: {user?.firstName}</h3>
           <p className="text-sm text-muted-foreground">Id: {user?.id}</p>
           <p className="text-sm text-muted-foreground">ClerkId: {user?.clerkId}</p>
+          <p className="text-sm text-muted-foreground">Selected Organization: {user?.selectedOrganization?.id}</p>
           <p className="text-sm text-muted-foreground">Bio: {user?.bio}</p>
         </div>
 
