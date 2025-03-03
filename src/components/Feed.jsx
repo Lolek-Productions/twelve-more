@@ -10,6 +10,7 @@ export default function Feed({ communityId }) {
   const [posts, setPosts] = useState([]); // Stores fetched posts
   const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [hasMore, setHasMore] = useState(false);
   const {appUser} = useAppUser();
   const selectedOrganizationId = appUser?.selectedOrganization?.id;
 
@@ -23,7 +24,8 @@ export default function Feed({ communityId }) {
       setIsLoading(true);
       try {
         const data = await getPosts({ limit: postNum, selectedOrganizationId, communityId });
-        setPosts(data);
+        setPosts(data.posts);
+        setHasMore(data.hasMore);
       } catch (error) {
         console.error('Error fetching posts:', error);
       } finally {
@@ -57,7 +59,8 @@ export default function Feed({ communityId }) {
         )}
       </div>
       <div>
-        {posts.length > 0 && !isLoading && (
+
+        {posts.length > 0 && !isLoading && hasMore && (
           <button
             onClick={() => setPostNum(postNum + 10)}
             className='text-blue-500 pl-4 pb-6 pt-3 hover:text-blue-700 text-sm'

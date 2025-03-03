@@ -31,14 +31,19 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
         select: 'firstName lastName',
       })
       .sort({ createdAt: -1 })
-      .limit(limit)
+      .limit(limit + 1)
       .lean();
 
-    if (!posts || posts.length === 0) {
-      return []; // No posts found
+    // Determine if there are more posts
+    const hasMore = posts.length > limit;
+    // Trim the extra post if it exists, returning only the requested limit
+    const limitedPosts = posts.slice(0, limit);
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { posts: [], hasMore: false }; // No posts found
     }
 
-    return posts.map((post) => ({
+    const mappedPosts = limitedPosts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       user: {
@@ -66,11 +71,12 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
         id: like._id.toString(), //this is the id of the user
       })) || [],
       createdAt: post.createdAt,
-      // Add other fields like author, createdAt if present
     }));
+
+    return { posts: mappedPosts, hasMore }
   } catch (error) {
     console.error("Error fetching posts by community ID:", error);
-    return []; // Return empty array on error
+    return [];
   }
 }
 
