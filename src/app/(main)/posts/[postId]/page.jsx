@@ -9,7 +9,7 @@ export default async function PostPage({ params }) {
   try {
     const result = await fetch(process.env.APP_URL + '/api/post/get', {
       method: 'POST',
-      body: JSON.stringify({ postId: params.id }),
+      body: JSON.stringify({ postId: params.postId }),
       cache: 'no-store',
     });
     data = await result.json();

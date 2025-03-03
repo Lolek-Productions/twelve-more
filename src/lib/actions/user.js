@@ -70,9 +70,9 @@ export async function getUserById(userId) {
         clerkId: user.clerkId,
         organizations: user.organizations
           ? user.organizations.map((org) => ({
-            id: org.organization?._id.toString(),        // Populated _id from organization ref
-            name: org.organization?.name || "Empty Organization", // Populated name
-            role: org.role || "",                 // Role in the organization
+            id: org.organization?._id.toString(),
+            name: org.organization?.name || "Empty Organization",
+            role: org.role || "",
             membershipId: org._id.toString(),
           }))
           : [],

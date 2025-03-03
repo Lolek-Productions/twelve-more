@@ -3,15 +3,12 @@ import { connect } from '@/lib/mongodb/mongoose';
 
 export const POST = async (req) => {
   try {
-    // Ensure MongoDB connection is established
     await connect();
 
-    // Parse the request body
     const data = await req.json();
-    // console.log('Request data:', data); // { userId: '67b63722b63603a6b567eb31' }
 
-    // Validate userId presence
     const { userId } = data;
+
     if (!userId) {
       return new Response(
         JSON.stringify({ error: 'userId is required' }),

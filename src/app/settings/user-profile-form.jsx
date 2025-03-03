@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button"
 import {
   Form,
