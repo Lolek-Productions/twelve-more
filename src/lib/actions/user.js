@@ -65,6 +65,8 @@ export async function getUserById(userId) {
         id: user._id?.toString() || "",
         firstName: user.firstName,
         lastName: user.lastName,
+        email: user.email,
+        bio: user.bio,
         clerkId: user.clerkId,
         organizations: user.organizations
           ? user.organizations.map((org) => ({
@@ -130,11 +132,57 @@ export const getUserByClerkId = async (clerkId) => {
   }
 };
 
-// export async function updateUser(userId, updates) {
-//   await dbConnect();
-//   const user = await User.findByIdAndUpdate(userId, updates, { new: true });
-//   return { success: !!user };
-// }
+export async function updateUser(user) {
+  try {
+    await connect();
+
+    // Ensure user is authenticated/provided
+    if (!user || !user.id) {
+      return {
+        success: false,
+        error: 'User not found or invalid input',
+      };
+    }
+
+    // Find and update the user in MongoDB
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user.id }, // Match user by MongoDB ID
+      {
+        $set: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          bio: user.bio,
+        },
+      },
+      { new: true } // Return updated user
+    );
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        error: 'User not found',
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: updatedUser._id.toString(),
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        bio: updatedUser.bio,
+      },
+    };
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return {
+      success: false,
+      error: 'Error updating user',
+    };
+  }
+}
 
 export async function addOrganizationToUser(organizationId, userId) {
   try {

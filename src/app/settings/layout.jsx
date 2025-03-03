@@ -1,4 +1,6 @@
 import SettingsLayout from "@/components/SettingsLayout";
+import {RedirectToSignIn, SignedIn, SignedOut} from "@clerk/nextjs";
+import SessionWrapper from "@/components/SessionWrapper.jsx";
 
 const sidebarNavItems = [
   {
@@ -13,11 +15,20 @@ const sidebarNavItems = [
 
 export default function UserSettingsLayout({ children }) {
   return (
-    <SettingsLayout
-      title="TwelveMore Settings"
-      description="Manage your account settings and set e-mail preferences."
-      sidebarNavItems={sidebarNavItems}
-      children={children}
-    />
+    <div>
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
+      <SignedIn>
+        <SessionWrapper>
+          <SettingsLayout
+            title="TwelveMore Settings"
+            description="Manage your account settings and set e-mail preferences."
+            sidebarNavItems={sidebarNavItems}
+            children={children}
+          />
+        </SessionWrapper>
+      </SignedIn>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button"
@@ -16,79 +16,45 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {useToast} from "@/hooks/use-toast";
+import {useAppUser} from "@/hooks/useAppUser.js";
+import {updateUser} from "@/lib/actions/user.js";
 
 const profileFormSchema = z.object({
-  firstname: z.string().min(2).max(30),
-  lastname: z.string().min(2).max(30),
-  email: z.string().email(),
-  bio: z.string().max(160).min(4),
+  firstname: z.string().min(2, { message: "First name must be at least 2 characters." }).max(30),
+  lastname: z.string().min(2, { message: "Last name must be at least 2 characters." }).max(30),
+  email: z.string().optional().refine((val) => !val || z.string().email().safeParse(val).success, {
+    message: "Please enter a valid email address or leave it blank.",
+  }),  bio: z.string().max(160, { message: "Bio must not exceed 160 characters." }).optional(), // Can be null, undefined, or a string up to 160 chars
 })
 
 export function UserProfileForm() {
-  const { user, isLoaded } = useUser();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const {appUser} = useAppUser();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (!isLoaded || !user) return;
+  const onUpdateUser = async (formData) => {
+    const result = await updateUser({
+      id: appUser?.id,
+      firstName: formData.firstname,
+      lastName: formData.lastname,
+      email: formData.email,
+      bio: formData.bio,
+    })
 
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("/api/user/get", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userId: user.id }),
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          console.log("Fetched User:", userData);
-
-          // ✅ Populate form with user data
-          form.reset({
-            firstname: userData.firstName || "",
-            lastname: userData.lastName || "",
-            email: userData.email || "",
-            bio: userData.bio || "",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [isLoaded, user]);
-
-
-  const updateUser = async (userData) => {
-    try {
-      const response = await fetch('/api/user/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user');
-      }
-
-      const updatedUser = await response.json();
-      console.log('✅ User updated successfully:', updatedUser);
-    } catch (error) {
-      console.error('❌ Error updating user:', error);
+    if (result.success) {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully",
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to update profile",
+        variant: "destructive",
+      })
     }
-  };
+  }
 
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
@@ -101,36 +67,20 @@ export function UserProfileForm() {
     mode: "onChange",
   });
 
-  const { fields, append } = useFieldArray({
-    name: "urls",
-    control: form.control,
-  })
-
-  function onSubmit(data) {
-    console.log(user?.publicMetadata?.userMongoId);
-
-    updateUser({
-      userMongoId: user?.publicMetadata?.userMongoId,
-      firstName: data.firstname,
-      lastName: data.lastname,
-      email: data.email,
-      bio: data.bio,
-    })
-      .then(() => {
-      // ✅ Show toast only if update is successful
-      toast({
-        title: "Profile Updated",
-        description: "Your Profile has been updated successfully",
-      });
-    })
-      .catch((error) => {
-        console.error("❌ Update failed:", error);
-      });
-  }
+  useEffect(() => {
+    if (appUser) {
+      form.reset({
+        firstname: appUser.firstName || "",
+        lastname: appUser.lastName || "",
+        email: appUser.email || "",
+        bio: appUser.bio || "",
+      })
+    }
+  }, [appUser, form])
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onUpdateUser)} className="space-y-8">
         <FormField
           control={form.control}
           name="firstname"
@@ -140,9 +90,6 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="First Name" {...field} />
               </FormControl>
-              {/*<FormDescription>*/}
-              {/*  This is your first name*/}
-              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -156,9 +103,6 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="Last Name" {...field} />
               </FormControl>
-              {/*<FormDescription>*/}
-              {/*  This is your last name*/}
-              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -172,9 +116,6 @@ export function UserProfileForm() {
               <FormControl>
                 <Input placeholder="Email Addresss" {...field} />
               </FormControl>
-              {/*<FormDescription>*/}
-              {/*  This is your emial address*/}
-              {/*</FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}

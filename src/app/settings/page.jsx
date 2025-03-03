@@ -1,4 +1,3 @@
-import { Separator } from "@/components/ui/separator"
 import { UserProfileForm } from "@/app/settings/user-profile-form"
 
 export default function SettingsProfilePage() {
@@ -10,7 +9,6 @@ export default function SettingsProfilePage() {
           This is how others will see you on the site.
         </p>
       </div>
-      {/*<Separator />*/}
       <UserProfileForm />
     </div>
   )
