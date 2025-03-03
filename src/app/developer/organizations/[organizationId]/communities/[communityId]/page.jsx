@@ -121,7 +121,7 @@ export default function CommunityMembersPage() {
   };
 
   if (!communityId) {
-    return <div className={'w-[30rem]'}>Loading...</div>;
+    return <div className={'md:w-[30rem]'}>Loading...</div>;
   }
 
   const handleMemberRemoved = async (memberId) => {

@@ -171,12 +171,12 @@ export default function Input({communityId}) {
 
   if (!isSignedIn || !isLoaded) {
     return (
-      <div className={'w-[30rem]'}></div>
+      <div className={'md:w-[30rem]'}></div>
     );
   }
 
   return (
-    <div className='flex border-b border-gray-200 p-3 space-x-3 w-[30rem]'>
+    <div className='flex border-b border-gray-200 p-3 space-x-3 md:w-[30rem]'>
       <img
         src={user.imageUrl}
         alt='user-img'

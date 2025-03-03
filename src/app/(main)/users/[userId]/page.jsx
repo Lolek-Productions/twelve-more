@@ -37,12 +37,12 @@ export default function UserPage() {
     fetchUserData();
   }, [userId]);
 
-  if (loading) return <div className="p-4 w-[30rem]">Loading...</div>;
+  if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
   if (error) return <div className="p-4 text-red-500 w-[30rem]">{error}</div>;
 
   return (
     <div className='max-w-xl mx-auto border-r border-l min-h-screen'>
-      <div className={'w-[30rem] px-3 py-2'}>
+      <div className={'md:w-[30rem] px-3 py-2'}>
       <h1 className="text-2xl font-bold mb-2">{user.firstName} {user.lastName}</h1>
 
       <p className="text-gray-700 mb-4 border rounded-lg p-3">

@@ -144,11 +144,11 @@ export default function CommunitiesList() {
 
   const isUserInCommunity = (communityId) => appUser?.communities?.some((c) => c.id === communityId) || false;
 
-  if (loading) return <div className="p-4 w-[30rem]">Loading...</div>;
+  if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
-    <div className="p-4 w-[30rem]">
+    <div className="p-4 md:w-[30rem]">
 
       <Button className="mb-4" onClick={() => setModalOpen(true)}>
         Create New Community
