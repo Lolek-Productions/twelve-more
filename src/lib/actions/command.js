@@ -56,6 +56,18 @@ export async function runCommand(commandName) {
         };
       }
 
+      case "Send Test Batch SMS": {
+        const result = await twilioService.sendBatchSMS(
+          ['+12708831110'],
+          'This is a test BATCH SMS from TwelveMore! Enjoy your day!'
+        );
+
+        return {
+          success: result.success,
+          message: result.message,
+        };
+      }
+
       default:
         return { success: false, error: "Unknown command" };
     }

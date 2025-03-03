@@ -25,6 +25,7 @@ function CommandsPage() {
     { id: "2", name: "Create Josh in Clerk" },
     { id: "3", name: "Delete Josh in Clerk" },
     { id: "4", name: "Send Test SMS" },
+    { id: "5", name: "Send Test Batch SMS" },
   ];
 
   const columns = [

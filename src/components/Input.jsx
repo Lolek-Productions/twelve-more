@@ -8,7 +8,6 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/
 import { Button } from "@/components/ui/button"
 import {useAppUser} from "@/hooks/useAppUser.js";
 
-
 export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
