@@ -1,5 +1,8 @@
-import Post from '../../../../lib/models/post.model';
-import { connect } from '../../../../lib/mongodb/mongoose';
+import Post from '@/lib/models/post.model';
+import User from '@/lib/models/user.model';
+import Community from '@/lib/models/community.model';
+import Organization from '@/lib/models/organization.model';
+import { connect } from '@/lib/mongodb/mongoose';
 
 export const POST = async (req) => {
   console.log('getting post from api/post/get')
@@ -27,7 +30,6 @@ export const POST = async (req) => {
           select: "firstName lastName",
         },
       });
-
 
     const formattedPost = {
       id: post._id.toString(),
