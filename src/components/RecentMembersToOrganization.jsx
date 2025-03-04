@@ -4,6 +4,7 @@ import Link from "next/link"
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useEffect, useState} from "react";
 import {getRecentOrganizationMembers} from "@/lib/actions/user.js";
+import moment from "moment/moment.js";
 
 export default function MemberList() {
   const {appUser} = useAppUser();
@@ -19,6 +20,7 @@ export default function MemberList() {
       setIsLoading(true);
       try {
         const data = await getRecentOrganizationMembers(appUser?.selectedOrganization?.id);
+        console.log(data.data)
         setMembers(data.data || []);
       } catch (error) {
         console.error('Error fetching posts:', error);
@@ -35,7 +37,7 @@ export default function MemberList() {
       <h4 className="font-bold px-4">Recent Members: {appUser?.selectedOrganization?.name}</h4>
       <div className="px-4 pb-2">
         {members.length > 0 ? (
-          <ul className="space-y-3 pl-4">
+          <ul className="space-y-4 pl-4">
             {members.map((member) => (
               <li key={member.id} className="flex items-center gap-3">
                 <Link href={`/users/${member.id}`} className={'flex items-center gap-3'}>
@@ -46,9 +48,12 @@ export default function MemberList() {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   )}
-                  <span className=" text-gray-700">
-                    {member.firstName} {member.lastName}
-                </span>
+                  <div>
+                    <span className=" text-gray-700">
+                      {member.firstName} {member.lastName}
+                    </span>
+                    <p className={'text-xs text-gray-500'}>Signed up {moment(member.createdAt).fromNow()}</p>
+                  </div>
                 </Link>
               </li>
             ))}
