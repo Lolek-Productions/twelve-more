@@ -92,7 +92,7 @@ export default function SignUpPage() {
                 type="tel"
                 required
                 value={formattedPhoneNumber}
-                className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
+                className={`hidden w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
                   submissionState === "error" ? "ring-red-400" : ""
                 } ${submissionState === "submitting" ? "opacity-50" : ""}`}
                 disabled={submissionState === "submitting"}
