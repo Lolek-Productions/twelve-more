@@ -20,10 +20,18 @@ export default function Post({ post, clickableText = true }) {
               <Link href={`/users/${post?.user?.id}`} className='flex-shrink-0'>
                 {post?.user?.firstName} {post?.user?.lastName}
               </Link>
-
             </h4>
-            {/* add dot space here */}
             <span className='text-xl text-gray-500'>·</span>
+            {post?.community?.id && (
+              <>
+                <h4 className="font-bold text-xs truncate max-w-32">
+                  <Link href={`/communities/${post?.community?.id}`} className="flex-shrink-0">
+                    {post?.community?.name}
+                  </Link>
+                </h4>
+                <span className="text-xl text-gray-500">·</span>
+              </>
+            )}
             <span className='text-xs text-gray-500 flex-1 truncate max-w-32'>
               {moment(post?.createdAt).fromNow()}
             </span>
