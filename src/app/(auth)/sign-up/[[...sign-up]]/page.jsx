@@ -100,7 +100,7 @@ export default function SignUpPage() {
                 disabled={submissionState === "submitting"}
               />
               <p className="text-xs text-zinc-500">
-                Enter your 10-digit US phone number in the standardized format, e.g. +12025550123.
+                Enter your 12-digit US phone number in the standardized format, e.g. +12025550123.
               </p>
               <Clerk.FieldError className="block text-sm text-red-400"/>
             </Clerk.Field>
