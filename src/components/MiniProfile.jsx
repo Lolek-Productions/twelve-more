@@ -1,48 +1,114 @@
 'use client';
 
-import { useRef } from 'react';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useState } from 'react';
+import { useClerk, useUser, SignOutButton } from '@clerk/nextjs';
 import { DEV_PHONE_NUMBERS } from '@/lib/constants';
+import { Button } from "@/components/ui/button.jsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function MiniProfile() {
-  const { user, isLoaded } = useUser(); // Add isLoaded to handle loading state
-  const userButtonRef = useRef(null);
+  const { user, isLoaded } = useUser();
+  const { openUserProfile } = useClerk();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Wait for Clerk to load user data
-  if (!isLoaded || !user) {
-    return <div>Loading...</div>; // Or your preferred loading component
+  // Early returns for loading and null states
+  if (!isLoaded) {
+    return <div>Loading...</div>;
   }
 
-  // Check if user is a developer
-  const isDeveloper = user?.phoneNumbers?.some(phone =>
-    DEV_PHONE_NUMBERS.includes(phone.phoneNumber)
-  );
+  if (!user) {
+    return <div>No user data available</div>;
+  }
 
-  const handleClick = () => {
-    if (userButtonRef.current) {
-      userButtonRef.current.click();
-    }
+  // Check developer status
+  const isDeveloper = user.phoneNumbers?.some(phone =>
+    DEV_PHONE_NUMBERS.includes(phone.phoneNumber)
+  ) || false;
+
+  // Get user's display name
+  const displayName = user.firstName && user.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : user.fullName || 'User';
+
+  // Handlers that close the popover
+  const handleProfileClick = () => {
+    openUserProfile();
+    setIsOpen(false);
   };
 
   return (
-    <div className='flex items-center gap-3 py-5'>
-      <UserButton />
-      <div className='flex flex-col'>
-        {/* Use Clerk's firstName and lastName */}
-        <div className='font-bold text-sm'>
-          {user.firstName && user.lastName
-            ? `${user.firstName} ${user.lastName}`
-            : user.fullName || ''} {/* Fallback to fullName or 'User' */}
-        </div>
-        {/* Developer badge */}
-        {isDeveloper && (
-          <div className='w-fit'>
-            <span className='text-xs bg-blue-500 text-white px-2 py-1 rounded-full mt-1'>
-              Developer
-            </span>
+    <div className="flex items-center gap-3 py-5">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="transparent"
+            className="flex items-center gap-2"
+          >
+            <div className={'flex items-center gap-3'}>
+              <Avatar className="h-11 w-11">
+                <AvatarImage src={user.imageUrl} alt={displayName} />
+                <AvatarFallback>
+                  {user.firstName?.[0] || user.fullName?.[0] || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className='flex flex-col items-start gap-1'>
+                <div>{displayName}</div>
+                {isDeveloper && (
+                  <span className="text-xs bg-blue-500 t text-white px-2 py-0.5 rounded-full">
+                    Dev
+                  </span>
+                )}
+              </div>
+            </div>
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-80">
+          <div className="flex flex-col gap-4">
+            {/* Profile Header with Avatar */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.imageUrl} alt={displayName} />
+                <AvatarFallback>
+                  {user.firstName?.[0] || user.fullName?.[0] || 'U'}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col">
+                <span className="font-bold">{displayName}</span>
+                <span className="text-sm text-muted-foreground">
+                  {user.primaryPhoneNumber?.phoneNumber || 'No phone'}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={handleProfileClick}
+              >
+                View Profile
+              </Button>
+
+              <SignOutButton>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-destructive"
+                >
+                  Sign Out
+                </Button>
+              </SignOutButton>
+            </div>
           </div>
-        )}
-      </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
