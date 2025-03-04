@@ -40,7 +40,6 @@ export default function RightSidebar() {
                 Take a minute to tell your community 5 things you are grateful for.
               </p>
             </div>
-            {/*<img src={task.urlToImage} width={70} className='rounded-xl' />*/}
           </div>
         </a>
       </div>

@@ -11,18 +11,18 @@ export default function MemberList({ community, members }) {
           <ul className="space-y-3 pl-4">
             {members.map((member) => (
               <li key={member.id} className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-gray-700 mr-2 shrink-0"/> {/* Manual dot */}
-                {/* <img
-                  src={member.imageUrl || '/default-avatar.png'}
+                <Link href={`/users/${member.id}`} className={'flex items-center gap-3'}>
+                {member.avatar && (
+                  <img
+                  src={member.avatar}
                   alt={`${member.firstName} ${member.lastName}'s avatar`}
                   className="w-10 h-10 rounded-full object-cover"
-                  onError={(e) => (e.target.src = '/default-avatar.png')}
-                /> */}
+                />
+                )}
                 <span className=" text-gray-700">
-                  <Link href={`/users/${member.id}`}>
                     {member.firstName} {member.lastName}
-                  </Link>
                 </span>
+                  </Link>
               </li>
             ))}
           </ul>

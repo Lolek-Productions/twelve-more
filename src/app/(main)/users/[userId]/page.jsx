@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getUserById } from "@/lib/actions/user";
 import { Button } from "@/components/ui/button";
+import Link from "next/link"
 
 export default function UserPage() {
   const [user, setUser] = useState(null);
@@ -80,9 +81,9 @@ export default function UserPage() {
           <div className="mt-2 space-y-2">
             {user.communities.map((community) => (
               <div key={community.id} className="px-2 rounded-md flex justify-start items-center">
-                <div>
+                <Link href={`/communities/${community?.id}`}>
                   <p className="text-sm">{`${community?.name}` || "Unknown"}</p>
-                </div>
+                </Link>
               </div>
             ))}
           </div>

@@ -66,6 +66,7 @@ export async function getUserById(userId) {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        avatar: user.avatar,
         bio: user.bio,
         clerkId: user.clerkId,
         organizations: user.organizations
@@ -443,7 +444,6 @@ export async function addCommunityToUser(communityId, userId) {
   }
 }
 
-
 export async function removeCommunityFromUserByMembershipId(communityMembershipId, userId) {
   try {
     // Input validation
@@ -554,7 +554,7 @@ export async function getCommunityMembers(communityId) {
     const members = await User.find({
       "communities.community": communityId,
     })
-    .select("firstName lastName")
+    .select("firstName lastName avatar")
     .lean();
     console.log(members);
 
@@ -574,6 +574,7 @@ export async function getCommunityMembers(communityId) {
         id: member._id.toString(),
         firstName: member.firstName,
         lastName: member.lastName,
+        avatar: member.avatar,
       })),
     };
   } catch (error) {
