@@ -46,8 +46,10 @@ export default function Invite() {
     mode: "onChange",
   });
   const { toast } = useToast();
+  const [submissionState, setSubmissionState] = useState("idle"); // "idle", "submitting", "error"
 
   const sendInvite = async (data) => {
+    setSubmissionState("submitting");
     try {
       const res = await fetch('/api/invite', {
         method: 'POST',
@@ -72,6 +74,7 @@ export default function Invite() {
         description: `An SMS invitation was sent to ${data.phoneNumber}.`,
       });
       form.reset();
+      setSubmissionState("idle");
     } catch (error) {
       console.error('Error sending invite:', error);
       toast({
@@ -79,6 +82,7 @@ export default function Invite() {
         description: error.message,
         variant: "destructive",
       });
+      setSubmissionState("error");
     }
   };
 
@@ -172,8 +176,12 @@ export default function Invite() {
             />
 
             <div>
-              <Button className="mt-5" type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Sending..." : "Invite"}
+              <Button
+                className="mt-5"
+                type="submit"
+                disabled={submissionState === "submitting"}
+              >
+                {submissionState === "submitting" ? "Sending..." : "Invite"}
               </Button>
             </div>
           </form>
