@@ -15,14 +15,13 @@ export default async function CommunitiesHome({params}) {
   const { communityId } = resolvedParams; // Now safely destructure
 
   const community = await getCommunityById(communityId);
-  console.log(communityId);
+  // console.log(communityId);
 
   const membersResponse = await getCommunityMembers(communityId);
   if (!membersResponse.success) {
     console.error(membersResponse.error);
   }
-  console.log(membersResponse);
-
+  // console.log(membersResponse);
 
   return (
     <div className="flex w-full">
