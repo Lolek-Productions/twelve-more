@@ -57,7 +57,7 @@ export default function Post({ post, clickableText = true }) {
             <audio controls src={post?.audio} />
           </div>
         }
-        <Icons post={post} id={post.id} />
+        <Icons post={post} id={post?.id} />
       </div>
     </div>
   );
