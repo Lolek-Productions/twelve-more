@@ -1,6 +1,6 @@
 'use client';
 
-export default function RightSidebar({ community, members }) {
+export default function MemberList({ community, members }) {
 
   return (
     <div className="mt-3 text-gray-700 space-y-3 bg-gray-100 rounded-xl py-2">

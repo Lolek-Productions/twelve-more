@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// import Tasks from './Tasks';
-// import tasks from "@/data/tasks";
 
 export default function RightSidebar() {
   const [input, setInput] = useState('');
@@ -46,8 +44,6 @@ export default function RightSidebar() {
           </div>
         </a>
       </div>
-
-      {/*<Tasks/>*/}
     </>
   );
 }
