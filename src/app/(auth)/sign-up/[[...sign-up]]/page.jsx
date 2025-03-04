@@ -93,7 +93,7 @@ export default function SignUpPage() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="e.g., +12025550123"
-                maxLength={10}
+                maxLength={12}
                 className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
                   submissionState === "error" ? "ring-red-400" : ""
                 } ${submissionState === "submitting" ? "opacity-50" : ""}`}
@@ -122,7 +122,7 @@ export default function SignUpPage() {
 
             <button
               disabled={
-                phoneNumber.length !== 10 ||
+                phoneNumber.length !== 12 ||
                 !firstName ||
                 !lastName ||
                 !smsOptIn ||
