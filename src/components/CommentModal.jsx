@@ -18,9 +18,13 @@ export default function CommentModal() {
   const router = useRouter();
 
   useEffect(() => {
-
+    if(!postId) {
+      console.log('no post id found in CommentModal');
+      return;
+    }
     const fetchPost = async () => {
       // console.log('trying from Atom', postId)
+
       if (postId !== '') {
         setPostLoading(true);
         setInput('');
@@ -37,7 +41,7 @@ export default function CommentModal() {
           setPostLoading(false);
         } else {
           setPostLoading(false);
-          console.log('Failed to fetch post');
+          console.log('Failed to fetch post from CommentModal');
         }
       }
     };
@@ -78,7 +82,7 @@ export default function CommentModal() {
 
   return (
     <div>
-      {open && (
+      {open && postId && (
         <Modal
           isOpen={open}
           onRequestClose={() => setOpen(false)}

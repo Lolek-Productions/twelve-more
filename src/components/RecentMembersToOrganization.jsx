@@ -20,7 +20,7 @@ export default function MemberList() {
       setIsLoading(true);
       try {
         const data = await getRecentOrganizationMembers(appUser?.selectedOrganization?.id);
-        console.log(data.data)
+        // console.log(data.data)
         setMembers(data.data || []);
       } catch (error) {
         console.error('Error fetching posts:', error);

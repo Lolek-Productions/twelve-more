@@ -537,7 +537,7 @@ export async function removeCommunityFromUser(communityId, userId) {
 }
 
 export async function getCommunityMembers(communityId) {
-  console.log('communityId',communityId);
+  // console.log('communityId',communityId);
 
   try {
     // Input validation
@@ -556,7 +556,7 @@ export async function getCommunityMembers(communityId) {
     })
     .select("firstName lastName avatar")
     .lean();
-    console.log(members);
+    // console.log(members);
 
     // Check if any members were found
     if (!members || members.length === 0) {

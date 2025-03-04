@@ -82,7 +82,7 @@ export const getCommunitiesByOrganization = async function (organizationId) {
 
 export const getCommunityById = async function (communityId) {
   try {
-    console.log('communityId', communityId);
+    // console.log('communityId', communityId);
 
     await connect(); // Ensure database connection
 
@@ -110,7 +110,7 @@ export const getCommunityById = async function (communityId) {
 };
 
 export async function removeUserFromCommunity(communityId, userId) {
-  console.log(communityId, userId);
+  // console.log(communityId, userId);
   return;
 
   try {

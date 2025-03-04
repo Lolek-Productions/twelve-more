@@ -53,7 +53,7 @@ export default function Invite() {
   }, [communityId]);
 
   async function fetchCommunity() {
-    console.log('communityId', communityId);
+    // console.log('communityId', communityId);
     try {
       const communityData = await getCommunityById(communityId);
       setCommunity(communityData);

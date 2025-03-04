@@ -2,6 +2,7 @@ import Post from '../../../../lib/models/post.model';
 import { connect } from '../../../../lib/mongodb/mongoose';
 
 export const POST = async (req) => {
+  console.log('getting post from api/post/get')
   try {
     await connect();
     const data = await req.json();
