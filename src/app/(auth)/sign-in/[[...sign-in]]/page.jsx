@@ -3,8 +3,12 @@
 import * as Clerk from '@clerk/elements/common'
 import * as SignIn from '@clerk/elements/sign-in'
 import Image from "next/image";
+import * as React from "react";
+import {useState} from "react";
 
 export default function SignInPage() {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [formattedPhoneNumber, setFormattedPhoneNumber] = useState("");
 
   return (
     <div className="min-h-screen grid w-full flex-grow items-center bg-zinc-100 px-4 sm:justify-center">
@@ -29,15 +33,28 @@ export default function SignInPage() {
 
           <Clerk.GlobalError className="block text-sm text-red-400"/>
 
-
           <div className="space-y-4">
             <Clerk.Field name="identifier" className="space-y-2">
               <Clerk.Label className="text-sm font-medium text-zinc-950">Mobile Phone Number</Clerk.Label>
               <Clerk.Input
-                type="tel" // Use "tel" for better mobile keyboard support
+                type="tel"
                 required
+                value={formattedPhoneNumber}
                 placeholder="e.g., 2025550123" // Suggest the format
-                className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
+                className="hidden w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
+              />
+              <input
+                type="tel"
+                required
+                value={phoneNumber}
+                onChange={(e) => {
+                    setFormattedPhoneNumber("+1" + e.target.value.replace(/\D/g, ""));
+                    setPhoneNumber(e.target.value.replace(/\D/g, ""));
+                  }
+                }
+                placeholder="e.g., 2025550123"
+                maxLength={10}
+                className={`w-full rounded-md drop-shadow-none shadow-none bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950`}
               />
               <p className="text-xs text-zinc-500">
                 Enter your 10-digit US phone number (no +1 needed).

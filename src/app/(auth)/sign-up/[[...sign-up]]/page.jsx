@@ -6,11 +6,13 @@ import Image from "next/image";
 import { useState } from "react";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
 import Link from "next/link";
 import * as React from "react";
 
 export default function SignUpPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [formattedPhoneNumber, setFormattedPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [submissionState, setSubmissionState] = useState("idle");
@@ -82,7 +84,6 @@ export default function SignUpPage() {
               <Clerk.FieldError className="block text-sm text-red-400"/>
             </Clerk.Field>
 
-            {/* Existing Phone Number Field */}
             <Clerk.Field name="phoneNumber" className="space-y-2">
               <Clerk.Label className="text-sm font-medium text-zinc-950">
                 Mobile Phone Number
@@ -90,17 +91,30 @@ export default function SignUpPage() {
               <Clerk.Input
                 type="tel"
                 required
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="e.g., +12025550123"
-                maxLength={12}
+                value={formattedPhoneNumber}
                 className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
                   submissionState === "error" ? "ring-red-400" : ""
                 } ${submissionState === "submitting" ? "opacity-50" : ""}`}
                 disabled={submissionState === "submitting"}
               />
+              <input
+                type="tel"
+                required
+                value={phoneNumber}
+                onChange={(e) => {
+                    setFormattedPhoneNumber("+1" + e.target.value.replace(/\D/g, ""));
+                    setPhoneNumber(e.target.value.replace(/\D/g, ""));
+                  }
+                }
+                placeholder="e.g., 2025550123"
+                maxLength={10}
+                className={`w-full rounded-md drop-shadow-none shadow-none bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
+                  submissionState === "error" ? "ring-red-400" : ""
+                } ${submissionState === "submitting" ? "opacity-50" : ""}`}
+                disabled={submissionState === "submitting"}
+              />
               <p className="text-xs text-zinc-500">
-                Enter your 12-digit US phone number in the standardized format, e.g. +12025550123.
+                Enter your 10-digit US phone number in the standardized format, e.g. 2025550123.
               </p>
               <Clerk.FieldError className="block text-sm text-red-400"/>
             </Clerk.Field>
@@ -122,7 +136,7 @@ export default function SignUpPage() {
 
             <button
               disabled={
-                phoneNumber.length !== 12 ||
+                phoneNumber.length !== 10 ||
                 !firstName ||
                 !lastName ||
                 !smsOptIn ||
