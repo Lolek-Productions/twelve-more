@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import LeftSidebar from "@/components/LeftSidebar";
-import RightSidebar from "@/components/RightSidebar";
 import CommentModal from "@/components/CommentModal";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/toaster";
