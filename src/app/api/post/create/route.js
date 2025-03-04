@@ -86,6 +86,7 @@ export const POST = async (req) => {
       }
     } else {
       console.log('No communityId provided or not in production, skipping notification');
+      console.log('communityId', data.communityId, 'isProduction', isProduction);
     }
 
     return new Response(JSON.stringify(newPost), {
