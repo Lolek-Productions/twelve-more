@@ -3,7 +3,6 @@
 import * as Clerk from '@clerk/elements/common'
 import * as SignUp from '@clerk/elements/sign-up'
 import Image from "next/image";
-import { useSignUp } from "@clerk/nextjs";
 import { useState } from "react";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
@@ -11,11 +10,10 @@ import Link from "next/link";
 import * as React from "react";
 
 export default function SignUpPage() {
-  const { signUp } = useSignUp();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [submissionState, setSubmissionState] = useState("idle"); // idle, submitting, success, error
+  const [submissionState, setSubmissionState] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
@@ -93,8 +91,8 @@ export default function SignUpPage() {
                 type="tel"
                 required
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-                placeholder="e.g., 2025550123"
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="e.g., +12025550123"
                 maxLength={10}
                 className={`w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 ${
                   submissionState === "error" ? "ring-red-400" : ""
@@ -102,7 +100,7 @@ export default function SignUpPage() {
                 disabled={submissionState === "submitting"}
               />
               <p className="text-xs text-zinc-500">
-                Enter your 10-digit US phone number (no +1 needed).
+                Enter your 10-digit US phone number in the standardized format, e.g. +12025550123.
               </p>
               <Clerk.FieldError className="block text-sm text-red-400"/>
             </Clerk.Field>
