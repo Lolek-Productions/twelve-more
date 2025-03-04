@@ -71,20 +71,23 @@ export default function CommunitiesList() {
       });
       return;
     }
+    setModalOpen(false);
+    createForm.reset();
+
     try {
       const result = await createCommunity({
         ...formData,
         organizationId: appUser.selectedOrganization.id,
       });
+
       if (!result.success) {
-        setModalOpen(false);
-        createForm.reset();
         return toast({
           title: "Error",
           description: result.error,
           variant: "destructive",
         });
       }
+
       toast({
         title: "Community Created",
         description: "Your new community has been created successfully!",
@@ -99,7 +102,6 @@ export default function CommunitiesList() {
       });
     }
   };
-
 
   async function handleAddCommunityToUser(communityId) {
     if (!appUser?.id) {

@@ -45,7 +45,7 @@ const getOrCreateClerkUser = async (client, { firstName, lastName, phoneNumber }
 };
 
 // Utility function to poll for MongoDB user
-const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 1000) => {
+const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const mongoUserResult = await getUserByClerkId(clerkUserId);

@@ -26,7 +26,7 @@ const profileFormSchema = z.object({
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., 2345678901)." })
     .min(10, { message: "Phone Number must be at least 10 digits." })
-    .max(15, { message: "Phone Number must not exceed 15 characters." }),
+    .max(10, { message: "Phone Number must not exceed 10 characters." }),
   smsOptIn: z
     .boolean()
     .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
@@ -52,7 +52,6 @@ export default function Invite() {
       const res = await fetch('/api/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Include all fields in the API call
         body: JSON.stringify({
           firstName: data.firstName,
           lastName: data.lastName,
