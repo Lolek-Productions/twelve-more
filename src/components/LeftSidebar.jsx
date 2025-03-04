@@ -7,13 +7,13 @@ import { HiHome, HiCog, HiOutlineServer, HiCheckCircle, HiUserGroup } from 'reac
 import MiniProfile from './MiniProfile';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useUser } from '@clerk/nextjs';
 import { DEV_PHONE_NUMBERS } from '@/lib/constants';
-import CommunityNav from "@/components/CommunityNav";
+import {useAppUser} from "@/hooks/useAppUser.js";
+
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
+  const {appUser} = useAppUser();
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
@@ -35,7 +35,7 @@ export default function LeftSidebar({ onLinkClick }) {
       title: 'Developer',
       href: '/developer',
       icon: <HiCommandLine className="w-6 h-6" />,
-      isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
+      isVisible: appUser?.phoneNumber && DEV_PHONE_NUMBERS.includes(appUser.phoneNumber),
     },
   ];
 
@@ -43,9 +43,24 @@ export default function LeftSidebar({ onLinkClick }) {
     item.isVisible === undefined || item.isVisible === true
   );
 
-  if (!isLoaded || !user) {
+  if (!appUser) {
     return <div className="p-3">Loading...</div>;
   }
+
+  const fallbackLink = {
+    id: 'join-community', // Unique key for the fallback
+    name: 'Join a Community',
+    href: '/communities/',
+  };
+
+  // Filter communities to only include those with an id, then decide on fallback
+  const validCommunities = appUser?.communities?.filter((community) =>
+    community.id && typeof community.id === 'string' && community.id.trim() !== ''
+  ) || [];
+
+  const communitiesToRender = validCommunities.length > 0
+    ? validCommunities
+    : [fallbackLink];
 
   return (
     <div className="flex h-full flex-col p-3">
@@ -79,12 +94,28 @@ export default function LeftSidebar({ onLinkClick }) {
           ))}
         </nav>
 
-        <CommunityNav />
-
+        <div className="p-3 bg-gray-100 rounded-md mt-2">
+          <div className="flex items-center">
+            <div className="ml-2 text-xl font-semibold mb-1">My Communities</div>
+          </div>
+          <div>
+            {communitiesToRender.map((community) => (
+              <Link
+                key={community.id}
+                href={community.href || `/communities/${community.id}`}
+                className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
+                onClick={handleLinkClick}
+              >
+                <span className="text-xl mr-2">·</span>
+                <span>{community.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mt-auto">
-        <MiniProfile />
+        <MiniProfile/>
       </div>
     </div>
   );
