@@ -2,6 +2,7 @@ import Feed from '@/components/Feed';
 import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
 import Input from '@/components/Input';
 import RightSidebar from "@/components/RightSidebar.jsx";
+import RecentMembersToOrganization from "@/components/RecentMembersToOrganization";
 
 //Build currently fails without this:
 export const dynamic = 'force-dynamic'; // ✅ Ensures Next.js treats this as a dynamic page
@@ -20,6 +21,7 @@ export default async function Home() {
 
       <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
         <RightSidebar/>
+        <RecentMembersToOrganization />
       </div>
     </div>
   );

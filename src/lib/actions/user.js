@@ -613,3 +613,56 @@ export async function setSelectedOrganizationOnUser(organizationId, userId) {
     return { success: false, error: "Failed to set selected organization" };
   }
 }
+
+export async function getRecentOrganizationMembers(organizationId) {
+  console.log('organizationId', organizationId);
+
+  try {
+    // Input validation
+    if (!organizationId || !mongoose.isValidObjectId(organizationId)) {
+      return {
+        success: false,
+        error: "Invalid or missing organization ID",
+      };
+    }
+
+    await connect(); // Ensure database connection
+
+    // Find the 10 most recent users in the organization, sorted by createdAt descending
+    const members = await User.find({
+      "organizations.organization": organizationId,
+    })
+      .select("firstName lastName avatar createdAt") // Include createdAt for sorting
+      .sort({ createdAt: -1 }) // -1 for descending (newest first)
+      .limit(10) // Limit to 10 members
+      .lean();
+
+    console.log('Members:', members);
+
+    // Check if any members were found
+    if (!members || members.length === 0) {
+      return {
+        success: true,
+        message: "No members found in this organization",
+        data: [],
+      };
+    }
+
+    return {
+      success: true,
+      message: "10 most recent organization members retrieved successfully",
+      data: members.map((member) => ({
+        id: member._id.toString(),
+        firstName: member.firstName,
+        lastName: member.lastName,
+        avatar: member.avatar,
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching recent community members:", error);
+    return {
+      success: false,
+      error: "Failed to fetch recent community members",
+    };
+  }
+}
