@@ -537,6 +537,8 @@ export async function removeCommunityFromUser(communityId, userId) {
 }
 
 export async function getCommunityMembers(communityId) {
+  console.log('communityId',communityId);
+
   try {
     // Input validation
     if (!communityId || !mongoose.isValidObjectId(communityId)) {
@@ -550,10 +552,11 @@ export async function getCommunityMembers(communityId) {
 
     // Find all users where the communities array contains the specified communityId
     const members = await User.find({
-      "communities.communityId": communityId,
+      "communities.community": communityId,
     })
-      .select("firstName lastName _id") // Select fields you need (adjust as needed)
-      .lean(); // Return plain JS objects for performance
+    .select("firstName lastName")
+    .lean();
+    console.log(members);
 
     // Check if any members were found
     if (!members || members.length === 0) {

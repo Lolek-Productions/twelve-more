@@ -59,7 +59,6 @@ export default function UsersPage() {
       const data = await getUserById(userId);
       console.log(data);
 
-
       if (data.user) {
         setUser(data.user);
         if (data.user.communities) {

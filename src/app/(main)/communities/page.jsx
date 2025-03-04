@@ -2,15 +2,24 @@ import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx"
 
 export const dynamic = 'force-dynamic'; // Ensures Next.js treats this as a dynamic page
 
-import CommunitiesList from "@/components/CommunitiesList"; // Assuming this will be a separate client component
+import CommunitiesList from "@/components/CommunitiesList";
+import Input from "@/components/Input.jsx";
+import Feed from "@/components/Feed.jsx";
+import RightSidebar from "@/components/RightSidebar.jsx"; // Assuming this will be a separate client component
 
 export default async function CommunitiesPage() {
   return (
-    <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
-      <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-        <h2 className='text-lg sm:text-xl font-bold'>Communities: <SelectedOrganizationName /></h2>
+    <div className="flex w-full">
+      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
+        <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
+          <h2 className='text-lg sm:text-xl font-bold'>Communities: <SelectedOrganizationName/></h2>
+        </div>
+        <CommunitiesList/>
       </div>
-      <CommunitiesList />
+
+      <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
+        <RightSidebar/>
+      </div>
     </div>
   );
 }

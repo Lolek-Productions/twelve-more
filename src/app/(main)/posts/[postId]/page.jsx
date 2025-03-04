@@ -2,6 +2,10 @@ import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
+import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
+import Input from "@/components/Input.jsx";
+import Feed from "@/components/Feed.jsx";
+import RightSidebar from "@/components/RightSidebar.jsx";
 
 export default async function PostPage({ params }) {
   let data = null;
@@ -21,18 +25,25 @@ export default async function PostPage({ params }) {
   }
 
   return (
-    <div className='max-w-xl mx-auto border-r border-l min-h-screen'>
+    <div className="flex w-full">
+      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
 
-      <div className='md:w-[30rem] flex items-center space-x-2 py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-        <Link href='/home' className='hover:bg-gray-100 rounded-full p-2'>
-          <HiArrowLeft className='h-5 w-5' />
-        </Link>
-        <h2 className='sm:text-lg'>Back</h2>
+        <div
+          className='md:w-[30rem] flex items-center space-x-2 py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
+          <Link href='/home' className='hover:bg-gray-100 rounded-full p-2'>
+            <HiArrowLeft className='h-5 w-5'/>
+          </Link>
+          <h2 className='sm:text-lg'>Back</h2>
+        </div>
+
+        {!data && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
+        {data && <Post post={data} clickableText={false} />}
+        {data && <Comments comments={data.comments} />}
       </div>
 
-      {!data && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
-      {data && <Post post={data} clickableText={false} />}
-      {data && <Comments comments={data.comments} />}
+      <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
+        <RightSidebar/>
+      </div>
     </div>
   );
 }

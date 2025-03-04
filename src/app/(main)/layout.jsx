@@ -61,13 +61,8 @@ export default function RootLayout({ children }) {
                 <LeftSidebar /> {/* No need for onLinkClick on desktop */}
               </div>
 
-              {/* Main Content Area */}
-              <main className="flex-1 w-full">{children}</main>
+              {children}
 
-              {/* Right Sidebar - Hidden on lg and below */}
-              <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
-                <RightSidebar />
-              </div>
             </div>
 
             {/* Modals and Toasts */}
