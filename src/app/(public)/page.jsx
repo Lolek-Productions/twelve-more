@@ -9,12 +9,12 @@ export default function Landing() {
       <h1 className="text-[50px] font-bold text-gray-800 leading-normal">
         GET HUNGRY
       </h1>
-      <p className="mt-4 text-2xl text-gray-600">
+      <p className=" text-2xl text-gray-600">
         Sign in and find your community
       </p>
 
-      <Button asChild className='mt-5'>
-        <Link href="/sign-up">Get Started</Link>
+      <Button asChild className='mt-9'>
+        <Link href="/sign-up">Join Us</Link>
       </Button>
     </div>
   )
