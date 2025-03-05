@@ -60,7 +60,7 @@ export const POST = async (req) => {
         },
       })) || [],
       likes: post.likes?.map((like) => ({
-        id: like._id.toString(),
+        id: like?._id.toString(),
       })) || [],
       createdAt: post.createdAt,
     };

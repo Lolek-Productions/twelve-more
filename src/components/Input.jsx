@@ -208,15 +208,15 @@ export default function Input({communityId}) {
             <audio controls src={recordedURL} />
           </div>
         }
-        <div className='flex items-center justify-between pt-2.5'>
-          <div className='flex items-center'>
-            <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
-              onClick={() => imagePickRef.current.click()}
-            />
-            {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
-              : <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
-            }
-          </div>
+        <div className='flex items-center justify-end pt-2.5'>
+          {/*<div className='flex items-center'>*/}
+          {/*  <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'*/}
+          {/*    onClick={() => imagePickRef.current.click()}*/}
+          {/*  />*/}
+          {/*  {isRecording ? <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />*/}
+          {/*    : <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />*/}
+          {/*  }*/}
+          {/*</div>*/}
           <input
             type='file'
             ref={imagePickRef}

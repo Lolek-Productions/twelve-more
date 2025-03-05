@@ -19,7 +19,7 @@ export default function CommentModal() {
 
   useEffect(() => {
     if (!postId) {
-      console.log('no post id found in CommentModal');
+      // console.log('no post id found in CommentModal');
       setPost({});
       setPostLoading(false);
       return;
