@@ -28,7 +28,6 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
       })
       .populate({
         path: 'likes',
-        select: 'firstName lastName',
       })
       .populate({
         path: 'prayers.user',
@@ -72,7 +71,7 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
         },
       })) || [],
       likes: post.likes?.map((like) => ({
-        id: like._id.toString(), //this is the id of the user
+        userId: like._id.toString(), //this is the id of the user
       })) || [],
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
@@ -191,7 +190,6 @@ export async function getPostById(postId) {
       })
       .populate({
         path: 'likes',
-        select: 'firstName lastName',
       })
       .populate({
         path: 'prayers.user',
@@ -234,7 +232,7 @@ export async function getPostById(postId) {
         },
       })) || [],
       likes: post.likes?.map((like) => ({
-        userId: like.user?._id?.toString(),
+        userId: like._id?.toString(),
       })) || [],
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
@@ -303,6 +301,61 @@ export async function sayPrayerAction(post, user) {
     return {
       status: false,
       message: 'Error updating prayer: ' + error.message
+    };
+  }
+}
+
+export async function setUserLikesAction(post, user) {
+  console.log('hello setUserLikesAction');
+  // console.log('post.id', post.id, 'user.id', user.id);
+
+  try {
+    await connect();
+
+    const existingPost = await Post.findById(post.id);
+
+    if (!existingPost) {
+      console.log('Post not found');
+      return { success: false, message: 'Post not found' };
+    }
+
+    const hasLiked = existingPost.likes.includes(user.id);
+
+    const updateOperation = hasLiked
+      ? { $pull: { likes: user.id } }
+      : { $addToSet: { likes: user.id } };
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      post.id,
+      updateOperation,
+      {
+        new: true,
+      }
+    );
+
+    if (!updatedPost) {
+      console.log('Failed to update post');
+      return { success: false, message: 'Failed to update post' };
+    }
+
+    const actionMessage = hasLiked
+      ? 'Like removed successfully'
+      : 'Like added successfully';
+    console.log(actionMessage);
+
+    return {
+      success: true,
+      message: actionMessage,
+      likes: updatedPost.likes?.map((like) => ({
+        userId: like._id.toString(),
+      })) || [],
+    };
+
+  } catch (error) {
+    console.error("Error updating like for post:", error.message);
+    return {
+      status: false,
+      message: 'Error updating like: ' + error.message
     };
   }
 }

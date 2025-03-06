@@ -12,7 +12,7 @@ import { modalState, postIdState } from '@/modalState/modalStateDefinition';
 import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
 import {useAppUser} from "@/hooks/useAppUser";
-import {sayPrayerAction} from "@/lib/actions/post.js";
+import {sayPrayerAction, setUserLikesAction} from "@/lib/actions/post.js";
 
 export default function Icons({ post }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -24,22 +24,34 @@ export default function Icons({ post }) {
   const router = useRouter();
   const {appUser} = useAppUser();
 
-  const likePost = () => {
-    const like = fetch('/api/post/like', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ postId: post.id }),
+  const likePost = async () => {
+    if (!appUser || !post) return;
+
+    try {
+      const response = await setUserLikesAction(post, appUser);
+
+      if(response.success) {
+        setLikes(response.likes);
+        checkUserLikes();
+      }
+
+    } catch (error) {
+      console.error('Failed to like post:', error);
+    }
+  };
+
+  const checkUserLikes = () => {
+    if (!likes || !appUser) {
+      return;
+    }
+
+    const appUserId = String(appUser.id);
+
+    const userLikes = likes.some((like) => {
+      return like.userId === appUserId;
     });
-    if (like && isLiked) {
-      setLikes(
-        likes.filter((like) => like !== appUser.id)
-      );
-    }
-    if (like && !isLiked) {
-      setLikes([...likes, appUser.id]);
-    }
+
+    setIsLiked(userLikes);
   };
 
   const sayPrayer = async () => {
@@ -58,15 +70,12 @@ export default function Icons({ post }) {
     }
   };
 
-  useEffect(() => {
-    const userHasLiked = likes?.some((like) => like.id === appUser.id);
 
-    if (appUser && userHasLiked) {
-      setIsLiked(true);
-    } else {
-      setIsLiked(false);
-    }
+  useEffect(() => {
+    if(!likes || !appUser) { return; }
+    checkUserLikes();
   }, [likes, appUser]);
+
 
   const checkUserPrayed = () => {
     if (!prayers || !appUser || !appUser.id) {
