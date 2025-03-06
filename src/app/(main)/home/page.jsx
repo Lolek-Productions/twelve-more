@@ -1,4 +1,4 @@
-import Feed from '@/components/Feed';
+import HomeFeed from '@/components/HomeFeed';
 import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
 import Input from '@/components/Input';
 import RightSidebar from "@/components/RightSidebar.jsx";
@@ -16,7 +16,7 @@ export default async function Home() {
           <h2 className='text-lg sm:text-xl font-bold'>Home: <SelectedOrganizationName/></h2>
         </div>
         <Input/>
-        <Feed/>
+        <HomeFeed/>
       </div>
 
       <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">

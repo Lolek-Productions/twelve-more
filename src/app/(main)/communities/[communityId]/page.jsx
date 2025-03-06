@@ -1,4 +1,4 @@
-import Feed from '@/components/Feed';
+import Feed from '@/components/HomeFeed';
 import Input from '@/components/Input';
 import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
 import CommunitiesList from "@/components/CommunitiesList.jsx";

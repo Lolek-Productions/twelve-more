@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DEV_PHONE_NUMBERS } from "@/lib/constants"; // Import developer phone numbers
-import { useUser } from "@clerk/nextjs"; // Clerk hook to get current user
-import { getUserByPhoneNumber } from "@/lib/actions/user"; // Import server action
+import { DEV_PHONE_NUMBERS } from "@/lib/constants";
+import { useUser } from "@clerk/nextjs";
+import { getUserByPhoneNumber } from "@/lib/actions/user";
 
 export default function DevelopersPage() {
   const [developers, setDevelopers] = useState([]);
@@ -17,7 +17,6 @@ export default function DevelopersPage() {
       try {
         setLoading(true);
 
-        // Fetch users for each phone number in DEV_PHONE_NUMBERS
         const developerPromises = DEV_PHONE_NUMBERS.map(async (phoneNumber) => {
           const result = await getUserByPhoneNumber(phoneNumber);
           return result.success ? result.data : null;
@@ -98,7 +97,6 @@ export default function DevelopersPage() {
               <p>
                 <strong>ID:</strong> {dev.id}
               </p>
-              {/* Add more fields as needed */}
             </li>
           ))}
         </ul>
@@ -106,9 +104,9 @@ export default function DevelopersPage() {
 
       <h2 className="text-xl font-semibold mt-7">Current Logged In User (you)</h2>
       <div className={'mt-1'}>
-        <div>Your UserId from Mongo: {dbUser._id}</div>
+        <div>Your UserId from Mongo: {dbUser?._id}</div>
         <div>Your userMongoId from Clerk: {user.publicMetadata.userMongoId}</div>
-        <div>Your ClerkId from Mongo: {dbUser.clerkId}</div>
+        <div>Your ClerkId from Mongo: {dbUser?.clerkId}</div>
         <div>Your ClerkId from Clerk: {user.id}</div>
       </div>
       <p className="text-muted-foreground mt-2">

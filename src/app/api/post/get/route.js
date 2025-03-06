@@ -31,9 +31,12 @@ export const POST = async (req) => {
         },
       });
 
+    console.log('post post', post);
+
     const formattedPost = {
       id: post._id.toString(),
       text: post.text,
+      image: post.image,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,

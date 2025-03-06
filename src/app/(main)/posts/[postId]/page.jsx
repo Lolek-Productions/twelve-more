@@ -2,10 +2,10 @@ import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
-import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
-import Input from "@/components/Input.jsx";
-import Feed from "@/components/Feed.jsx";
-import RightSidebar from "@/components/RightSidebar.jsx";
+import SelectedOrganizationName from "@/components/SelectedOrganizationName";
+import Input from "@/components/Input";
+import Feed from "@/components/HomeFeed";
+import RightSidebar from "@/components/RightSidebar";
 
 export default async function PostPage({ params }) {
   let data = null;

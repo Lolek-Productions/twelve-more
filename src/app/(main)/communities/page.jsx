@@ -3,8 +3,8 @@ import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx"
 export const dynamic = 'force-dynamic'; // Ensures Next.js treats this as a dynamic page
 
 import CommunitiesList from "@/components/CommunitiesList";
-import Input from "@/components/Input.jsx";
-import Feed from "@/components/Feed.jsx";
+import Input from "@/components/Input";
+import Feed from "@/components/HomeFeed";
 import RightSidebar from "@/components/RightSidebar.jsx"; // Assuming this will be a separate client component
 
 export default async function CommunitiesPage() {

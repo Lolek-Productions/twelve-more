@@ -72,7 +72,7 @@ Consistency: Ensures a uniform look (e.g., rounded-md, shadow-sm) across the app
 Design Patterns
 Responsive Layouts: SettingsLayout.jsx switches between a sidebar (desktop) and Sheet (mobile) using md:hidden and hidden md:block. LeftSidebar.jsx follows a similar pattern.
 Visual Feedback: Buttons and icons (e.g., in Icons.jsx) feature hover states (hover:bg-sky-100) and transitions (transition duration-500).
-Loading States: Skeletons (Skeleton.jsx) in Feed.jsx and spinners (Loader.jsx) in app/layout.jsx enhance UX during data fetching.
+Loading States: Skeletons (Skeleton.jsx) in HomeFeed.jsx and spinners (Loader.jsx) in app/layout.jsx enhance UX during data fetching.
 Aesthetic
 Minimalist: White backgrounds (bg-white), muted grays (text-gray-500), and bold accents (text-blue-500) create a clean, professional look.
 Typography: Uses system fonts (Arial, Helvetica, sans-serif) via globals.css, with sizes like text-sm and text-xl for hierarchy.
@@ -98,7 +98,7 @@ State Management
 Jotai:
 modalState and postIdState in modalStateDefinition.js control CommentModal.jsx.
 userAtom in SessionWrapper.jsx syncs Clerk and MongoDB user data.
-React Hooks: useEffect in Feed.jsx fetches posts, useState in Input.jsx manages form inputs.
+React Hooks: useEffect in HomeFeed.jsx fetches posts, useState in Input.jsx manages form inputs.
 Error Handling and Feedback
 Toasts: use-toast.js provides a toast system (e.g., in UserProfileForm.jsx) with ADD_TOAST, DISMISS_TOAST actions.
 Server Actions: handleApiResponse in utils.js standardizes API responses with success/error toasts.
@@ -116,7 +116,7 @@ users/[userId]/page.jsx: Displays user details and posts, with a FollowButton (i
 Posts:
 Input.jsx: Creates posts with text, images, and audio, uploading to Firebase and posting via /api/post/create.
 Post.jsx: Renders posts with clickable text (linking to /posts/[id]) and Icons for liking/commenting.
-Feed.jsx: Fetches and displays posts by community, with infinite scrolling via Load more.
+HomeFeed.jsx: Fetches and displays posts by community, with infinite scrolling via Load more.
 Communities:
 admin/communities/page.jsx: CRUD interface with CommunityTable, using createOrUpdateCommunity and deleteCommunity.
 communities/[communityId]/invite/page.jsx: Sends SMS invites via /api/invite, requiring first/last name and phone number.

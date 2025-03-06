@@ -53,11 +53,11 @@ export default function Post({ post, clickableText = true }) {
             <img src={post?.image} className="rounded-2xl mr-2 max-w-full h-auto" alt="post image" />
           </Link>
         )}
-        {post?.audio && (
-          <div className="w-full py-1">
-            <audio controls src={post?.audio} className="w-full" />
-          </div>
-        )}
+        {/*{post?.audio && (*/}
+        {/*  <div className="w-full py-1">*/}
+        {/*    <audio controls src={post?.audio} className="w-full" />*/}
+        {/*  </div>*/}
+        {/*)}*/}
         <Icons post={post} id={post?.id} />
       </div>
     </div>

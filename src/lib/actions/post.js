@@ -1,12 +1,12 @@
 'use server'
 
-import { connect } from "@/lib/mongodb/mongoose"; // Adjust to your MongoDB connection path
-import Post from "@/lib/models/post.model"; // Adjust to your Post model path
-import User from '@/lib/models/user.model';
+import { connect } from "@/lib/mongodb/mongoose";
+import Post from "@/lib/models/post.model";
+import User from '@/lib/models/user.model';  //Keep even though WebStorm doesn't think it is being used!!!
 
 export async function getPosts({limit = 10, selectedOrganizationId, communityId}) {
   try {
-    console.log(selectedOrganizationId);
+    // console.log(selectedOrganizationId);
 
     await connect();
     const query = {
@@ -46,6 +46,7 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
     const mappedPosts = limitedPosts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
+      image: post.image,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -195,6 +196,7 @@ export async function getPostById(postId) {
     return {
       id: post._id.toString(),
       text: post.text,
+      image: post.image,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,

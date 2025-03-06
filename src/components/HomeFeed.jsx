@@ -6,7 +6,7 @@ import { getPosts } from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton"
 import {useAppUser} from "@/hooks/useAppUser.js";
 
-export default function Feed({ communityId }) {
+export default function HomeFeed({ communityId }) {
   const [posts, setPosts] = useState([]); // Stores fetched posts
   const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
   const [isLoading, setIsLoading] = useState(true); // Add loading state

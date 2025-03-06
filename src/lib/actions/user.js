@@ -301,7 +301,6 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
   try {
     await connect();
 
-    // Fetch a single user by phoneNumber
     const user = await User.findOne({ phoneNumber }).lean();
 
     if (!user) {
@@ -311,7 +310,6 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
       };
     }
 
-    // Return the user data in a simplified format
     return {
       success: true,
       data: {
