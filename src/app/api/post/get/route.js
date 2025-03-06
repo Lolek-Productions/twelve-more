@@ -31,7 +31,7 @@ export const POST = async (req) => {
         },
       });
 
-    console.log('post post', post);
+    // console.log('post post', post);
 
     const formattedPost = {
       id: post._id.toString(),

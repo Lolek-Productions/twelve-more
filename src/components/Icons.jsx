@@ -7,23 +7,24 @@ import {
   HiHeart,
 } from 'react-icons/hi';
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { modalState, postIdState } from '@/modalState/modalStateDefinition';
 import { useAtom } from 'jotai';
+import { PiHandsPraying } from "react-icons/pi";
+import {useAppUser} from "@/hooks/useAppUser";
+import {sayPrayerAction} from "@/lib/actions/post.js";
 
 export default function Icons({ post }) {
   const [isLiked, setIsLiked] = useState(false);
+  const [hasPrayed, setHasPrayed] = useState(false);
   const [likes, setLikes] = useState(post.likes || []);
+  const [prayers, setPrayers] = useState(post.prayers || []);
   const [open, setOpen] = useAtom(modalState);
   const [postId, setPostId] = useAtom(postIdState);
-  const { user } = useUser();
   const router = useRouter();
+  const {appUser} = useAppUser();
 
   const likePost = () => {
-    if (!user) {
-      return router.push('/sign-in');
-    }
     const like = fetch('/api/post/like', {
       method: 'PUT',
       headers: {
@@ -33,27 +34,66 @@ export default function Icons({ post }) {
     });
     if (like && isLiked) {
       setLikes(
-        likes.filter((like) => like !== user.publicMetadata.userMongoId)
+        likes.filter((like) => like !== appUser.id)
       );
     }
     if (like && !isLiked) {
-      setLikes([...likes, user.publicMetadata.userMongoId]);
+      setLikes([...likes, appUser.id]);
+    }
+  };
+
+  const sayPrayer = async () => {
+    if (!appUser || !post) return;
+
+    try {
+      const response = await sayPrayerAction(post, appUser);
+
+      if(response.success) {
+        setPrayers(response.prayers);
+        checkUserPrayed();
+      }
+
+    } catch (error) {
+      console.error('Failed to add prayer:', error);
     }
   };
 
   useEffect(() => {
-    const userHasLiked = likes?.some((like) => like.id === user.publicMetadata.userMongoId);
+    const userHasLiked = likes?.some((like) => like.id === appUser.id);
 
-    if (user && userHasLiked) {
+    if (appUser && userHasLiked) {
       setIsLiked(true);
     } else {
       setIsLiked(false);
     }
-  }, [likes, user]);
+  }, [likes, appUser]);
+
+  const checkUserPrayed = () => {
+    if (!prayers || !appUser || !appUser.id) {
+      console.warn("Skipping checkUserPrayed - Missing data:", { prayers, appUser });
+      return;
+    }
+
+    const appUserId = String(appUser.id);
+
+    const userHasPrayed = prayers.some((prayer) => {
+      // console.log("Inside .some() loop - appUserId (captured):", appUserId);
+      return prayer.userId === appUserId;
+    });
+
+    // console.log('userHasPrayed', userHasPrayed);
+    setHasPrayed(userHasPrayed);
+  };
+
+  useEffect(() => {
+    if(!prayers || !appUser) { return; }
+    // console.log('post.prayers', post.prayers);
+    checkUserPrayed();
+  }, [prayers, appUser]);
 
   const deletePost = async () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      if (user && user.publicMetadata.userMongoId === post.user.id) {
+      if (appUser && appUser.id === post.user.id) {
         const res = await fetch('/api/post/delete', {
           method: 'DELETE',
           headers: {
@@ -81,7 +121,6 @@ export default function Icons({ post }) {
             } else {
               setOpen(!open);
               setPostId(post.id);
-              // console.log('setting postId', post)
             }
           }}
         />
@@ -107,7 +146,27 @@ export default function Icons({ post }) {
           </span>
         )}
       </div>
-      {user && user.publicMetadata.userMongoId === post.user.id && (
+
+      <div className='flex items-center'>
+        {hasPrayed ? (
+          <PiHandsPraying
+            onClick={sayPrayer}
+            className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 text-green-600 hover:text-green-500 hover:bg-green-100'
+          />
+        ) : (
+          <PiHandsPraying
+            onClick={sayPrayer}
+            className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-green-500 hover:bg-green-100'
+          />
+        )}
+        {prayers.length > 0 && (
+          <span className={`text-xs ${hasPrayed && 'text-green-600'}`}>
+            {prayers.length}
+          </span>
+        )}
+      </div>
+
+      {appUser && appUser.id === post.user.id && (
         <HiOutlineTrash
           onClick={deletePost}
           className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'

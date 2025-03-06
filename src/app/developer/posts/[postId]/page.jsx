@@ -24,8 +24,7 @@ export default function PostPage() {
     async function fetchPostData() {
       try {
         const postData = await getPostById(postId);
-
-        console.log(postData);
+        // console.log(postData);
 
         if (!postData) {
           setError("Post not found");

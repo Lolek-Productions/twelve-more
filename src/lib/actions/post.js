@@ -30,6 +30,9 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
         path: 'likes',
         select: 'firstName lastName',
       })
+      .populate({
+        path: 'prayers.user',
+      })
       .sort({ createdAt: -1 })
       .limit(limit + 1)
       .lean();
@@ -70,6 +73,9 @@ export async function getPosts({limit = 10, selectedOrganizationId, communityId}
       })) || [],
       likes: post.likes?.map((like) => ({
         id: like._id.toString(), //this is the id of the user
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
       })) || [],
       createdAt: post.createdAt,
     }));
@@ -187,13 +193,18 @@ export async function getPostById(postId) {
         path: 'likes',
         select: 'firstName lastName',
       })
+      .populate({
+        path: 'prayers.user',
+      })
       .lean();
 
     if (!post) {
       throw new Error("Post not found");
     }
 
-    return {
+    // console.log('post - post.js', post);
+
+    const postData = {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -223,12 +234,75 @@ export async function getPostById(postId) {
         },
       })) || [],
       likes: post.likes?.map((like) => ({
-        id: like._id.toString(),
+        userId: like.user?._id?.toString(),
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
       })) || [],
       createdAt: post.createdAt,
     };
+
+    // console.log('postData Result', postData.prayers);
+    // console.log('postData Result', JSON.stringify(post.prayers, null, 2));
+
+    return postData;
   } catch (error) {
     console.error("Error fetching post:", error.message);
     return null;
+  }
+}
+
+export async function sayPrayerAction(post, user) {
+  console.log('hello sayPrayer');
+  console.log('post.id', post.id, 'user.id', user.id);
+
+  try {
+    await connect();
+
+    const existingPost = await Post.findById(post.id);
+
+    if (!existingPost) {
+      console.log('Post not found');
+      return { success: false, message: 'Post not found' };
+    }
+
+    const hasPrayed = existingPost.prayers.includes(user.id);
+
+    const updateOperation = hasPrayed
+      ? { $pull: { prayers: user.id } }
+      : { $addToSet: { prayers: user.id } };
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      post.id,
+      updateOperation,
+      {
+        new: true,
+      }
+    );
+
+    if (!updatedPost) {
+      console.log('Failed to update post');
+      return { success: false, message: 'Failed to update post' };
+    }
+
+    const actionMessage = hasPrayed
+      ? 'Prayer removed successfully'
+      : 'Prayer added successfully';
+    console.log(actionMessage);
+
+    return {
+      success: true,
+      message: actionMessage,
+      prayers: updatedPost.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(), // Assigning the converted `_id` to a key
+      })) || [],
+    };
+
+  } catch (error) {
+    console.error("Error updating prayer for post:", error.message);
+    return {
+      status: false,
+      message: 'Error updating prayer: ' + error.message
+    };
   }
 }

@@ -1,28 +1,43 @@
+'use client'
+
 import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
-import SelectedOrganizationName from "@/components/SelectedOrganizationName";
-import Input from "@/components/Input";
-import Feed from "@/components/HomeFeed";
 import RightSidebar from "@/components/RightSidebar";
+import {useEffect, useState} from "react";
+import {getPostById, getPosts} from "@/lib/actions/post.js";
+import {useAppUser} from "@/hooks/useAppUser.js";
+import {useParams} from "next/navigation";
 
-export default async function PostPage({ params }) {
-  let data = null;
-  const resolvedParams = await params;
-  const { postId } = resolvedParams;
 
-  try {
-    const result = await fetch(process.env.APP_URL + '/api/post/get', {
-      method: 'POST',
-      body: JSON.stringify({ postId: postId }),
-      cache: 'no-store',
-    });
-    data = await result.json();
-  } catch (error) {
-    console.log('Error getting post:', error);
-    data = { text: 'Failed to load post' };
-  }
+export default function PostPage() {
+  const params = useParams();
+  const { postId } = params;
+  const {appUser} = useAppUser();
+  const [isLoading, setIsLoading] = useState(false);
+  const [post, setPost] = useState(null);
+
+  useEffect(() => {
+    if (!postId) {
+      return;
+    }
+    const fetchPost = async () => {
+      setIsLoading(true);
+      // console.log(postId);
+      try {
+        const postData = await getPostById(postId);
+        // console.log(postData);
+        setPost(postData);
+      } catch (error) {
+        console.error('Error fetching post:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [postId]);
 
   return (
     <div className="flex w-full">
@@ -36,9 +51,9 @@ export default async function PostPage({ params }) {
           <h2 className='sm:text-lg'>Back</h2>
         </div>
 
-        {!data && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
-        {data && <Post post={data} clickableText={false} />}
-        {data && <Comments comments={data.comments} />}
+        {!post && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
+        {post && <Post post={post} clickableText={false} />}
+        {post && <Comments comments={post.comments} />}
       </div>
 
       <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
