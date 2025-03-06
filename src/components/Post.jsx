@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import moment from 'moment';
 import Icons from './Icons';
+import {linkifyText} from "@/lib/utils";
 
 export default function Post({ post, clickableText = true }) {
   return (
@@ -45,7 +46,7 @@ export default function Post({ post, clickableText = true }) {
           </Link>
         ) : (
           <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden">
-            {post?.text || 'No text available'}
+            {linkifyText(post?.text) || 'No text available'}
           </p>
         )}
         {post?.image && (

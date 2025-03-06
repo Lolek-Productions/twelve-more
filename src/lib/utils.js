@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
+import Link from 'next/link';
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -119,3 +120,23 @@ export const handleClerkError = (error) => {
     { status: error.status || 500 }
   );
 };
+
+export function linkifyText(text) {
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  // Split the text into parts based on URLs
+  const parts = text.split(urlRegex);
+
+  // Map through the parts and wrap URLs in Link components
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <Link key={index} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          {part}
+        </Link>
+      );
+    }
+    return part;
+  });
+}
