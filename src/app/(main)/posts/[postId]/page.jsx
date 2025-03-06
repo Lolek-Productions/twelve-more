@@ -51,7 +51,7 @@ export default function PostPage() {
           <h2 className='sm:text-lg'>Back</h2>
         </div>
 
-        {!post && <h2 className='text-center mt-5 text-lg'>Post not found</h2>}
+        {!post && isLoading && <h2 className='text-center mt-5 text-lg'>Post Loading...</h2>}
         {post && <Post post={post} clickableText={false} />}
         {post && <Comments comments={post.comments} />}
       </div>
