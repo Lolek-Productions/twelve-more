@@ -125,7 +125,7 @@ export default function Icons({ post }) {
         <HiOutlineChat
           className='h-8 w-8 cursor-pointer rounded-full  transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100'
           onClick={() => {
-            if (!user) {
+            if (!appUser) {
               router.push('/sign-in');
             } else {
               setOpen(!open);

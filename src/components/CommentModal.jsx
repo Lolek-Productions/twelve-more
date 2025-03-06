@@ -5,8 +5,9 @@ import { useAtom } from 'jotai';
 import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+// import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import {useAppUser} from "@/hooks/useAppUser.js";
 
 export default function CommentModal() {
   const [open, setOpen] = useAtom(modalState);
@@ -14,7 +15,8 @@ export default function CommentModal() {
   const [post, setPost] = useState({});
   const [postLoading, setPostLoading] = useState(false);
   const [input, setInput] = useState('');
-  const { user } = useUser();
+  // const { user } = useUser();
+  const {appUser} = useAppUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -24,10 +26,10 @@ export default function CommentModal() {
       setPostLoading(false);
       return;
     }
-    console.log('found post id in CommentModal');
+    // console.log('found post id in CommentModal');
 
     const fetchPost = async () => {
-      console.log('trying from Atom', postId);
+      // console.log('trying from Atom', postId);
 
       if (postId !== '') {
         setPostLoading(true);
@@ -56,7 +58,7 @@ export default function CommentModal() {
   }, [postId]);
 
   const sendComment = async () => {
-    if (!user) {
+    if (!appUser) {
       return router.push('/sign-in');
     }
     try {
@@ -68,10 +70,8 @@ export default function CommentModal() {
         body: JSON.stringify({
           postId,
           comment: input,
-          user: user.publicMetadata.userMongoId,
-          name: user.name,
-          username: user.username,
-          profileImg: user.imageUrl,
+          user: appUser.id,
+          profileImg: appUser.imageUrl,
         }),
       });
       if (res.status === 200) {
@@ -132,7 +132,7 @@ export default function CommentModal() {
             </p>
             <div className="flex p-3 space-x-3">
               <img
-                src={user?.imageUrl}
+                src={appUser?.avatar}
                 alt="user-img"
                 className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95"
               />
