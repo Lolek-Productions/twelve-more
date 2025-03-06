@@ -21,3 +21,7 @@ find . -type f -exec sh -c 'echo "--- File: {} ---"; cat "{}"; echo ""' \; | pbc
 
 # Git Summary
 git log --since="7 days ago" --pretty=tformat: --numstat | awk '{ add += $1; rem += $2 } END { print "Lines added: " add "\nLines removed: " rem "\nTotal changes: " (add + rem) }'
+
+# Starter Video:
+https://www.youtube.com/watch?v=gsysxSuTohA
+

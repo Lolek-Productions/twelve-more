@@ -359,3 +359,101 @@ export async function setUserLikesAction(post, user) {
     };
   }
 }
+
+export async function getPostsByUserId(userId, limit) {
+  try {
+    await connect();
+
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    const posts = await Post.find({user: userId})
+      .populate({
+        path: "comments",
+        select: "comment profileImg createdAt",
+        populate: {
+          path: "user",
+          select: "firstName lastName",
+        },
+      })
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+      })
+      .populate({
+        path: 'prayers.user',
+      })
+      .limit(limit)
+      .lean();
+
+    if (!posts) {
+      throw new Error("Posts not found");
+    }
+
+    // Determine if there are more posts
+    const hasMore = posts.length > limit;
+    // Trim the extra post if it exists, returning only the requested limit
+    const limitedPosts = posts.slice(0, limit);
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { posts: [], hasMore: false }; // No posts found
+    }
+
+    // console.log('-----post - post.js', posts);
+
+    const mappedPosts = posts.map((post) => ({
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
+      },
+      profileImg: post.profileImg,
+      comments: post.comments?.map((comment) => ({
+        id: comment._id.toString(),
+        comment: comment.comment,
+        profileImg: comment.profileImg,
+        createdAt: comment.createdAt,
+        user: {
+          id: comment.user?._id.toString(),
+          firstName: comment.user?.firstName,
+          lastName: comment.user?.lastName,
+        },
+      })) || [],
+      likes: post.likes?.map((like) => ({
+        userId: like._id?.toString(),
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    }));
+
+    return {success: true, posts: mappedPosts, hasMore};
+  } catch (error) {
+    console.error("Error fetching post:", error.message);
+    return null;
+  }
+}
