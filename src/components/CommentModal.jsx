@@ -5,7 +5,6 @@ import { useAtom } from 'jotai';
 import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
-// import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import {useAppUser} from "@/hooks/useAppUser.js";
 
@@ -71,7 +70,7 @@ export default function CommentModal() {
           postId,
           comment: input,
           user: appUser.id,
-          profileImg: appUser.imageUrl,
+          profileImg: appUser.avatar,
         }),
       });
       if (res.status === 200) {
