@@ -7,7 +7,7 @@ import { HiHome, HiUserGroup } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { DEV_PHONE_NUMBERS } from '@/lib/constants';
+import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 
 export default function LeftSidebar({ onLinkClick }) {
@@ -29,7 +29,7 @@ export default function LeftSidebar({ onLinkClick }) {
       title: 'Developer',
       href: '/developer',
       icon: <HiCommandLine className="w-6 h-6" />,
-      isVisible: !!appUser?.phoneNumber && DEV_PHONE_NUMBERS.includes(appUser.phoneNumber),
+      isVisible: !!appUser?.phoneNumber && DEV_IDS.includes(appUser.id),
     },
   ];
 
