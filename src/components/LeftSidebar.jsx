@@ -24,12 +24,7 @@ export default function LeftSidebar({ onLinkClick }) {
     { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
     // { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
     // { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
-    // {
-    //   title: 'Admin',
-    //   href: '/admin',
-    //   icon: <HiOutlineServer className="w-6 h-6" />,
-    //   isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)),
-    // },
+    // { title: 'Admin', href: '/admin', icon: <HiOutlineServer className="w-6 h-6" />, isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)) },
     {
       title: 'Developer',
       href: '/developer',
@@ -49,7 +44,7 @@ export default function LeftSidebar({ onLinkClick }) {
   }
 
   const fallbackLink = {
-    id: 'join-community', // Unique key for the fallback
+    id: 'join-community',
     name: 'Join a Community',
     href: '/communities/',
   };
@@ -89,7 +84,6 @@ export default function LeftSidebar({ onLinkClick }) {
               onClick={handleLinkClick}
             >
               {item.icon}
-              {/* Always show title on mobile, hide on xl+ unless needed */}
               <span className="font-bold">{item.title}</span>
             </Link>
           ))}
