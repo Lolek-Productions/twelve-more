@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine } from "react-icons/hi2";
-import { HiHome, HiUserGroup } from 'react-icons/hi';
+import {HiHome, HiOutlinePlus, HiUserGroup} from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
+import {Button} from "@/components/ui/button.jsx";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
@@ -29,7 +30,7 @@ export default function LeftSidebar({ onLinkClick }) {
       title: 'Developer',
       href: '/developer',
       icon: <HiCommandLine className="w-6 h-6" />,
-      isVisible: !!appUser?.phoneNumber && DEV_IDS.includes(appUser.id),
+      isVisible: appUser?.id && DEV_IDS.includes(appUser.id),
     },
   ];
 
@@ -37,7 +38,9 @@ export default function LeftSidebar({ onLinkClick }) {
     item.isVisible === undefined || item.isVisible === true);
 
   // console.log(visibleNavItems.length)
-  // console.log(appUser?.phoneNumber, DEV_PHONE_NUMBERS,);
+  // console.log(appUser?.id, DEV_IDS,);
+  // const ans = DEV_IDS.includes(appUser?.id);
+  // console.log('calc', ans)
 
   if (isLoaded || !appUser) {
     return <div className="p-3">Loading...</div>;
@@ -91,7 +94,10 @@ export default function LeftSidebar({ onLinkClick }) {
 
         <div className="p-3 bg-gray-100 rounded-md mt-2">
           <div className="flex items-center">
-            <div className="ml-2 text-xl font-semibold mb-1">My Communities</div>
+            <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
+            <Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>
+              <HiOutlinePlus className='h-5 w-5'/>
+            </Link>
           </div>
           <div>
             {communitiesToRender.map((community) => (
@@ -108,6 +114,8 @@ export default function LeftSidebar({ onLinkClick }) {
           </div>
         </div>
       </div>
+
+      {/*<Button onClick={() => {console.log(appUser)}}>Console User</Button>*/}
 
       <div className="mt-auto">
         <MiniProfile/>
