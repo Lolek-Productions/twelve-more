@@ -66,6 +66,7 @@ export async function getUserById(userId) {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         avatar: user.avatar,
         bio: user.bio,
         clerkId: user.clerkId,

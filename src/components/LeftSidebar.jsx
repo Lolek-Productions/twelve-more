@@ -3,17 +3,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine } from "react-icons/hi2";
-import { HiHome, HiCog, HiOutlineServer, HiCheckCircle, HiUserGroup } from 'react-icons/hi';
+import { HiHome, HiUserGroup } from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { DEV_PHONE_NUMBERS } from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 
-
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
-  const {appUser} = useAppUser();
+  const {appUser, isLoaded} = useAppUser();
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
@@ -35,15 +34,17 @@ export default function LeftSidebar({ onLinkClick }) {
       title: 'Developer',
       href: '/developer',
       icon: <HiCommandLine className="w-6 h-6" />,
-      isVisible: appUser?.phoneNumber && DEV_PHONE_NUMBERS.includes(appUser.phoneNumber),
+      isVisible: !!appUser?.phoneNumber && DEV_PHONE_NUMBERS.includes(appUser.phoneNumber),
     },
   ];
 
   const visibleNavItems = sidebarNavItems.filter(item =>
-    item.isVisible === undefined || item.isVisible === true
-  );
+    item.isVisible === undefined || item.isVisible === true);
 
-  if (!appUser) {
+  // console.log(visibleNavItems.length)
+  // console.log(appUser?.phoneNumber, DEV_PHONE_NUMBERS,);
+
+  if (isLoaded || !appUser) {
     return <div className="p-3">Loading...</div>;
   }
 
