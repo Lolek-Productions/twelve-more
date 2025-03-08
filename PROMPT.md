@@ -31,7 +31,7 @@ communities/page.jsx: Manages communities with CRUD operations via CommunityTabl
 profile-form.jsx: A sample profile editing form using react-hook-form and zod (not fully integrated).
 developer: Developer tools, restricted to users with phone numbers in DEV_PHONE_NUMBERS.
 layout.jsx: Similar to admin/layout.jsx, with a sidebar for Home, Developer, Organizations, etc.
-organizations/page.jsx: Lists and manages organizations with OrganizationTable.
+organizations/page.jsx: Lists and manages organizations with CommunityTable.
 organizations/[organizationId]/page.jsx: Manages communities within an organization using CommunityTable.
 organizations/[organizationId]/communities/[communityId]/page.jsx: Manages community members with MembersTable.
 users/page.js: Lists users with UserTable.

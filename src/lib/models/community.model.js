@@ -6,8 +6,16 @@ const communitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    description: {
+    purpose: {
       type: String,
+    },
+    visibility: {
+      type: String,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     organization: {
       type: mongoose.Schema.Types.ObjectId,

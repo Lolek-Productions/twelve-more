@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
-import {createCommunity, getCommunitiesByOrganization} from '@/lib/actions/community';
+import {createCommunity, deleteCommunity, getCommunitiesByOrganization} from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
 import {
@@ -49,7 +49,7 @@ export default function CommunitiesList() {
     }
     try {
       setLoading(true);
-      const orgCommunities = await getCommunitiesByOrganization(appUser.selectedOrganization.id);
+      const orgCommunities = await getCommunitiesByOrganization(appUser.selectedOrganization.id, appUser);
       setCommunities(orgCommunities);
     } catch (err) {
       setError(err.message);
@@ -144,7 +144,31 @@ export default function CommunitiesList() {
     }
   }
 
+  async function handleDeleteCommunity(communityId) {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      const resp = await deleteCommunity(communityId);
+
+      if (!resp.success) {
+        return toast({
+          title: "Error",
+          description: resp.error,
+        })
+      }
+      location.reload();
+      toast({
+        title: "Community Deleted",
+        description: 'You have deleted from the community',
+      })
+    }
+  }
+
   const isUserInCommunity = (communityId) => appUser?.communities?.some((c) => c.id === communityId) || false;
+
+  const isCommunityLeader = (communityId) => {
+    return appUser?.communities?.some(
+      (c) => c.id === communityId && c.role === "leader"
+    ) || false;
+  };
 
   if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -152,8 +176,8 @@ export default function CommunitiesList() {
   return (
     <div className="p-4 md:w-[30rem]">
 
-      <Button className="mb-4" onClick={() => setModalOpen(true)}>
-        Create New Community
+      <Button asChild className="mb-4" >
+        <Link href={`/communities/create`}>Create New Community</Link>
       </Button>
 
       {communities.length === 0 ? (
@@ -166,8 +190,13 @@ export default function CommunitiesList() {
             return (
               <li key={community.id} className="border p-4 rounded-md">
                 <Link href={`/communities/${community.id}`}>
-                  <h4 className="text-lg font-medium">{community.name}</h4>
-                  <p className="text-muted-foreground">{community.description}</p>
+                  <h4 className="text-lg font-medium">
+                    {community.name}{" "}
+                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
+                      {community?.visibility?.charAt(0).toUpperCase() + community?.visibility?.slice(1)}
+                    </span>
+                  </h4>
+                  <p className="text-muted-foreground">{community.purpose}</p>
                 </Link>
                 <div className="flex items-center gap-2 mt-2">
                   {!isMember ? (
@@ -192,6 +221,12 @@ export default function CommunitiesList() {
                   <Button asChild className="mt-2" variant="outline">
                     <Link href={`/communities/${community.id}/invite`}>Invite others to community</Link>
                   </Button>
+
+                  {isCommunityLeader(community.id) && (
+                    <Button onClick={()=> handleDeleteCommunity(`${community.id}`)} className="mt-2" variant="outline">
+                      Delete
+                    </Button>
+                  )}
                 </div>
                 {status.error && <p className="text-red-500 text-sm mt-1">{status.error}</p>}
                 {status.success && !status.loading && <p className="text-green-500 text-sm mt-1">{status.success}</p>}

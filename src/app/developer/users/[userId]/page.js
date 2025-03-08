@@ -173,7 +173,6 @@ export default function UsersPage() {
   };
 
   const handleAddOrganization = async (organizationId) => { // Add organization add handler
-    //trying to add org with id:
     // console.log(organizationId);
 
     try {

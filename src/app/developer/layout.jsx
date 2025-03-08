@@ -14,6 +14,10 @@ const sidebarNavItems = [
     href: "/developer/organizations",
   },
   {
+    title: "Communities",
+    href: "/developer/communities",
+  },
+  {
     title: "Users",
     href: "/developer/users",
   },

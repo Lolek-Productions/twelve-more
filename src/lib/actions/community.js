@@ -6,36 +6,50 @@ import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 
-export async function createCommunity({ name, organizationId }) {
-  if (!name) {
-    return { error: "Community name is required." };
-  }
-
-  if (!organizationId) {
-    return { error: "Organization ID is required." };
-  }
+export async function createCommunity(formData, user) {
+  if (!user) return { error: "User is required." };
 
   try {
-    await connect(); // Ensure database connection
+    const name = formData.name?.trim();
+    const purpose = formData.purpose?.trim();
+    const visibility = formData.visibility?.trim();
 
-    console.log("Creating a new community:", name);
+    if (!name) return { error: "Community name is required." };
+    if (!purpose) return { error: "Purpose is required." };
+    if (!visibility) return { error: "Visibility is required." };
+
+    await connect();
+
+    // console.log("Creating a new community:", name);
 
     const newCommunity = await Community.create({
-      name: name.trim(), // Clean up whitespace
-      organization: organizationId, // Use organizationId instead of hardcoded value
+      name,
+      purpose,
+      visibility,
+      createdBy: user.id,
+      organization: user.selectedOrganization.id,
     });
 
+    console.log('newCommunity', newCommunity);
+
+    await User.findOneAndUpdate(
+      { _id: user.id },
+      { $addToSet: { communities: { community: newCommunity._id, role: "leader" } } } // Add as leader
+    );
+
     return {
-      success: "Community created successfully!",
+      success: true,
+      message: "Community created successfully!",
       community: {
         id: newCommunity._id.toString(),
         name: newCommunity.name,
-        organization: newCommunity.organization.toString(),
+        purpose: newCommunity.purpose,
+        visibility: newCommunity.visibility,
       },
     };
   } catch (error) {
     console.error("Error creating community:", error);
-    return { error: "Failed to create community." };
+    return { success: false, error: "Failed to create community." };
   }
 }
 
@@ -47,31 +61,58 @@ export const deleteCommunity = async (id) => {
       return { error: "Community ID is required to delete." };
     }
 
-    await Community.findByIdAndDelete(new mongoose.Types.ObjectId(id));
+    // Step 1: Delete the community from the Community collection
+    const deletedCommunity = await Community.findByIdAndDelete(id);
 
-    return { success: "Community deleted successfully!" };
+    if (!deletedCommunity) {
+      return { error: "Community not found or already deleted." };
+    }
+
+    // Step 2: Remove the community from all users who were members
+    await User.updateMany(
+      { "communities.community": id },
+      { $pull: { communities: { community: id } } }
+    );
+
+    return { success: true, message: "Community deleted successfully!" };
   } catch (error) {
     console.error("Error deleting community:", error);
-    return { error: "Failed to delete community." };
+    return { success: false, error: "Failed to delete community." };
   }
 };
 
-export const getCommunitiesByOrganization = async function (organizationId) {
+export const getCommunitiesByOrganization = async function (organizationId, user = null) {
   try {
     console.log(organizationId);
     await connect(); // Ensure database connection (assuming this is your MongoDB connection function)
 
-    const communities = await Community.find({ organization: organizationId })
-      .populate({
-        path: "organization", // Field to populate
-        select: "name", // Only fetch firstName and lastName
-      })
-      .lean();
+    const userCommunityIds = user?.communities.map((c) => {
+      return c.id
+    }) || [];
+    // console.log(userCommunityIds);
+
+    const communities = await Community.find({
+      $or: [
+        {
+          organization: organizationId,
+          visibility: "public"
+        },
+        {
+          _id: {$in: userCommunityIds}
+        }
+      ]
+    })
+    .populate({
+      path: "organization", // Field to populate
+      select: "name", // Only fetch firstName and lastName
+    })
+    .lean();
 
     return communities.map((community) => ({
       id: community._id?.toString() || "",
       name: community.name,
-      description: community.description,
+      purpose: community.purpose,
+      visibility: community.visibility,
       organization: { name: community.organization?.name || "Unknown Organization" }, // Optional: Include organizationName if available in your schema
     }));
   } catch (error) {
@@ -81,10 +122,10 @@ export const getCommunitiesByOrganization = async function (organizationId) {
 };
 
 export const getCommunityById = async function (communityId) {
-  try {
-    // console.log('communityId', communityId);
+  // console.log('communityId', communityId);
 
-    await connect(); // Ensure database connection
+  try {
+    await connect();
 
     const community = await Community.findById(communityId)
       .lean();
@@ -97,7 +138,8 @@ export const getCommunityById = async function (communityId) {
     return {
       id: community._id?.toString() || "",
       name: community.name,
-      description: community.description,
+      purpose: community.purpose,
+      visibility: community.visibility,
       organization: {
         name: community.organization?.name || "Unknown Organization",
         id: community.organization?._id?.toString() || "",
@@ -108,90 +150,6 @@ export const getCommunityById = async function (communityId) {
     return null;
   }
 };
-
-export async function removeUserFromCommunity(communityId, userId) {
-  // console.log(communityId, userId);
-  return;
-
-  try {
-    // Input validation
-    if (!communityId || !mongoose.isValidObjectId(communityId)) {
-      return {
-        success: false,
-        error: "Invalid or missing community ID",
-      };
-    }
-    if (!userId || !mongoose.isValidObjectId(userId)) {
-      return {
-        success: false,
-        error: "Invalid or missing user ID",
-      };
-    }
-
-    await connect(); // Ensure database connection
-
-    // Convert string IDs to ObjectId
-    const communityObjectId = new mongoose.Types.ObjectId(communityId);
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-
-    // Update the community by pulling the userId from members array
-    const result = await Community.updateOne(
-      { _id: communityObjectId },
-      { $pull: { members: userObjectId } }
-    );
-
-    // Check if the operation modified anything
-    if (result.modifiedCount === 0) {
-      return {
-        success: false,
-        error: "User not found in community or community does not exist",
-      };
-    }
-
-    return {
-      success: true,
-      message: "User removed from community",
-    };
-  } catch (error) {
-    console.error("Error removing user from community:", error);
-    return {
-      success: false,
-      error: "Failed to remove user from community",
-    };
-  }
-}
-
-export async function getUserCommunities() {
-  try {
-    await connect();
-
-    // Get the current user from Clerk
-    const user = await currentUser();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-    if (!user.publicMetadata.userMongoId) {
-      throw new Error('User missing userMongoId');
-    }
-
-    // Fetch communities where this user is a member
-    const communities = await Community.find({ members: user.publicMetadata.userMongoId }).lean();
-
-    return {
-      success: true,
-      communities: communities.map((community) => ({
-        id: community._id.toString(),
-        name: community.name,
-      })),
-    };
-  } catch (error) {
-    console.error('Error fetching communities:', error.message);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-}
 
 export async function addUserToCommunity(communityId, userId) {
   // console.log(communityId, userId);
@@ -268,5 +226,79 @@ export async function searchCommunities(query) {
       success: false,
       error: "Failed to search communities",
     };
+  }
+}
+
+export const getAllCommunities = async function () {
+  try {
+    await connect();
+
+    const communities = await Community.find()
+      .populate({
+        path: "organization", // Field to populate
+        select: "name", // Only fetch firstName and lastName
+      })
+      .lean();
+
+    return communities.map((community) => ({
+      id: community._id?.toString() || "",
+      name: community.name,
+      purpose: community.purpose,
+      visibility: community.visibility,
+      organization: { name: community.organization?.name || "Unknown Organization" },
+    }));
+  } catch (error) {
+    console.error("Error fetching communities by organization:", error);
+    return [];
+  }
+};
+
+export async function updateCommunity(formData) {
+  if (!formData.id) return { error: "Community ID is required." };
+
+  try {
+    const id = formData.id;
+    const name = formData.name?.trim();
+    const purpose = formData.purpose?.trim();
+    const visibility = formData.visibility?.trim();
+
+    if (!name) return { error: "Community name is required." };
+    if (!purpose) return { error: "Purpose is required." };
+    if (!visibility) return { error: "Visibility is required." };
+
+    await connect();
+
+    // console.log("Creating a new community:", name);
+
+    const updatedCommunity = await Community.findByIdAndUpdate(
+      id,
+      {
+        name,
+        purpose,
+        visibility,
+      },
+      { new: true }
+    );
+
+    console.log('updatedCommunity', updatedCommunity);
+
+    // await User.findOneAndUpdate(
+    //   { _id: user.id },
+    //   { $addToSet: { communities: { community: newCommunity._id, role: "leader" } } } // Add as leader
+    // );
+
+    return {
+      success: true,
+      message: "Community created successfully!",
+      community: {
+        id: updatedCommunity._id.toString(),
+        name: updatedCommunity.name,
+        purpose: updatedCommunity.purpose,
+        visibility: updatedCommunity.visibility,
+      },
+    };
+  } catch (error) {
+    console.error("Error creating community:", error);
+    return { success: false, error: "Failed to create community." };
   }
 }
