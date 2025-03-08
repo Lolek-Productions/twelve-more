@@ -11,7 +11,9 @@ export default function MemberList({ community, members, hideInvite = false }) {
         <h4 className="font-bold text-xl text-center">
           Community Members: {community?.name}{" "}
           <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
-            {community?.visibility?.charAt(0).toUpperCase() + community?.visibility?.slice(1)}
+            {community?.visibility
+              ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
+              : ""}
           </span>
         </h4>
 
