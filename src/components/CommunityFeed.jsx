@@ -2,14 +2,14 @@
 
 import Post from './Post';
 import { useEffect, useState } from "react";
-import {getPostsForHomeFeed} from "@/lib/actions/post";
+import { getPostsForCommunityFeed } from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton"
 import {useAppUser} from "@/hooks/useAppUser.js";
 
-export default function HomeFeed() {
-  const [posts, setPosts] = useState([]);
-  const [postNum, setPostNum] = useState(10);
-  const [isLoading, setIsLoading] = useState(true);
+export default function CommunityFeed({ communityId }) {
+  const [posts, setPosts] = useState([]); // Stores fetched posts
+  const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [hasMore, setHasMore] = useState(false);
   const {appUser} = useAppUser();
 
@@ -22,7 +22,7 @@ export default function HomeFeed() {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await getPostsForHomeFeed(postNum, appUser);
+        const data = await getPostsForCommunityFeed(postNum, appUser, communityId);
         setPosts(data.posts);
         setHasMore(data.hasMore);
       } catch (error) {
@@ -33,8 +33,9 @@ export default function HomeFeed() {
     };
 
     fetchPosts();
-  }, [appUser, postNum]);
+  }, [appUser, postNum, communityId]);
 
+  // Skeleton loading component
   const LoadingSkeleton = () => (
     <div className="space-y-4 p-5 md:w-[30rem]">
       {[...Array(1)].map((_, index) => (

@@ -1,4 +1,4 @@
-import Feed from '@/components/HomeFeed';
+import CommunityFeed from '@/components/CommunityFeed';
 import Input from '@/components/Input';
 import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
 import CommunitiesList from "@/components/CommunitiesList.jsx";
@@ -30,7 +30,7 @@ export default async function CommunitiesHome({params}) {
           <h2 className='text-lg sm:text-xl font-bold'>{community.name}</h2>
         </div>
         <Input communityId={communityId}/>
-        <Feed communityId={communityId}/>
+        <CommunityFeed communityId={communityId} />
       </div>
 
       <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">

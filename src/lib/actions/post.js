@@ -4,16 +4,104 @@ import { connect } from "@/lib/mongodb/mongoose";
 import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';  //Keep even though WebStorm doesn't think it is being used!!!
 
-export async function getPosts({limit = 10, selectedOrganizationId, communityId}) {
+export async function getPostsForHomeFeed(limit = 10, user) {
+  try {
+    await connect();
+
+    //Get the posts where the communityId is null OR get the posts where the communityId matches the users selected organization and where the user is a member of that community.
+    const posts = await Post.find(
+      {
+        $or: [
+          { organization: user.selectedOrganization.id, community: null },  // Get posts without a community
+          {
+            community: { $in: user.communities.map(c => c.id) }, // Posts from communities user belongs to
+            organization: user.selectedOrganization.id // Within the selected organization
+          }
+        ]
+      }
+    )
+      .populate({
+        path: "comments",
+        select: "text author createdAt",
+      })
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+      })
+      .populate({
+        path: 'prayers.user',
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .lean();
+
+    // Determine if there are more posts
+    const hasMore = posts.length > limit;
+    // Trim the extra post if it exists, returning only the requested limit
+    const limitedPosts = posts.slice(0, limit);
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { posts: [], hasMore: false }; // No posts found
+    }
+
+    const mappedPosts = limitedPosts.map((post) => ({
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      profileImg: post.profileImg,
+      comments: post.comments?.map((comment) => ({
+        id: comment._id.toString(),
+        text: comment.text,
+        author: comment.author,
+        createdAt: comment.createdAt,
+        user: {
+          id: comment.user?._id.toString(),
+          firstName: comment.user?.firstName,
+          lastName: comment.user?.lastName,
+        },
+      })) || [],
+      likes: post.likes?.map((like) => ({
+        userId: like._id.toString(), //this is the id of the user
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    }));
+
+    return { posts: mappedPosts, hasMore }
+  } catch (error) {
+    console.error("Error fetching posts by community ID:", error);
+    return [];
+  }
+}
+
+export async function getPostsForCommunityFeed(limit = 10, user, communityId) {
+
   try {
     // console.log(selectedOrganizationId);
+    // console.log(';lkj;kljk');
 
     await connect();
-    const query = {
-      ...(communityId && { community: communityId }),
-      ...(selectedOrganizationId && { organization: selectedOrganizationId })
-    };
-    const posts = await Post.find(query)
+    const posts = await Post.find(
+        { community: communityId },
+      )
       .populate({
         path: "comments",
         select: "text author createdAt",
