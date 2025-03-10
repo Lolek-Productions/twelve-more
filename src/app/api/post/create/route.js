@@ -66,8 +66,16 @@ export const POST = async (req) => {
           return new Response(JSON.stringify(newPost), { status: 200 });
         }
 
+        // Truncate the post text if it exists
+        const maxTextLength = 50; // Adjust this number based on desired preview length
+        const truncatedText = data.text
+          ? data.text.length > maxTextLength
+            ? `${data.text.substring(0, maxTextLength)}...`
+            : data.text
+          : '';
+
         const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
-        const messageBody = `A new post was added to your community! Check it out: ${communityLink}`;
+        const messageBody = `New post: ${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
 
         // Send batch SMS using Twilio Notify
         const batchResult = await twilioService.sendBatchSMS(otherMembersPhoneNumbers, messageBody);
