@@ -1,6 +1,7 @@
-import Post from '../../../../lib/models/post.model';
-import { connect } from '../../../../lib/mongodb/mongoose';
+import Post from '@/lib/models/post.model';
+import { connect } from '@/lib/mongodb/mongoose';
 import { currentUser } from '@clerk/nextjs/server';
+import {notifyOnNewComment} from "@/lib/actions/post.js";
 
 export const PUT = async (req) => {
   const user = await currentUser();
@@ -30,6 +31,10 @@ export const PUT = async (req) => {
       },
       { new: true }
     );
+
+    //Notify the owner of the post when a comment has been made
+    await notifyOnNewComment(updatedPost, data);
+
     return new Response(JSON.stringify(updatedPost), { status: 200 });
   } catch (error) {
     console.log('Error adding a comment to a post:', error);

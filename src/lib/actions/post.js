@@ -2,7 +2,8 @@
 
 import { connect } from "@/lib/mongodb/mongoose";
 import Post from "@/lib/models/post.model";
-import User from '@/lib/models/user.model';  //Keep even though WebStorm doesn't think it is being used!!!
+import User from '@/lib/models/user.model';
+import twilioService from "@/lib/services/twilioService.js";  //Keep even though WebStorm doesn't think it is being used!!!
 
 export async function getPostsForHomeFeed(limit = 10, user) {
   try {
@@ -543,5 +544,53 @@ export async function getPostsByUserId(userId, limit) {
   } catch (error) {
     console.error("Error fetching post:", error.message);
     return null;
+  }
+}
+
+export async function notifyOnNewComment(post, commentData) {
+  // Make sure post and comment exist
+  if (!post || !commentData) {
+    console.error('Missing post or comment data for notification');
+    return;
+  }
+
+  try {
+    // Get the phone number of the person who created the post
+    const postOwner = post.user;
+    const phoneNumber = postOwner?.phoneNumber;
+
+    // If no phone number found, exit early
+    if (!phoneNumber) {
+      console.log('No phone number available for notification');
+      return;
+    }
+
+    // Check if the commenter is the same as the post owner - exit if they're the same person
+    if (commentData.user.id === postOwner.id) {
+      console.log('Post owner commenting on their own post - skipping notification');
+      return;
+    }
+
+    const commenterName = `${commentData.user.firstName || ''} ${commentData.user.lastName || ''}`.trim();
+
+    // Truncate the comment text if it's too long
+    const maxCommentLength = 50;
+    const truncatedComment = commentData.comment
+      ? commentData.comment.length > maxCommentLength
+        ? `${commentData.comment.substring(0, maxCommentLength)}...`
+        : commentData.comment
+      : '';
+
+    // Create the message text
+    const messageBody = `${commenterName} has commented on your post: "${truncatedComment}"  Check out the post here: https://twelvemore.social/posts/${post.id}`;
+
+    // Send the SMS
+    const batchResult = await twilioService.sendSMS(phoneNumber, messageBody);
+    console.log('Notification sent successfully', batchResult);
+    return batchResult;
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+    // Optional: You could implement a retry mechanism or alternative notification method here
+    throw error;
   }
 }
