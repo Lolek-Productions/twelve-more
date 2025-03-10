@@ -20,27 +20,27 @@ export async function getPostsForHomeFeed(limit = 10, user) {
         ]
       }
     )
-      .populate({
-        path: "comments",
-        select: "text author createdAt",
-      })
-      .populate({
-        path: 'community',
-        select: 'name',
-      })
-      .populate({
-        path: 'user',
-        select: 'firstName lastName',
-      })
-      .populate({
-        path: 'likes',
-      })
-      .populate({
-        path: 'prayers.user',
-      })
-      .sort({ createdAt: -1 })
-      .limit(limit + 1)
-      .lean();
+    .populate({
+      path: "comments",
+      select: "text author createdAt",
+    })
+    .populate({
+      path: 'community',
+      select: 'name',
+    })
+    .populate({
+      path: 'user',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'likes',
+    })
+    .populate({
+      path: 'prayers.user',
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit + 1)
+    .lean();
 
     // Determine if there are more posts
     const hasMore = posts.length > limit;
