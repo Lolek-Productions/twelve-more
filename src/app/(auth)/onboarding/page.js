@@ -41,23 +41,18 @@ export default function OnboardingComponent() {
           />
           <CardTitle className="text-center text-2xl">Welcome to TwelveMore!</CardTitle>
         </CardHeader>
+
         <CardContent>
-          <form action={handleSubmit} className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <Checkbox id="smsOptIn" name="smsOptIn"/>
-              <Label htmlFor="smsOptIn" className="text-sm">
-                I agree to receive SMS notifications from TwelveMore. Message & data rates may apply.
-                Reply <strong>STOP</strong> to unsubscribe.
-                See our <Link href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</Link>.
-              </Label>
-            </div>
+          <div className="flex items-center space-x-4">
+            We have a great purpose at TwelveMore.  We are going to explain it here.
+          </div>
 
-            {error && <p className="text-red-600 text-sm">Error: {error}</p>}
+          <Button asChild variant="default" className="mt-9 w-full" size="lg">
+            <Link href="/home" className="block w-full text-center">
+              Get Started
+            </Link>
+          </Button>
 
-            <div>
-              <Button type="submit" className="w-full mt-6">Get Started</Button>
-            </div>
-          </form>
         </CardContent>
       </Card>
     </div>

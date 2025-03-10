@@ -19,9 +19,8 @@ export const completeOnboarding = async (formData) => {
 
     // ✅ Merge existing metadata with new values
     const updatedMetadata = {
-      ...existingMetadata, // Keep existing metadata
+      ...existingMetadata,
       onboardingComplete: true,
-      smsOptIn: formData.get('smsOptIn') === 'on', // Convert checkbox value to boolean
     };
 
 
