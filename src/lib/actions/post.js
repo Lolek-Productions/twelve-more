@@ -548,6 +548,8 @@ export async function getPostsByUserId(userId, limit) {
 }
 
 export async function notifyOnNewComment(post, commentData) {
+  console.error('post', post, 'commentData', commentData);
+
   // Make sure post and comment exist
   if (!post || !commentData) {
     console.error('Missing post or comment data for notification');
