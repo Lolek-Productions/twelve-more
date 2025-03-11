@@ -55,7 +55,7 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) =
         return { success: true, user: mongoUserResult.user };
       }
 
-      console.log(`Attempt ${attempt}: MongoDB user not found yet`);
+      // console.log(`Attempt ${attempt}: MongoDB user not found yet`);
 
       // Wait before next attempt if not the last one
       if (attempt < maxAttempts) {
