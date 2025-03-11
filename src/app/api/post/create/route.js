@@ -7,7 +7,6 @@ import twilioService from '@/lib/services/twilioService.js'; // Import your Twil
 
 export const POST = async (req) => {
   const user = await currentUser();
-  const isProduction = process.env.NEXT_PUBLIC_ENV === 'production'; // Check environment
 
   try {
     await connect();
@@ -35,7 +34,7 @@ export const POST = async (req) => {
 
     await newPost.save();
 
-    if (data.communityId && isProduction) {
+    if (data.communityId) {
       try {
         // Verify the community exists
         const community = await Community.findById(data.communityId).lean();
@@ -94,7 +93,7 @@ export const POST = async (req) => {
       }
     } else {
       console.log('No communityId provided or not in production, skipping notification');
-      console.log('communityId', data.communityId, 'isProduction', isProduction);
+      console.log('communityId', data.communityId);
     }
 
     return new Response(JSON.stringify(newPost), {
