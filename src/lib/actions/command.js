@@ -2,6 +2,7 @@
 
 import {clerkClient} from "@clerk/nextjs/server";
 import twilioService from "@/lib/services/twilioService";
+import {getPrivateUserById} from "@/lib/actions/user.js";
 
 export async function runCommand(commandName) {
   try {
@@ -34,7 +35,7 @@ export async function runCommand(commandName) {
           limit: 1,
         });
         if (!users.data.length) {
-          return { success: false, error: `No user found with phone number ${phoneNumber}` };
+          return { success: false, message: `No user found with phone number ${phoneNumber}` };
         }
         const userId = users.data[0].id;
         await client.users.deleteUser(userId);
@@ -68,11 +69,31 @@ export async function runCommand(commandName) {
         };
       }
 
+      case "TEST": {
+        try {
+          const userId = "67b63722b63603a6b567eb31"; // Replace with a real user ID from your database
+
+          const user = await getPrivateUserById(userId);
+
+          if (!user) {
+            return { success: false, message: `No user found with ID: ${userId}` };
+          }
+
+          console.log("TEST TEST TEST", user);
+
+          return { success: true, message: `Found user: ${user.firstName} ${user.lastName}` };
+        } catch (dbError) {
+          console.error("Database error:", dbError);
+          return { success: false, message: `Database error: ${dbError.message}` };
+        }
+
+      }
+
       default:
-        return { success: false, error: "Unknown command" };
+        return { success: false, message: "Unknown command" };
     }
   } catch (error) {
     console.error(`Error running command ${commandName}:`, error.message);
-    return { success: false, error: `Failed to execute command: ${error.message}` };
+    return { success: false, message: `Failed to execute command: ${error.message}` };
   }
 }

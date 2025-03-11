@@ -9,7 +9,7 @@ export function cn(...inputs) {
 export const supportEmailAddress = 'fr.josh@lolekproductions.org';
 
 // lib/utils.js
-import { toast } from "@/hooks/use-toast";
+import {toast, useToast} from "@/hooks/use-toast";
 import {NextResponse} from "next/server";
 
 /**
@@ -139,4 +139,49 @@ export function linkifyText(text) {
     }
     return part;
   });
+}
+
+export const useApiToast = () => {
+  const { toast } = useToast();
+
+  const showResponseToast = (response) => {
+    toast({
+      variant: response.success ? "default" : "destructive",
+      title: response.success ? "Success" : "Error",
+      description: response.message
+    });
+  };
+
+  const showErrorToast = (message = "An unexpected error occurred") => {
+    // Handle different error types (string, Error object, etc.)
+    const errorMessage = error instanceof Error
+      ? error.message
+      : (typeof error === 'string' ? error : "An unexpected error occurred");
+
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: errorMessage
+    });
+  };
+
+  return { showResponseToast, showErrorToast };
+};
+
+/**
+ * Truncates a string if it exceeds the specified maximum length
+ * @param {string} text - The text to truncate
+ * @param {number} maxLength - Maximum allowed length before truncation
+ * @param {string} suffix - String to append after truncation (default: "...")
+ * @return {string} The truncated string or original if shorter than maxLength
+ */
+export function truncateText(text, maxLength = 50, suffix = "...") {
+  // Handle empty, null or undefined text
+  if (!text) return "";
+
+  // If text is shorter than or equal to maxLength, return it as is
+  if (text.length <= maxLength) return text;
+
+  // Otherwise truncate and add suffix
+  return `${text.substring(0, maxLength)}${suffix}`;
 }

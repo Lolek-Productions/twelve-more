@@ -103,6 +103,36 @@ export async function getUserById(userId) {
   }
 }
 
+export async function getPrivateUserById(userId) {
+  try {
+    await connect();
+
+    const user = await User.findById(userId)
+      .lean();
+
+    return {
+      success: true,
+      user: {
+        id: user._id?.toString() || "",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        clerkId: user.clerkId,
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching user from MongoDB:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    return { success: false, message: error.message };
+  }
+}
+
 export const getUserByClerkId = async (clerkId) => {
   try {
     await connect();

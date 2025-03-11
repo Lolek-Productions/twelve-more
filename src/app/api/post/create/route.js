@@ -3,7 +3,8 @@ import User from '@/lib/models/user.model.js';
 import Community from '@/lib/models/community.model.js';
 import { connect } from '@/lib/mongodb/mongoose.js';
 import { currentUser } from '@clerk/nextjs/server';
-import twilioService from '@/lib/services/twilioService.js'; // Import your Twilio service
+import twilioService from '@/lib/services/twilioService.js';
+import {truncateText} from "@/lib/utils.js"; // Import your Twilio service
 
 export const POST = async (req) => {
   const user = await currentUser();
@@ -65,13 +66,7 @@ export const POST = async (req) => {
           return new Response(JSON.stringify(newPost), { status: 200 });
         }
 
-        // Truncate the post text if it exists
-        const maxTextLength = 50; // Adjust this number based on desired preview length
-        const truncatedText = data.text
-          ? data.text.length > maxTextLength
-            ? `${data.text.substring(0, maxTextLength)}...`
-            : data.text
-          : '';
+        const truncatedText = truncateText(data.text, 50);
 
         const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
         const messageBody = `New post: ${community.name}: "${truncatedText}" Check it out: ${communityLink}`;

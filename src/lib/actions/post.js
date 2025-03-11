@@ -3,7 +3,9 @@
 import { connect } from "@/lib/mongodb/mongoose";
 import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';
-import twilioService from "@/lib/services/twilioService.js";  //Keep even though WebStorm doesn't think it is being used!!!
+import twilioService from "@/lib/services/twilioService.js";
+import {getPrivateUserById} from "@/lib/actions/user.js";
+import {truncateText} from "@/lib/utils.js";  //Keep even though WebStorm doesn't think it is being used!!!
 
 export async function getPostsForHomeFeed(limit = 10, user) {
   try {
@@ -548,7 +550,7 @@ export async function getPostsByUserId(userId, limit) {
 }
 
 export async function notifyOnNewComment(post, commentData) {
-  console.error('post', post, 'commentData', commentData);
+  // console.error('post', post, 'commentData', commentData);
 
   // Make sure post and comment exist
   if (!post || !commentData) {
@@ -557,12 +559,14 @@ export async function notifyOnNewComment(post, commentData) {
   }
 
   try {
-    // Get the phone number of the person who created the post
-    const postOwner = post.user;
-    const phoneNumber = postOwner?.phoneNumber;
+    const postOwner = await getPrivateUserById(post.user.id);
+
+    if (!postOwner) {
+      return { success: false, message: `No post owner found.` };
+    }
 
     // If no phone number found, exit early
-    if (!phoneNumber) {
+    if (!postOwner.phoneNumber) {
       console.log('No phone number available for notification');
       return;
     }
@@ -575,19 +579,13 @@ export async function notifyOnNewComment(post, commentData) {
 
     const commenterName = `${commentData.user.firstName || ''} ${commentData.user.lastName || ''}`.trim();
 
-    // Truncate the comment text if it's too long
-    const maxCommentLength = 50;
-    const truncatedComment = commentData.comment
-      ? commentData.comment.length > maxCommentLength
-        ? `${commentData.comment.substring(0, maxCommentLength)}...`
-        : commentData.comment
-      : '';
+    const truncatedComment = truncateText(commentData.comment, 50);
 
     // Create the message text
     const messageBody = `${commenterName} has commented on your post: "${truncatedComment}"  Check out the post here: https://twelvemore.social/posts/${post.id}`;
 
     // Send the SMS
-    const batchResult = await twilioService.sendSMS(phoneNumber, messageBody);
+    const batchResult = await twilioService.sendSMS(postOwner.phoneNumber, messageBody);
     console.log('Notification sent successfully', batchResult);
     return batchResult;
   } catch (error) {

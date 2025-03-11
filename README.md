@@ -25,3 +25,7 @@ git log --since="7 days ago" --pretty=tformat: --numstat | awk '{ add += $1; rem
 # Starter Video:
 https://www.youtube.com/watch?v=gsysxSuTohA
 
+# Throwing an error:
+throw new Error("This is a test error message");
+
+

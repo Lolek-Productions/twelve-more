@@ -11,14 +11,14 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useToast } from "@/hooks/use-toast";
+import { useApiToast } from "@/lib/utils";
 import { runCommand } from "@/lib/actions/command";
+import {error} from "next/dist/build/output/log.js";
 
 function CommandsPage() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-
-  const { toast } = useToast();
+  const { showResponseToast, showErrorToast } = useApiToast();
 
   const commands = [
     { id: "1", name: "Log Hello" },
@@ -26,6 +26,7 @@ function CommandsPage() {
     { id: "3", name: "Delete Josh in Clerk" },
     { id: "4", name: "Send Test SMS" },
     { id: "5", name: "Send Test Batch SMS" },
+    { id: "6", name: "TEST" },
   ];
 
   const columns = [
@@ -51,24 +52,9 @@ function CommandsPage() {
         const handleRunCommand = async () => {
           try {
             const response = await runCommand(command.name);
-            if (response.success) {
-              toast({
-                title: "Success",
-                description: response.message,
-              });
-            } else {
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: response.error,
-              });
-            }
+            showResponseToast(response);
           } catch (error) {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to run command",
-            });
+            showErrorToast(error);
           }
         };
 
