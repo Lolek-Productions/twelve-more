@@ -74,9 +74,10 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) =
 };
 
 // Send SMS invitation
-const sendCommunityInvitation = async (firstName, phoneNumber, communityId) => {
+const sendCommunityInvitation = async (firstName, phoneNumber, communityId, appUser) => {
   const communityLink = `https://twelvemore.social/communities/${communityId}`;
-  const messageBody = `Hi ${firstName}, you've been invited to join a community! Click here to check it out: ${communityLink}`;
+
+  const messageBody = `Hi ${firstName}! ${appUser.firstName} ${appUser.lastName} invited to join a community at TwelveMore! Click here to check it out: ${communityLink}`;
 
   const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);
   if (!smsResult.success) {
@@ -90,7 +91,7 @@ const sendCommunityInvitation = async (firstName, phoneNumber, communityId) => {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { firstName, lastName, phoneNumber, communityId } = body;
+    const { firstName, lastName, phoneNumber, communityId, appUser } = body;
 
     // Validate request body
     const validation = validateRequestBody(body);
@@ -126,7 +127,7 @@ export async function POST(req) {
     ]);
 
     // 4. Send SMS invitation
-    await sendCommunityInvitation(firstName, phoneNumber, communityId);
+    await sendCommunityInvitation(firstName, phoneNumber, communityId, appUser);
 
     return NextResponse.json({ success: true, userId: clerkUser.id });
   } catch (error) {

@@ -17,6 +17,7 @@ import RightSidebar from "@/components/RightSidebar.jsx";
 import MemberList from "@/components/MemberList.jsx";
 import {getCommunityMembers} from "@/lib/actions/user.js";
 import {getPostById} from "@/lib/actions/post.js";
+import {useAppUser} from "@/hooks/useAppUser.js";
 
 // Updated schema to include firstName and lastName
 const profileFormSchema = z.object({
@@ -52,6 +53,7 @@ export default function Invite() {
   const [members, setMembers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {appUser} = useAppUser();
 
   useEffect(() => {
     if (communityId) {
@@ -93,6 +95,7 @@ export default function Invite() {
           lastName: data.lastName,
           phoneNumber: data.phoneNumber,
           communityId: communityId,
+          appUser: appUser,
         }),
       });
 
