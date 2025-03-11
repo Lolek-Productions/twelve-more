@@ -9,6 +9,15 @@ const organizationSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    welcomingCommunity: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Community',
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );

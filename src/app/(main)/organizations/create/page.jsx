@@ -22,67 +22,88 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createCommunity } from "@/lib/actions/community.js";
+import { createOrganization } from "@/lib/actions/organization.js";
 import { useAppUser } from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
 import { useState } from "react";
+import {setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
 
-const communityFormSchema = z.object({
+const organizationFormSchema = z.object({
   name: z
     .string()
     .min(3, {
-      message: "Community name must be at least 3 characters.",
+      message: "Organization name must be at least 3 characters.",
     })
     .max(50, {
-      message: "Community name must not be longer than 50 characters.",
+      message: "Organization name must not be longer than 50 characters.",
     }),
-  purpose: z
+  description: z
     .string()
     .min(10, {
-      message: "Purpose must be at least 10 characters.",
+      message: "Description must be at least 10 characters.",
     })
     .max(500, {
-      message: "Purpose must not be longer than 500 characters.",
-    }),
-  visibility: z
-    .string({
-      required_error: "Please select a visibility option.",
-    })
-    .refine((val) => ["public", "private"].includes(val), {
-      message: "Visibility must be 'public' or 'private'.",
+      message: "Description must not be longer than 500 characters.",
     }),
 });
 
 const defaultValues = {
-  name: "",
-  purpose: "",
-  visibility: "public", //public or private
+  name: "TEST name",
+  description: "joJosh lMcjkCartylkjtest de",
 };
 
-export default function NewCommunityPage() {
+export default function NewOrganizationPage() {
   const { appUser } = useAppUser();
   const router = useRouter();
   const { showResponseToast, showErrorToast } = useApiToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(communityFormSchema),
+    resolver: zodResolver(organizationFormSchema),
     defaultValues,
     mode: "onChange",
   });
 
   const onSubmit = async (data) => {
+    // console.log("Organization data submitted:", data);
+
     try {
       setIsSubmitting(true);
-      // console.log("Community data submitted:", data);
-
-      const response = await createCommunity(data, appUser);
+      const response = await createOrganization(data, appUser);
 
       showResponseToast(response);
 
       if (response.success) {
-        router.push('/communities');
+        // Get the new organization ID from the response
+        const newOrgId = response.data?.id;
+
+        if (newOrgId) {
+          // Ask for confirmation before switching to the new organization
+          const confirmed = window.confirm(
+            "Your organization has been created successfully. Would you like to switch to this organization now?"
+          );
+
+          if (confirmed) {
+            // User agreed to switch - update the selected organization
+            const updateResponse = await setSelectedOrganizationOnUser(newOrgId, appUser.id);
+
+            if (updateResponse.success) {
+              // Redirect to communities page within the new organization context
+              router.push('/home');
+              location.reload();
+            } else {
+              showResponseToast(updateResponse);
+              // Just refresh to update the sidebar
+              // router.refresh();
+              location.reload();
+            }
+          } else {
+            router.refresh();
+          }
+        } else {
+          showErrorToast(response.message);
+        }
       }
     } catch (error) {
       showErrorToast(error);
@@ -95,23 +116,23 @@ export default function NewCommunityPage() {
     <div className="flex w-full">
       <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
         <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-          <h2 className='text-lg sm:text-xl font-bold'>Create a New Community</h2>
+          <h2 className='text-lg sm:text-xl font-bold'>Create a New Organization</h2>
         </div>
         <div className="p-7">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Community Name */}
+              {/* Organization Name */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Community Name</FormLabel>
+                    <FormLabel>Organization Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="My Awesome Community" {...field} />
+                      <Input placeholder="My Awesome Organization" {...field} />
                     </FormControl>
                     <FormDescription>
-                      This is the name of your community. It should be unique and
+                      This is the name of your organization. It should be unique and
                       descriptive.
                     </FormDescription>
                     <FormMessage/>
@@ -119,61 +140,34 @@ export default function NewCommunityPage() {
                 )}
               />
 
-              {/* Community Purpose */}
+              {/* Organization Description */}
               <FormField
                 control={form.control}
-                name="purpose"
+                name="description"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Purpose</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Tell us about the purpose of your community..."
+                        placeholder="Tell us about the description of your organization..."
                         className="resize-none"
                         rows="6"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Provide a brief description of the purpose of your community.
+                      Provide a brief description of the description of your organization.
                     </FormDescription>
                     <FormMessage/>
                   </FormItem>
                 )}
               />
 
-              {/* Community Visibility */}
-              <FormField
-                control={form.control}
-                name="visibility"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>Visibility</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select visibility"/>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Choose who can see and join your community:{" "}
-                      <span className="block">Public: Anyone can view and join.</span>
-                      <span className="block">Private: Only invited members can view and join.</span>
-                    </FormDescription>
-                    <FormMessage/>
-                  </FormItem>
-                )}
-              />
               <Button
                 type="submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Creating..." : "Create Community"}
+                {isSubmitting ? "Creating..." : "Create Organization"}
               </Button>
             </form>
           </Form>

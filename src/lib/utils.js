@@ -152,7 +152,7 @@ export const useApiToast = () => {
     });
   };
 
-  const showErrorToast = (message = "An unexpected error occurred") => {
+  const showErrorToast = (error = "An unexpected error occurred") => {
     // Handle different error types (string, Error object, etc.)
     const errorMessage = error instanceof Error
       ? error.message

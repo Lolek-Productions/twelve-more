@@ -3,21 +3,40 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine } from "react-icons/hi2";
-import {HiHome, HiOutlinePlus, HiUserGroup} from 'react-icons/hi';
+import {HiHome, HiOutlinePlus, HiUserGroup, HiBriefcase, HiChevronDown, HiChevronRight} from 'react-icons/hi';
 import MiniProfile from './MiniProfile';
-import { usePathname } from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
+import {useState} from "react";
+import {setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
+import { useApiToast } from "@/lib/utils"; // Import your utility
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
   const {appUser, isLoaded} = useAppUser();
+  const [organizationsOpen, setOrganizationsOpen] = useState(false);
+  const { showResponseToast, showErrorToast } = useApiToast();
+  const router = useRouter();
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
     if (onLinkClick) onLinkClick(); // Only call if provided (mobile case)
+  };
+
+  const handleOrganizationClick = async (organizationId) => {
+    try {
+      const response = await setSelectedOrganizationOnUser(organizationId, appUser.id);
+      showResponseToast(response);
+      if (response.success) {
+        router.push('/home');
+        location.reload();
+      }
+    } catch (error) {
+      showErrorToast(error);
+    }
   };
 
   const sidebarNavItems = [
@@ -37,11 +56,6 @@ export default function LeftSidebar({ onLinkClick }) {
   const visibleNavItems = sidebarNavItems.filter(item =>
     item.isVisible === undefined || item.isVisible === true);
 
-  // console.log(visibleNavItems.length)
-  // console.log(appUser?.id, DEV_IDS,);
-  // const ans = DEV_IDS.includes(appUser?.id);
-  // console.log('calc', ans)
-
   if (isLoaded || !appUser) {
     return <div className="p-3">Loading...</div>;
   }
@@ -54,12 +68,29 @@ export default function LeftSidebar({ onLinkClick }) {
 
   // Filter communities to only include those with an id, then decide on fallback
   const validCommunities = appUser?.communities?.filter((community) =>
-    community.id && typeof community.id === 'string' && community.id.trim() !== ''
+    community.id && typeof community.id === 'string' && community.id.trim() !== '' && community.organizationId === appUser.selectedOrganization.id
   ) || [];
+
+
+
+  // console.log(validCommunities);
+
+
 
   const communitiesToRender = validCommunities.length > 0
     ? validCommunities
     : [fallbackLink];
+
+  // Sample organizations data - replace with actual data from appUser
+  const organizations = appUser?.organizations || [];
+  const fallbackOrg = { id: 'create-org', name: 'Create an Organization', href: '/organizations/create' };
+
+  const orgsToRender = organizations.length > 0 ? organizations : [fallbackOrg];
+
+  // Check if current path includes an organization ID
+  const currentOrgId = pathname.includes('/organizations/')
+    ? pathname.split('/organizations/')[1]?.split('/')[0]
+    : null;
 
   return (
     <div className="flex h-full flex-col p-3">
@@ -90,6 +121,49 @@ export default function LeftSidebar({ onLinkClick }) {
               <span className="font-bold">{item.title}</span>
             </Link>
           ))}
+
+          {/* Organizations dropdown */}
+          <div className="mt-2">
+            <button
+              onClick={() => setOrganizationsOpen(!organizationsOpen)}
+              className="flex items-center p-2 rounded-md w-full hover:bg-muted/50 transition-all duration-200"
+            >
+              <HiBriefcase className="w-6 h-6 mr-2" />
+              <span className="font-bold">Organizations</span>
+              {organizationsOpen ? (
+                <HiChevronDown className="ml-auto w-5 h-5" />
+              ) : (
+                <HiChevronRight className="ml-auto w-5 h-5" />
+              )}
+            </button>
+
+            {organizationsOpen && (
+              <div className="ml-8 mt-1 space-y-1">
+                {orgsToRender.map((org) => (
+                  <Button
+                    variant={'ghost'}
+                    key={org.id}
+                    className={cn(
+                      "flex items-center p-1.5 rounded-md transition-all duration-200 gap-2",
+                      currentOrgId === org.id ? "bg-blue-100 text-blue-700 font-medium" : "hover:bg-gray-100"
+                    )}
+                    onClick={() => handleOrganizationClick(org.id)}
+                  >
+                    <span className="text-sm">{org.name}</span>
+                  </Button>
+                ))}
+
+                <Link
+                  href="/organizations/create"
+                  className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
+                  onClick={handleLinkClick}
+                >
+                  <HiOutlinePlus className="w-3 h-3 mr-1" />
+                  <span className="text-xs">New Organization</span>
+                </Link>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="p-3 bg-gray-100 rounded-md mt-2">

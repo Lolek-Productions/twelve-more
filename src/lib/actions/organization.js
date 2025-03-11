@@ -3,15 +3,49 @@
 import Organization from "@/lib/models/organization.model"; // Define this model
 import { connect } from "@/lib/mongodb/mongoose";
 import Community from "@/lib/models/community.model";
+import User from '../models/user.model';
+import {addCommunityToUser, addOrganizationToUser} from "@/lib/actions/user.js";
 
-export async function createOrganization({ name }) {
+export async function createOrganization(formData, appUser) {
   try {
-    await connect(); // Ensure this is idempotent or guarded
-    const data = await Organization.create({ name }); // Creates a new document
+    await connect();
+
+    const data = await Organization.create({
+      name: formData.name,
+      description: formData.description,
+      createdBy: appUser.id,
+    });
 
     const organization = {
       id: data._id?.toString() || "",
       name: data.name,
+      description: data.description,
+    }
+
+    const orgAddResult = await addOrganizationToUser(organization.id, appUser.id);
+    if (!orgAddResult.success) {
+      throw new Error(`Failed to associate organization with user: ${orgAddResult.error}`);
+    }
+
+    const community = await Community.create({
+      name: `Welcome to ${data.name}!`,
+      purpose: `To warmly invite new members to feel a greater sense of belonging at ${data.name}`,
+      visibility: "public",
+      createdBy: appUser.id,
+      organization: organization.id,
+    });
+
+    // Add the community to the organization as the welcomingCommunity
+    await Organization.findByIdAndUpdate(
+      organization.id,
+      { welcomingCommunity: community._id }
+    );
+
+    // Add community to User (consider a specific function to add as admin)
+    const comAddResult = await addCommunityToUser(community._id.toString(), appUser.id);
+    if (!comAddResult.success) {
+      console.warn(`Failed to associate community with user: ${comAddResult.error}`);
+      // We don't throw here since the organization was already created
     }
 
     return { success: true, message: "Organization created", data: organization };
@@ -23,12 +57,14 @@ export async function createOrganization({ name }) {
 export async function deleteOrganization(id) {
   console.log('organization Id:', id)
 
+  //Lots of things to do here.  See the above: CreateOrganization and undo all of that.
+
   try {
     await connect();
     await Organization.findByIdAndDelete(id);
     return { success: true };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, message: error.message };
   }
 }
 

@@ -55,7 +55,13 @@ export async function getUserById(userId) {
 
     const user = await User.findById(userId)
       .populate('organizations.organization')
-      .populate('communities.community')
+      .populate({
+        path: 'communities.community',
+        populate: {
+          path: 'organization',
+          select: '_id name'
+        }
+      })
       .populate('selectedOrganization')
       .lean();
 
@@ -89,6 +95,8 @@ export async function getUserById(userId) {
             name: com.community?.name || "Empty Community", // Populated name
             role: com.role || "",
             membershipId: com._id.toString(),
+            organizationId: com.community?.organization?._id.toString() || null,
+            organizationName: com.community?.organization?.name || null,
           }))
           : [],
       }

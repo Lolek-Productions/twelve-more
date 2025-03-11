@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import Community from '../models/community.model';
 import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
-import { clerkClient, currentUser } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export async function createCommunity(formData, user) {
   if (!user) return { error: "User is required." };

@@ -32,7 +32,6 @@ export const PUT = async (req) => {
       { new: true }
     );
 
-    //Notify the owner of the post when a comment has been made
     await notifyOnNewComment(updatedPost, data);
 
     return new Response(JSON.stringify(updatedPost), { status: 200 });

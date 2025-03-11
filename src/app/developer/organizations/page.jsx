@@ -86,7 +86,7 @@ export default function AdminOrganizationsPage() {
           <h3 className="text-lg font-medium">Organizations</h3>
           <p className="text-sm text-muted-foreground">Globally manage the TwelveMore organizations.</p>
         </div>
-        <Button onClick={() => setModalOpen(true)}>New Organization</Button>
+        {/*<Button onClick={() => setModalOpen(true)}>New Organization</Button>*/}
       </div>
       <div className="mt-3">
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
