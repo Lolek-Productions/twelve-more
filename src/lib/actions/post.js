@@ -588,7 +588,7 @@ export async function notifyOnNewComment(post, commentData) {
 
     const commenterName = `${commenter.firstName || ''} ${commenter.lastName || ''}`.trim();
 
-    const truncatedComment = truncateText(commentData.comment, 50);
+    const truncatedComment = truncateText(commentData.comment, 150);
 
     const messageBody = `${commenterName} has commented on your post: "${truncatedComment}".    Check out the post here: https://twelvemore.social/posts/${post.id}`;
 

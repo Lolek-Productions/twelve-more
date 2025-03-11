@@ -66,7 +66,7 @@ export const POST = async (req) => {
           return new Response(JSON.stringify(newPost), { status: 200 });
         }
 
-        const truncatedText = truncateText(data.text, 50);
+        const truncatedText = truncateText(data.text, 150);
 
         const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
         const messageBody = `New post: ${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
