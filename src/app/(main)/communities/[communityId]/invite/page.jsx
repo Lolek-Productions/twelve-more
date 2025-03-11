@@ -100,7 +100,7 @@ export default function Invite() {
       });
 
       const text = await res.text();
-      console.log('Raw response:', text); // Debug
+      // console.log('Raw response:', text); // Debug
 
       const result = JSON.parse(text);
       if (!res.ok) {
