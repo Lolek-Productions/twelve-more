@@ -55,9 +55,9 @@ const communityFormSchema = z.object({
 
 // Default values for the form
 const defaultValues = {
-  name: "St. LEO Amazing staff",
-  purpose: "This the group for the staff to communicate",
-  visibility: "private",
+  name: "",
+  purpose: "",
+  visibility: "public", //public or private
 };
 
 export default function NewCommunityPage() {
