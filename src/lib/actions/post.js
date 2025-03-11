@@ -558,20 +558,13 @@ export async function notifyOnNewComment(post, commentData) {
     return;
   }
 
-  console.error('post.user.id', post.user);
-
   try {
-    const postOwner = await getPrivateUserById(post.user.id);
+    const response = await getPrivateUserById(post.user._id.toString());
+    const postOwner = response.user;
 
     if (!postOwner) {
       console.error('no post owner found.');
       return { success: false, message: `No post owner found.` };
-    }
-
-    // If no phone number found, exit early
-    if (!postOwner.phoneNumber) {
-      console.log('No phone number available for notification');
-      return;
     }
 
     // Check if the commenter is the same as the post owner - exit if they're the same person
@@ -580,14 +573,25 @@ export async function notifyOnNewComment(post, commentData) {
       return;
     }
 
-    const commenterName = `${commentData.user.firstName || ''} ${commentData.user.lastName || ''}`.trim();
+    // If no phone number found, exit early
+    if (!postOwner.phoneNumber) {
+      console.error(`No phone number available for notification with ownerId ${postOwner.id}`);
+      return;
+    }
+
+    // console.log(commentData.user)
+    // throw new Error()
+
+
+    const commenterResponse = await getPrivateUserById(commentData.user);
+    const commenter = commenterResponse.user;
+
+    const commenterName = `${commenter.firstName || ''} ${commenter.lastName || ''}`.trim();
 
     const truncatedComment = truncateText(commentData.comment, 50);
 
-    // Create the message text
-    const messageBody = `${commenterName} has commented on your post: "${truncatedComment}"  Check out the post here: https://twelvemore.social/posts/${post.id}`;
+    const messageBody = `${commenterName} has commented on your post: "${truncatedComment}".    Check out the post here: https://twelvemore.social/posts/${post.id}`;
 
-    // Send the SMS
     const batchResult = await twilioService.sendSMS(postOwner.phoneNumber, messageBody);
     console.log('Notification sent successfully', batchResult);
     return batchResult;
