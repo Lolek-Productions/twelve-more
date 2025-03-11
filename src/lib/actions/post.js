@@ -558,10 +558,13 @@ export async function notifyOnNewComment(post, commentData) {
     return;
   }
 
+  console.error('post.user.id', post.user);
+
   try {
     const postOwner = await getPrivateUserById(post.user.id);
 
     if (!postOwner) {
+      console.error('no post owner found.');
       return { success: false, message: `No post owner found.` };
     }
 
