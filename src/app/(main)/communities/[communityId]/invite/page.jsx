@@ -51,6 +51,7 @@ export default function Invite() {
   const [community, setCommunity] = useState({});
   const [members, setMembers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (communityId) {
@@ -119,7 +120,14 @@ export default function Invite() {
   };
 
   const onSubmit = (data) => {
-    sendInvite(data);
+    setIsSubmitting(true);
+    try {
+      sendInvite(data);
+    } catch (error) {
+      console.error('Error in submission:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -232,8 +240,8 @@ export default function Invite() {
               />
 
               <div>
-                <Button className="mt-5" type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? "Sending..." : "Invite"}
+                <Button className="mt-5" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Sending..." : "Invite"}
                 </Button>
               </div>
             </form>
