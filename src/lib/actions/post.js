@@ -568,7 +568,7 @@ export async function notifyOnNewComment(post, commentData) {
     }
 
     // Check if the commenter is the same as the post owner - exit if they're the same person
-    if (commentData.user.id === postOwner.id) {
+    if (commentData.user === postOwner.id) {
       console.log('Post owner commenting on their own post - skipping notification');
       return;
     }
