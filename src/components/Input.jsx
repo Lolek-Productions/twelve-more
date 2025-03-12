@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { HiOutlinePhotograph, HiOutlineMicrophone, HiX, HiOutlineStop } from 'react-icons/hi';
+import { HiOutlinePhotograph } from 'react-icons/hi';
 import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
@@ -12,13 +12,13 @@ export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const selectedOrganizationId = appUser?.selectedOrganization?.id;
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission status
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUplaoding, setImageFileUploading] = useState(false);
   const [text, setText] = useState('');
-  const [postLoading, setPostLoading] = useState(false);
   const imagePickRef = useRef(null);
 
   //Audio
@@ -141,10 +141,8 @@ export default function Input({communityId}) {
   }
 
   const handleSubmit = async () => {
-    // console.log(selectedOrganizationId, 'selectedOrganizationId');
-    // return;
+    setIsSubmitting(true);
 
-    setPostLoading(true);
     const response = await fetch('/api/post/create', {
       method: 'POST',
       headers: {
@@ -160,7 +158,7 @@ export default function Input({communityId}) {
         organizationId: selectedOrganizationId,
       }),
     });
-    setPostLoading(false);
+    setIsSubmitting(false);
     setText('');
     setSelectedFile(null);
     setImageFileUrl(null);
@@ -226,8 +224,10 @@ export default function Input({communityId}) {
           />
           <Button
             onClick={handleSubmit}
-            disabled={text.trim() === '' || postLoading || imageFileUplaoding}
-          >Post</Button>
+            disabled={text.trim() === '' || imageFileUplaoding || isSubmitting}
+          >
+            {isSubmitting ? 'Posting...' : 'Post'}
+          </Button>
         </div>
       </div>
     </div>
