@@ -71,12 +71,6 @@ export default function LeftSidebar({ onLinkClick }) {
     community.id && typeof community.id === 'string' && community.id.trim() !== '' && community.organizationId === appUser.selectedOrganization.id
   ) || [];
 
-
-
-  // console.log(validCommunities);
-
-
-
   const communitiesToRender = validCommunities.length > 0
     ? validCommunities
     : [fallbackLink];
@@ -93,8 +87,9 @@ export default function LeftSidebar({ onLinkClick }) {
     : null;
 
   return (
-    <div className="flex h-full flex-col p-3">
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col h-full">
+      {/* Fixed header */}
+      <div className="p-3 pb-0">
         <Link href="/home" className="flex items-center gap-2 mb-4" onClick={handleLinkClick}>
           <Image
             src="/logo.png"
@@ -105,93 +100,99 @@ export default function LeftSidebar({ onLinkClick }) {
           />
           <div className="font-semibold text-xl">TwelveMore</div>
         </Link>
+      </div>
 
-        <nav className="space-y-2">
-          {visibleNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                pathname === item.href ? 'bg-muted' : 'hover:bg-muted/50',
-                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
-              )}
-              onClick={handleLinkClick}
-            >
-              {item.icon}
-              <span className="font-bold">{item.title}</span>
-            </Link>
-          ))}
-
-          {/* Organizations dropdown */}
-          <div className="mt-2">
-            <button
-              onClick={() => setOrganizationsOpen(!organizationsOpen)}
-              className="flex items-center p-2 rounded-md w-full hover:bg-muted/50 transition-all duration-200"
-            >
-              <HiBriefcase className="w-6 h-6 mr-2" />
-              <span className="font-bold">Organizations</span>
-              {organizationsOpen ? (
-                <HiChevronDown className="ml-auto w-5 h-5" />
-              ) : (
-                <HiChevronRight className="ml-auto w-5 h-5" />
-              )}
-            </button>
-
-            {organizationsOpen && (
-              <div className="ml-8 mt-1 space-y-1">
-                {orgsToRender.map((org) => (
-                  <Button
-                    variant={'ghost'}
-                    key={org.id}
-                    className={cn(
-                      "flex items-center p-1.5 rounded-md transition-all duration-200 gap-2",
-                      currentOrgId === org.id ? "bg-blue-100 text-blue-700 font-medium" : "hover:bg-gray-100"
-                    )}
-                    onClick={() => handleOrganizationClick(org.id)}
-                  >
-                    <span className="text-sm">{org.name}</span>
-                  </Button>
-                ))}
-
-                <Link
-                  href="/organizations/create"
-                  className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
-                  onClick={handleLinkClick}
-                >
-                  <HiOutlinePlus className="w-3 h-3 mr-1" />
-                  <span className="text-xs">New Organization</span>
-                </Link>
-              </div>
-            )}
-          </div>
-        </nav>
-
-        <div className="p-3 bg-gray-100 rounded-md mt-2">
-          <div className="flex items-center">
-            <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
-            <Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>
-              <HiOutlinePlus className='h-5 w-5'/>
-            </Link>
-          </div>
-          <div>
-            {communitiesToRender.map((community) => (
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto p-3 pt-0">
+        <div className="flex flex-col gap-3">
+          <nav className="space-y-2">
+            {visibleNavItems.map((item) => (
               <Link
-                key={community.id}
-                href={community.href || `/communities/${community.id}`}
-                className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  pathname === item.href ? 'bg-muted' : 'hover:bg-muted/50',
+                  'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+                )}
                 onClick={handleLinkClick}
               >
-                <span className="text-xl mr-2">·</span>
-                <span>{community.name}</span>
+                {item.icon}
+                <span className="font-bold">{item.title}</span>
               </Link>
             ))}
+
+            {/* Organizations dropdown */}
+            <div className="mt-2">
+              <button
+                onClick={() => setOrganizationsOpen(!organizationsOpen)}
+                className="flex items-center p-2 rounded-md w-full hover:bg-muted/50 transition-all duration-200"
+              >
+                <HiBriefcase className="w-6 h-6 mr-2" />
+                <span className="font-bold">Organizations</span>
+                {organizationsOpen ? (
+                  <HiChevronDown className="ml-auto w-5 h-5" />
+                ) : (
+                  <HiChevronRight className="ml-auto w-5 h-5" />
+                )}
+              </button>
+
+              {organizationsOpen && (
+                <div className="ml-8 mt-1 space-y-1">
+                  {orgsToRender.map((org) => (
+                    <Button
+                      variant={'ghost'}
+                      key={org.id}
+                      className={cn(
+                        "flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 w-full justify-start",
+                        appUser?.selectedOrganization?.id === org.id
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : "hover:bg-gray-100"
+                      )}
+                      onClick={() => handleOrganizationClick(org.id)}
+                    >
+                      <span className="text-sm">{org.name}</span>
+                    </Button>
+                  ))}
+
+                  <Link
+                    href="/organizations/create"
+                    className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
+                    onClick={handleLinkClick}
+                  >
+                    <HiOutlinePlus className="w-3 h-3 mr-1" />
+                    <span className="text-xs">New Organization</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </nav>
+
+          <div className="p-3 bg-gray-100 rounded-md mt-2">
+            <div className="flex items-center">
+              <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
+              <Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>
+                <HiOutlinePlus className='h-5 w-5'/>
+              </Link>
+            </div>
+            <div>
+              {communitiesToRender.map((community) => (
+                <Link
+                  key={community.id}
+                  href={community.href || `/communities/${community.id}`}
+                  className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
+                  onClick={handleLinkClick}
+                >
+                  <span className="text-xl mr-2">·</span>
+                  <span>{community.name}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/*<Button onClick={() => {console.log(appUser)}}>Console User</Button>*/}
-
-      <div className="mt-auto">
+      {/* Fixed footer */}
+      <div className="">
         <MiniProfile/>
       </div>
     </div>
