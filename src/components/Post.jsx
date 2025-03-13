@@ -41,12 +41,12 @@ export default function Post({ post, clickableText = true }) {
         </div>
         {clickableText ? (
           <Link href={`/posts/${post?.id}`} className="block">
-            <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden">
+            <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden whitespace-pre-line">
               {post?.text || 'No text available'}
             </p>
           </Link>
         ) : (
-          <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden">
+          <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden whitespace-pre-line">
             {linkifyText(post?.text) || 'No text available'}
           </p>
         )}
