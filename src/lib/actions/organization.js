@@ -41,6 +41,8 @@ export async function createOrganization(formData, appUser) {
       { welcomingCommunity: community._id }
     );
 
+    //TODO need to see about adding the organization as selectedOrganization
+
     // Add community to User (consider a specific function to add as admin)
     const comAddResult = await addCommunityToUser(community._id.toString(), appUser.id);
     if (!comAddResult.success) {
@@ -57,7 +59,7 @@ export async function createOrganization(formData, appUser) {
 export async function deleteOrganization(id) {
   console.log('organization Id:', id)
 
-  //Lots of things to do here.  See the above: CreateOrganization and undo all of that.
+  //TODO: Lots of things to do here.  See the above: CreateOrganization and undo all of that.
 
   try {
     await connect();
@@ -66,6 +68,8 @@ export async function deleteOrganization(id) {
   } catch (error) {
     return { success: false, message: error.message };
   }
+
+
 }
 
 export async function getOrganizations() {

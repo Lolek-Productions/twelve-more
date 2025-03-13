@@ -57,7 +57,6 @@ export default function HomeFeed() {
         )}
       </div>
       <div>
-
         {posts.length > 0 && !isLoading && hasMore && (
           <button
             onClick={() => setPostNum(postNum + 10)}

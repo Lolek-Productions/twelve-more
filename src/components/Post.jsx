@@ -15,28 +15,29 @@ export default function Post({ post, clickableText = true }) {
         />
       </Link>
       <div className="flex-1 overflow-hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1 whitespace-nowrap">
-            <h4 className="font-bold text-xs truncate max-w-32">
-              <Link href={`/users/${post?.user?.id}`} className="flex-shrink-0">
-                {post?.user?.firstName} {post?.user?.lastName}
-              </Link>
-            </h4>
-            <span className="text-xl text-gray-500">·</span>
-            {post?.community?.id && (
-              <div className={'hidden sm:flex items-center'}>
-                <h4 className="font-bold text-xs truncate max-w-32">
-                  <Link href={`/communities/${post?.community?.id}`} className="flex-shrink-0">
-                    {post?.community?.name}
-                  </Link>
-                </h4>
-                <span className="text-xl text-gray-500">·</span>
-              </div>
-            )}
-            <span className="text-xs text-gray-500 flex-1 truncate max-w-32">
-              {moment(post?.createdAt).fromNow()}
-            </span>
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1 whitespace-nowrap">
+              <h4 className="font-bold text-xs truncate max-w-32">
+                <Link href={`/users/${post?.user?.id}`} className="flex-shrink-0">
+                  {post?.user?.firstName} {post?.user?.lastName}
+                </Link>
+              </h4>
+              <span className="text-xl text-gray-500">·</span>
+              <span className="text-xs text-gray-500 flex-1 truncate max-w-32">
+                {moment(post?.createdAt).fromNow()}
+              </span>
+            </div>
           </div>
+          {post?.community?.id && (
+            <div className="flex items-center space-x-1">
+              <h4 className="font-bold text-xs whitespace-nowrap max-w-32">
+                <Link href={`/communities/${post?.community?.id}`} className="flex-shrink-0">
+                  {post?.community?.name}
+                </Link>
+              </h4>
+            </div>
+          )}
         </div>
         {clickableText ? (
           <Link href={`/posts/${post?.id}`} className="block">
@@ -51,7 +52,7 @@ export default function Post({ post, clickableText = true }) {
         )}
         {post?.image && (
           <Link href={`/posts/${post?.id}`}>
-            <img src={post?.image} className="rounded-2xl mr-2 max-w-full h-auto" alt="post image" />
+            <img src={post?.image} className="rounded-2xl mr-2 max-w-full h-auto" alt="post image"/>
           </Link>
         )}
         {/*{post?.audio && (*/}
@@ -59,7 +60,7 @@ export default function Post({ post, clickableText = true }) {
         {/*    <audio controls src={post?.audio} className="w-full" />*/}
         {/*  </div>*/}
         {/*)}*/}
-        <Icons post={post} id={post?.id} />
+        <Icons post={post} id={post?.id}/>
       </div>
     </div>
   );
