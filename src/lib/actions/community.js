@@ -98,6 +98,7 @@ export const getCommunitiesByOrganization = async function (organizationId, user
           visibility: "public"
         },
         {
+          organization: organizationId,
           _id: {$in: userCommunityIds}
         }
       ]
