@@ -13,6 +13,8 @@ export const POST = async (req) => {
     await connect();
     const data = await req.json();
 
+    //todo: look up the one who is posting and use the data from their mongodb record
+
     if (!user?.publicMetadata?.userMongoId) {
       console.error('⚠️ Warning: Missing userMongoId in publicMetadata');
     }
@@ -69,7 +71,7 @@ export const POST = async (req) => {
         const truncatedText = truncateText(data.text, 150);
 
         const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
-        const messageBody = `New post: ${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
+        const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
 
         // Send batch SMS using Twilio Notify
         const batchResult = await twilioService.sendBatchSMS(otherMembersPhoneNumbers, messageBody);
