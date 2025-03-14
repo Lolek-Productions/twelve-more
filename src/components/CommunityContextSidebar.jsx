@@ -39,8 +39,8 @@ export default function CommunityContextSidebarComponent({ community, communityI
   if (loading) {
     return (
       <div className="flex flex-col h-full">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-medium">Community Members</h2>
+        <div className="p-4">
+          <h2 className="text-lg font-medium">Loading Community Members</h2>
         </div>
       </div>
     );
@@ -49,27 +49,16 @@ export default function CommunityContextSidebarComponent({ community, communityI
   if (error) {
     return (
       <div className="flex flex-col h-full">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-medium">Community Members</h2>
-        </div>
-        <div className="p-4 flex-1">
-          <p className="text-red-500">Error loading members: {error}</p>
-          {onClose && (
-            <button
-              className="mt-4 text-primary hover:underline"
-              onClick={onClose}
-            >
-              Close
-            </button>
-          )}
+        <div className="p-4">
+          <h2 className="text-lg font-medium">Error</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
+    <div className="flex flex-col h-full p-3">
+      <div className="p-4">
         <h2 className="text-lg font-medium">Community Members</h2>
       </div>
       <div className="flex-1 overflow-auto">
