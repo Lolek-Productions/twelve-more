@@ -15,7 +15,7 @@ export default async function CommunitiesPage() {
         <CommunitiesList/>
       </div>
 
-      <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
+      <div className="hidden lg:flex lg:flex-col p-3 h-screen w-[24rem] flex-shrink-0">
         <RightSidebar/>
       </div>
     </div>

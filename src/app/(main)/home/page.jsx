@@ -1,13 +1,30 @@
+"use client";
+
 import HomeFeed from '@/components/HomeFeed';
 import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
 import Input from '@/components/Input';
-import RightSidebar from "@/components/RightSidebar.jsx";
-import RecentMembersToOrganization from "@/components/RecentMembersToOrganization";
+import { useEffect, useCallback } from "react";
+import { useContextContent } from "@/components/ContextProvider";
+import HomeContextSidebar from "@/components/HomeContextSidebar";
 
-//Build currently fails without this:
-export const dynamic = 'force-dynamic'; // ✅ Ensures Next.js treats this as a dynamic page
+export default function HomePage() {
+  const { setContextContent, clearContextContent } = useContextContent();
 
-export default async function Home() {
+  // Create a stable onClose callback that won't change on re-renders
+  const handleClose = useCallback(() => {
+    clearContextContent();
+  }, [clearContextContent]);
+
+  useEffect(() => {
+    // Create the context component once when the component mounts
+    const ContextComponent = <HomeContextSidebar onClose={handleClose} />;
+    setContextContent(ContextComponent);
+
+    // Clean up when the component unmounts
+    return () => {
+      clearContextContent();
+    };
+  }, [setContextContent, handleClose]);
 
   return (
     <div className="flex w-full">
@@ -17,11 +34,6 @@ export default async function Home() {
         </div>
         <Input/>
         <HomeFeed/>
-      </div>
-
-      <div className="hidden lg:flex lg:flex-col p-3 h-screen border-l w-[24rem] flex-shrink-0">
-        <RightSidebar/>
-        <RecentMembersToOrganization />
       </div>
     </div>
   );
