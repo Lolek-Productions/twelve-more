@@ -12,14 +12,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Info, EllipsisVertical } from "lucide-react";
+import { Menu, EllipsisVertical } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import SessionWrapper from "@/components/SessionWrapper";
 import { ContextProvider, useContextContent } from "@/components/ContextProvider";
 
 // Inner layout component that has access to the context
 function InnerLayout({ children }) {
-  const { contentComponent } = useContextContent();
+  const { contentComponent, clearContextContent } = useContextContent();
   const [isLeftSheetOpen, setIsLeftSheetOpen] = useState(false);
   const [isRightSheetOpen, setIsRightSheetOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
@@ -70,7 +70,7 @@ function InnerLayout({ children }) {
     <div className="flex min-h-screen w-full flex-col">
       {/* Mobile Header with Menu Trigger */}
       <header
-        className={`sticky top-0 z-[60] flex h-16 items-center border-b bg-background px-4 md:hidden transition-transform duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-40 flex h-16 items-center border-b bg-background px-4 md:hidden transition-transform duration-300 ${
           showHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -84,7 +84,7 @@ function InnerLayout({ children }) {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
+              <SheetContent side="left" className="w-64 p-0 z-50 mt-0 pt-0">
                 <VisuallyHidden>
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </VisuallyHidden>
@@ -103,12 +103,14 @@ function InnerLayout({ children }) {
                     <span className="sr-only">Context Information</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-64 p-0">
+                <SheetContent side="right" className="w-64 p-0 z-50 mt-0 pt-0">
                   <VisuallyHidden>
                     <SheetTitle>Context Information</SheetTitle>
                   </VisuallyHidden>
                   {/* Render the dynamic content component in the right sheet on mobile */}
-                  {contentComponent}
+                  <div className="pt-9 px-3">
+                    {contentComponent}
+                  </div>
                 </SheetContent>
               </Sheet>
             )}
@@ -117,7 +119,7 @@ function InnerLayout({ children }) {
       </header>
 
       {/* Main Content with Three-Column Layout */}
-      <div className="flex flex-1 max-w-6xl mx-auto w-full">
+      <div className="flex flex-1 max-w-6xl mx-auto w-full mt-16 md:mt-0">
         {/* Left Sidebar - Always visible on desktop */}
         <div className="hidden md:block h-screen sticky top-0 w-64 flex-shrink-0">
           <LeftSidebar />

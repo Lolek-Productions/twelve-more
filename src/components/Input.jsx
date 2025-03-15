@@ -12,7 +12,7 @@ export default function Input({communityId}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const selectedOrganizationId = appUser?.selectedOrganization?.id;
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -168,20 +168,20 @@ export default function Input({communityId}) {
 
   if (!isSignedIn || !isLoaded) {
     return (
-      <div className={'md:w-[30rem]'}></div>
+      <div className="w-full"></div>
     );
   }
 
   return (
-    <div className='flex border-b border-gray-200 p-3 space-x-3 md:w-[30rem]'>
+    <div className='flex border-b border-gray-200 p-3 space-x-3 w-full'>
       <img
         src={user.imageUrl}
         alt='user-img'
-        className='h-11 w-11 rounded-full cursor-pointer hover:brightness-95 object-cover'
+        className='h-11 w-11 rounded-full cursor-pointer hover:brightness-95 object-cover flex-shrink-0'
       />
       <div className='w-full divide-y divide-gray-200'>
         <textarea
-          className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700 '
+          className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700'
           placeholder="What's happening?"
           rows='2'
           value={text}
@@ -198,22 +198,18 @@ export default function Input({communityId}) {
             className={`w-full max-h-[250px] object-cover cursor-pointer ${
               imageFileUplaoding ? 'animate-pulse' : ''
             }`}
-
-            />
-          )}
+          />
+        )}
         {recordedURL &&
           <div className="w-full py-5">
-            <audio controls src={recordedURL} />
+            <audio controls src={recordedURL} className="w-full" />
           </div>
         }
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
-              onClick={() => imagePickRef.current.click()}
+                                 onClick={() => imagePickRef.current.click()}
             />
-            {/*{isRecording ? <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />*/}
-            {/*  : <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />*/}
-            {/*}*/}
           </div>
           <input
             type='file'
