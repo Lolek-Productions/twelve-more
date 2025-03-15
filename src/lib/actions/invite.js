@@ -66,13 +66,13 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) =
     } catch (error) {
       console.error(`Attempt ${attempt} failed:`, error);
       if (attempt === maxAttempts) {
-        return { success: false, error: `Failed to find MongoDB user after ${maxAttempts} attempts: ${error.message}` };
+        return { success: false, messsage: `Failed to find MongoDB user after ${maxAttempts} attempts: ${error.message}` };
       }
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
 
-  return { success: false, error: `MongoDB user not found after ${maxAttempts} attempts` };
+  return { success: false, messsage: `MongoDB user not found after ${maxAttempts} attempts` };
 };
 
 // Send SMS invitation

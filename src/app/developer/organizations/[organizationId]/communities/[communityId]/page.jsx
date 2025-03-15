@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {useParams, useRouter} from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { deleteCommunity, getCommunityById } from "@/lib/actions/community"; // New action to fetch a single community
+import { deleteCommunities, getCommunityById } from "@/lib/actions/community"; // New action to fetch a single community
 import { MembersTable } from "./members-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -99,7 +99,7 @@ export default function CommunityMembersPage() {
 
   const handleDeleteCommunity = async () => {
     try {
-      const response = await deleteCommunity(communityId);
+      const response = await deleteCommunities(communityId);
 
       if (response?.success) {
         router.push(`/developer/organizations/${organizationId}`); // Redirect after deletion

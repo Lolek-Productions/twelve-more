@@ -4,7 +4,7 @@ import { Provider, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 import { userAtom } from '@/lib/atoms/userAtom';
 import { useUser } from '@clerk/nextjs';
-import {getUserById} from "@/lib/actions/user";
+import { getUserById } from "@/lib/actions/user";
 
 function SessionInitializer({ initialUser }) {
   const setUser = useSetAtom(userAtom);

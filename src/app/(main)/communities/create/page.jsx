@@ -77,7 +77,7 @@ export default function NewCommunityPage() {
       setIsSubmitting(true);
       // console.log("Community data submitted:", data);
 
-      const response = await createCommunity(data, appUser);
+      const response = await createCommunity(data, appUser.id, appUser.selectedOrganization.id);
 
       showResponseToast(response);
 

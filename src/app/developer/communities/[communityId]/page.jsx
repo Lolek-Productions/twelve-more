@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {updateCommunity, getCommunityById, deleteCommunity} from "@/lib/actions/community.js";
+import {updateCommunity, getCommunityById, deleteCommunities} from "@/lib/actions/community.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from 'next/navigation'
 import {useToast} from "@/hooks/use-toast.js";
@@ -123,7 +123,7 @@ export default function EditCommunityPage() {
   }, [communityId]);
 
   const onDeleteCommunity = async () => {
-      const response = await deleteCommunity(communityId);
+      const response = await deleteCommunities(communityId);
       if(response.success) {
         router.push("/developer/communities")
       }

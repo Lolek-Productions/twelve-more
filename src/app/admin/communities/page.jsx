@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createOrUpdateCommunity,
-  deleteCommunity,
+  deleteCommunities,
   getCommunities,
   addUserToCommunity,
 } from "@/lib/actions/community";
@@ -69,7 +69,7 @@ export default function AdminCommunitiesPage() {
 
   const deleteEntity = async (id) => {
     try {
-      await deleteCommunity(id);
+      await deleteCommunities(id);
       toast({
         title: "Community Deleted",
         description: "The community has been deleted successfully.",

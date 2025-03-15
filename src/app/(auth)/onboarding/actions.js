@@ -1,36 +1,45 @@
 'use server'
 
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { currentUser } from '@clerk/nextjs/server';
+import { setSelectedOrganizationOnUser } from "@/lib/actions/user.js";
+import { createOrganizationWithWelcomingCommunity } from "@/lib/actions/organization.js";
 
 export const completeOnboarding = async (formData) => {
-  const { userId } = await auth()
-
-  if (!userId) {
-    return { message: 'No Logged In User' }
-  }
-
-  const client = await clerkClient()
-
   try {
-    // ✅ Fetch existing metadata to merge new values
-    const existingUser = await client.users.getUser(userId);
+    const user = await currentUser();
+    const userId = user.publicMetadata.userMongoId;
 
-    const existingMetadata = existingUser.publicMetadata || {};
+    if (!userId) {
+      return { success: false, message: 'No Logged In User' }
+    }
 
-    // ✅ Merge existing metadata with new values
-    const updatedMetadata = {
-      ...existingMetadata,
-      onboardingComplete: true,
-    };
+    const organizationName = formData.get('organizationName');
+    const description = formData.get('description') || '';
 
+    if (!organizationName) {
+      return { success: false, message: 'Organization name is required' }
+    }
 
-    // ✅ Update user metadata without deleting other fields
-    const res = await client.users.updateUser(userId, {
-      publicMetadata: updatedMetadata,
-    });
+    const organizationResult = await createOrganizationWithWelcomingCommunity({
+      name: organizationName,
+      description: description,
+    }, userId);
 
-    return { message: res.publicMetadata }
-  } catch (err) {
-    return { error: 'There was an error updating the user metadata.' }
+    if (!organizationResult?.success) {
+      return { success: false, message: 'Failed to create organization' }
+    }
+
+    await setSelectedOrganizationOnUser(organizationResult?.organization.id, userId);
+
+    return {
+      success: true,
+      message: 'Organization created successfully!',
+    }
+  } catch (error) {
+    console.error('Onboarding error:', error);
+    return {
+      success: false,
+      message: error.message || 'Failed to complete onboarding'
+    }
   }
 }

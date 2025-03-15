@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
-import {createCommunity, deleteCommunity, getCommunitiesByOrganization} from '@/lib/actions/community';
+import {createCommunity, deleteCommunities, getCommunitiesByOrganization} from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
 import {
@@ -146,7 +146,7 @@ export default function CommunitiesList() {
 
   async function handleDeleteCommunity(communityId) {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      const resp = await deleteCommunity(communityId);
+      const resp = await deleteCommunities(communityId);
 
       if (!resp.success) {
         return toast({

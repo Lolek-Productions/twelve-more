@@ -16,7 +16,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { OrganizationTable } from "./organization-table";
-import { createOrganization, deleteOrganization, getOrganizations } from "@/lib/actions/organization";
+import {
+  createOrganization,
+  createOrganizationWithWelcomingCommunity,
+  deleteOrganization,
+  getOrganizations
+} from "@/lib/actions/organization";
 import {Breadcrumb} from "@/components/ui/breadcrumb";
 
 const organizationSchema = z.object({
@@ -60,7 +65,9 @@ export default function AdminOrganizationsPage() {
 
   const onCreateSubmit = async (formData) => {
     setIsSaving(true);
-    const response = await createOrganization(formData);
+    const userId = null;
+    throw new Error('no userId yet.')
+    const response = await createOrganizationWithWelcomingCommunity(formData, userId);
     setServerResponse(response);
     if (response?.success) {
       createForm.reset();

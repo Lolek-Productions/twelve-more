@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createOrganization } from "@/lib/actions/organization.js";
+import { createOrganizationWithWelcomingCommunity } from "@/lib/actions/organization.js";
 import { useAppUser } from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
@@ -70,13 +70,13 @@ export default function NewOrganizationPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await createOrganization(data, appUser);
+      const response = await createOrganizationWithWelcomingCommunity(data, appUser.id);
 
       showResponseToast(response);
 
       if (response.success) {
         // Get the new organization ID from the response
-        const newOrgId = response.data?.id;
+        const newOrgId = response.organization?.id;
 
         if (newOrgId) {
           // Ask for confirmation before switching to the new organization
