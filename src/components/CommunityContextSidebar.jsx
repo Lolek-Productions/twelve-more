@@ -58,9 +58,6 @@ export default function CommunityContextSidebarComponent({ community, communityI
 
   return (
     <div className="flex flex-col h-full p-3">
-      <div className="p-4">
-        <h2 className="text-lg font-medium">Community Members</h2>
-      </div>
       <div className="flex-1 overflow-auto">
         <MemberList community={community} members={members} />
       </div>

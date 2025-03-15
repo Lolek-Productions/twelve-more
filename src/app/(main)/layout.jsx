@@ -84,7 +84,7 @@ function InnerLayout({ children }) {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0 z-50 mt-0 pt-0">
+              <SheetContent side="left" className="w-64 p-0 z-[100] mt-0 pt-0">
                 <VisuallyHidden>
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </VisuallyHidden>
@@ -103,7 +103,7 @@ function InnerLayout({ children }) {
                     <span className="sr-only">Context Information</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-64 p-0 z-50 mt-0 pt-0">
+                <SheetContent side="right" className="w-64 p-0 z-[100] mt-0 pt-0">
                   <VisuallyHidden>
                     <SheetTitle>Context Information</SheetTitle>
                   </VisuallyHidden>
