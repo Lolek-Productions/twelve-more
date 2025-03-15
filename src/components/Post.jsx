@@ -1,58 +1,65 @@
 import Link from 'next/link';
-import { HiDotsHorizontal } from 'react-icons/hi';
 import moment from 'moment';
 import Icons from './Icons';
-import {linkifyText} from "@/lib/utils";
+import { linkifyText } from "@/lib/utils";
 
 export default function Post({ post, clickableText = true }) {
   return (
-    <div className="flex p-3 border-b border-gray-200 w-full hover:bg-gray-50">
-      <Link href={`/users/${post?.user?.id}`} className="flex-shrink-0">
+    <div className="flex p-2 sm:p-3 border-b border-gray-200 w-full hover:bg-gray-50">
+      <Link href={`/users/${post?.user?.id}`} className="flex-shrink-0 mr-2">
         <img
           src={post?.profileImg || '/default-avatar.png'}
           alt="user-img"
-          className="h-11 w-11 rounded-full mr-4 flex-shrink-0"
+          className="h-9 w-9 sm:h-11 sm:w-11 rounded-full object-cover flex-shrink-0"
         />
       </Link>
-      <div className="flex-1 overflow-hidden">
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1 whitespace-nowrap">
-              <h4 className="font-bold text-xs truncate max-w-32">
-                <Link href={`/users/${post?.user?.id}`} className="flex-shrink-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex flex-col w-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-1 min-w-0 max-w-full">
+              <h4 className="font-bold text-xs truncate max-w-[120px] xs:max-w-[150px] sm:max-w-[180px]">
+                <Link href={`/users/${post?.user?.id}`} className="block truncate">
                   {post?.user?.firstName} {post?.user?.lastName}
                 </Link>
               </h4>
-              <span className="text-xl text-gray-500">·</span>
-              <span className="text-xs text-gray-500 flex-1 truncate max-w-32">
+              <span className="text-lg text-gray-500 mx-0.5 flex-shrink-0">·</span>
+              <span className="text-xs text-gray-500 truncate">
                 {moment(post?.createdAt).fromNow()}
               </span>
             </div>
           </div>
           {post?.community?.id && (
-            <div className="flex items-center space-x-1">
-              <h4 className="font-bold text-xs whitespace-nowrap max-w-32">
-                <Link href={`/communities/${post?.community?.id}`} className="flex-shrink-0">
+            <div className="flex items-center mt-0.5">
+              <h4 className="font-bold text-xs truncate max-w-[200px]">
+                <Link href={`/communities/${post?.community?.id}`} className="block truncate">
                   {post?.community?.name}
                 </Link>
               </h4>
             </div>
           )}
         </div>
+
         {clickableText ? (
-          <Link href={`/posts/${post?.id}`} className="block">
-            <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden whitespace-pre-line">
+          <Link href={`/posts/${post?.id}`} className="block w-full">
+            <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
               {post?.text || 'No text available'}
             </p>
           </Link>
         ) : (
-          <p className="text-gray-800 text-sm my-3 max-w-full break-words overflow-hidden whitespace-pre-line">
+          <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
+             style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>
             {linkifyText(post?.text) || 'No text available'}
           </p>
         )}
         {post?.image && (
-          <Link href={`/posts/${post?.id}`}>
-            <img src={post?.image} className="rounded-2xl mr-2 max-w-full h-auto" alt="post image"/>
+          <Link href={`/posts/${post?.id}`} className="block">
+            <div className="relative w-full overflow-hidden rounded-lg sm:rounded-2xl">
+              <img
+                src={post?.image}
+                className="w-full h-auto object-cover"
+                alt="post image"
+              />
+            </div>
           </Link>
         )}
         {/*{post?.audio && (*/}

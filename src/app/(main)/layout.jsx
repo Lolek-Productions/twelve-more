@@ -70,7 +70,7 @@ function InnerLayout({ children }) {
     <div className="flex min-h-screen w-full flex-col">
       {/* Mobile Header with Menu Trigger */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 flex h-16 items-center border-b bg-background px-4 md:hidden transition-transform duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[60] flex h-16 items-center border-b bg-background px-4 md:hidden transition-transform duration-300 ${
           showHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
