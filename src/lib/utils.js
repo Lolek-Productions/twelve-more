@@ -122,6 +122,8 @@ export const handleClerkError = (error) => {
 };
 
 export function linkifyText(text) {
+  if(!text) return;
+
   // Regular expression to match URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 

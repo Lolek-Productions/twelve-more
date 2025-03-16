@@ -7,6 +7,8 @@ import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {useAppUser} from "@/hooks/useAppUser.js";
+import {linkifyText} from "@/lib/utils.js";
+import Link from "next/link.js";
 
 export default function CommentModal() {
   const [open, setOpen] = useAtom(modalState);
@@ -99,7 +101,8 @@ export default function CommentModal() {
           setPostId(null);
         }}
         ariaHideApp={false}
-        className="max-w-lg w-[90%] absolute top-24 left-[50%] translate-x-[-50%] bg-white border-2 border-gray-200 rounded-xl shadow-md"
+        className="max-w-lg w-[90%] absolute top-24 left-[50%] translate-x-[-50%] bg-white border-2 border-gray-200 rounded-xl shadow-md z-[80]"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-[70]"
       >
         <div className="flex flex-col h-[70vh] max-h-[70vh]">
           <div className="border-b border-gray-200 py-2 px-1.5 flex justify-end shrink-0">
@@ -131,8 +134,13 @@ export default function CommentModal() {
                 <h4 className="font-bold sm:text-[16px] text-[15px] hover:underline truncate">
                   {postLoading ? 'Name' : `${post?.user?.firstName} ${post?.user?.lastName}`}
                 </h4>
-                <p className="text-gray-500 text-[15px] sm:text-[16px]">
-                  {postLoading ? 'Loading...' : post?.text}
+                <h4 className="font-bold text-xs">
+                    {post?.community?.name}
+                </h4>
+                <p
+                  className="mt-2 text-gray-500 text-[15px] sm:text-[16px] whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
+                  style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>
+                  {postLoading ? 'Loading...' : linkifyText(post?.text)}
                 </p>
               </div>
             </div>
