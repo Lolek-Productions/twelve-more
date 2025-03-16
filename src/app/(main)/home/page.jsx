@@ -40,11 +40,10 @@ export default function HomePage() {
         </div>
         {appUser?.selectedOrganization?.id &&
           <>
-          <Input/>
-          <HomeFeed/>
+            <Input/>
+            <HomeFeed/>
           </>
         }
-
       </div>
     </div>
   );

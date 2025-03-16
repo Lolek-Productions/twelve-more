@@ -1,22 +1,44 @@
-import SelectedOrganizationName from "@/components/SelectedOrganizationName.jsx";
+'use client';
 
-export const dynamic = 'force-dynamic';
+import {useContextContent} from "@/components/ContextProvider.jsx";
+import {useAppUser} from "@/hooks/useAppUser.js";
+import {useCallback, useEffect} from "react";
+import HomeContextSidebar from "@/components/HomeContextSidebar.jsx";
+import CommunitiesList from "@/components/CommunitiesList.jsx";
 
-import CommunitiesList from "@/components/CommunitiesList";
-import RightSidebar from "@/components/RightSidebar.jsx";
+export default function CommunitiesPage() {
+  const { setContextContent, clearContextContent } = useContextContent();
+  const { appUser} = useAppUser();
 
-export default async function CommunitiesPage() {
+  // Create a stable onClose callback that won't change on re-renders
+  const handleClose = useCallback(() => {
+    clearContextContent();
+  }, [clearContextContent]);
+
+  useEffect(() => {
+    // Create the context component once when the component mounts
+    const ContextComponent = <HomeContextSidebar onClose={handleClose} />;
+    setContextContent(ContextComponent);
+
+    // Clean up when the component unmounts
+    return () => {
+      clearContextContent();
+    };
+  }, [setContextContent, handleClose]);
+
   return (
-    <div className="flex w-full">
-      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
+    <div className="flex w-full justify-center">
+      <div className='min-h-screen w-full max-w-xl md:border-r md:border-l border-gray-200'>
         <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-          <h2 className='text-lg sm:text-xl font-bold'>Communities: <SelectedOrganizationName/></h2>
+          <h2 className='text-lg sm:text-xl font-bold'>
+            {appUser?.selectedOrganization?.id ?
+              <>Communities: {appUser?.selectedOrganization?.name}</> :
+              'Select An Organization'
+            }
+          </h2>
         </div>
-        <CommunitiesList/>
-      </div>
 
-      <div className="hidden lg:flex lg:flex-col p-3 h-screen w-[24rem] flex-shrink-0">
-        <RightSidebar/>
+        <CommunitiesList/>
       </div>
     </div>
   );
