@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import MemberList from "@/components/MemberList.jsx";
 import { getCommunityMembers } from "@/lib/actions/user.js";
 
-export default function CommunityContextSidebarComponent({ community, communityId, onClose }) {
+export default function CommunityContextSidebarComponent({ community, communityId }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,16 +61,6 @@ export default function CommunityContextSidebarComponent({ community, communityI
       <div className="flex-1 overflow-auto">
         <MemberList community={community} members={members} />
       </div>
-      {onClose && (
-        <div className="p-4 border-t md:hidden">
-          <button
-            className="text-primary hover:underline"
-            onClick={onClose}
-          >
-            Close Panel
-          </button>
-        </div>
-      )}
     </div>
   );
 }
