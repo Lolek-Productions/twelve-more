@@ -28,17 +28,13 @@ export default function CommunitiesHome({ params }) {
         setLoading(false);
       }
     }
-
     fetchCommunityData();
   }, [communityId]);
 
-  const { setContextContent, clearContextContent } = useContextContent();
-  const handleClose = useCallback(() => {clearContextContent();}, [clearContextContent]);
+  const { setContextContent } = useContextContent();
   useEffect(() => {
-    const ContextComponent = <CommunityContextSidebar community={community} communityId={communityId} onClose={handleClose} />;
-    setContextContent(ContextComponent);
-    return () => {clearContextContent();};
-  }, [setContextContent, handleClose, community, communityId]);
+    setContextContent(<CommunityContextSidebar community={community} communityId={communityId} />);
+  }, [setContextContent, community, communityId]);
 
   if (loading) {
     return (

@@ -4,9 +4,8 @@ import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
-import RightSidebar from "@/components/RightSidebar";
 import {useEffect, useState} from "react";
-import {getPostById, getPosts} from "@/lib/actions/post.js";
+import {getPostById} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams} from "next/navigation";
 

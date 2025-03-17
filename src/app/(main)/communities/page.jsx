@@ -3,20 +3,17 @@
 import {useAppUser} from "@/hooks/useAppUser.js";
 import HomeContextSidebar from "@/components/HomeContextSidebar.jsx";
 import CommunitiesList from "@/components/CommunitiesList.jsx";
-import {useCallback, useEffect} from "react";
+import {useEffect} from "react";
 import {useContextContent} from "@/components/ContextProvider.jsx";
 
 
 export default function CommunitiesPage() {
   const { appUser} = useAppUser();
 
-  const { setContextContent, clearContextContent } = useContextContent();
-  const handleClose = useCallback(() => {clearContextContent();}, [clearContextContent]);
+  const { setContextContent } = useContextContent();
   useEffect(() => {
-    const ContextComponent = <HomeContextSidebar onClose={handleClose} />;
-    setContextContent(ContextComponent);
-    return () => {clearContextContent();};
-  }, [setContextContent, handleClose]);
+    setContextContent(<HomeContextSidebar />);
+  }, [setContextContent]);
 
   return (
     <>

@@ -48,7 +48,7 @@ export default function HomeFeed() {
       <div>
         {isLoading ? (
           <LoadingSkeleton />
-        ) : posts.length > 0 ? (
+        ) : posts?.length > 0 ? (
           posts.map((post) =>
             post && post.id ? <Post key={post.id} post={post} /> : null
           )

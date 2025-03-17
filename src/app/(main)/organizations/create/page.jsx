@@ -49,8 +49,8 @@ const organizationFormSchema = z.object({
 });
 
 const defaultValues = {
-  name: "TEST name",
-  description: "joJosh lMcjkCartylkjtest de",
+  name: "",
+  description: "",
 };
 
 export default function NewOrganizationPage() {

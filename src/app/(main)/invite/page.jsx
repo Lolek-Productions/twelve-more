@@ -90,8 +90,6 @@ export default function Invite() {
     sendInvite(data);
   };
 
-
-
   return (
     <>
       <div className="py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">

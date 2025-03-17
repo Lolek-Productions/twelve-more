@@ -10,13 +10,10 @@ import {useAppUser} from "@/hooks/useAppUser.js";
 export default function HomePage() {
   const { appUser} = useAppUser();
 
-  const { setContextContent, clearContextContent } = useContextContent();
-  const handleClose = useCallback(() => {clearContextContent();}, [clearContextContent]);
+  const { setContextContent } = useContextContent();
   useEffect(() => {
-    const ContextComponent = <HomeContextSidebar onClose={handleClose} />;
-    setContextContent(ContextComponent);
-    return () => {clearContextContent();};
-  }, [setContextContent, handleClose]);
+    setContextContent(<HomeContextSidebar />);
+  }, [setContextContent]);
 
   return (
     <>
