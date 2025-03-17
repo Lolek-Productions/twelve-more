@@ -126,7 +126,13 @@ function InnerLayout({ children }) {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1">{children}</div>
+        <div className="flex-1">
+          <div className="flex w-full justify-center">
+            <div className='min-h-screen w-full max-w-xl md:border-r md:border-l border-gray-200'>
+              {children}
+            </div>
+          </div>
+        </div>
 
         {/* Right Context Column - Only on desktop and only if content exists */}
         {contentComponent && (

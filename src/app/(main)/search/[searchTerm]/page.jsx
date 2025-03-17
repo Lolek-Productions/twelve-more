@@ -18,8 +18,7 @@ export default async function SearchPage({ params }) {
   }
 
   return (
-    <div className="flex w-full">
-      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
+      <>
         <div className='flex items-center space-x-2 py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
           <Link href='/home' className='hover:bg-gray-100 rounded-full p-2'>
             <HiArrowLeft className='h-5 w-5'/>
@@ -35,7 +34,6 @@ export default async function SearchPage({ params }) {
           <h1 className='text-center pt-6 text-2xl'>No results found</h1>
         )}
         {data && data.map((post) => <Post key={post.id} post={post}></Post>)}
-      </div>
-    </div>
+      </>
   );
 }

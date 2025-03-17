@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react';
-import { use } from 'react'; // Import use from React
+import { use } from 'react';
 import CommunityFeed from '@/components/CommunityFeed';
 import Input from '@/components/Input';
 import { getCommunityById } from "@/lib/actions/community.js";
@@ -9,14 +9,11 @@ import { useContextContent } from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 
 export default function CommunitiesHome({ params }) {
-  // Unwrap the params Promise using React.use()
   const resolvedParams = use(params);
   const { communityId } = resolvedParams;
 
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const { setContextContent, clearContextContent } = useContextContent();
 
   useEffect(() => {
     async function fetchCommunityData() {
@@ -35,26 +32,13 @@ export default function CommunitiesHome({ params }) {
     fetchCommunityData();
   }, [communityId]);
 
-  // Create a stable onClose callback that won't change on re-renders
-  const handleClose = useCallback(() => {
-    clearContextContent();
-  }, [clearContextContent]);
-
-  // Set up context sidebar
+  const { setContextContent, clearContextContent } = useContextContent();
+  const handleClose = useCallback(() => {clearContextContent();}, [clearContextContent]);
   useEffect(() => {
-    if (!community) return;
-
-    // Create desktop and mobile components
-    const desktopComponent = <CommunityContextSidebar community={community} communityId={communityId} />;
-    const mobileComponent = <CommunityContextSidebar community={community} communityId={communityId} onClose={handleClose} />;
-
-    setContextContent(desktopComponent, mobileComponent);
-
-    // Clean up when the component unmounts
-    return () => {
-      clearContextContent();
-    };
-  }, [setContextContent, handleClose, clearContextContent, community, communityId]);
+    const ContextComponent = <CommunityContextSidebar community={community} communityId={communityId} onClose={handleClose} />;
+    setContextContent(ContextComponent);
+    return () => {clearContextContent();};
+  }, [setContextContent, handleClose, community, communityId]);
 
   if (loading) {
     return (
@@ -73,14 +57,12 @@ export default function CommunitiesHome({ params }) {
   }
 
   return (
-    <div className="flex w-full">
-      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
-        <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-          <h2 className='text-lg sm:text-xl font-bold'>{community.name}</h2>
-        </div>
-        <Input communityId={communityId}/>
-        <CommunityFeed communityId={communityId} />
+    <>
+      <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
+        <h2 className='text-lg sm:text-xl font-bold'>{community.name}</h2>
       </div>
-    </div>
+      <Input communityId={communityId}/>
+      <CommunityFeed communityId={communityId} />
+    </>
   );
 }
