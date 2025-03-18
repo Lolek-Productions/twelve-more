@@ -55,7 +55,7 @@ export const handleApiResponse = async ({
         description: response?.error || errorDescription,
       });
       if (onError) onError(response?.error);
-      return { success: false, messsage: response?.error || errorDescription };
+      return { success: false, message: response?.error || errorDescription };
     }
   } catch (error) {
     console.error(`${errorTitle}:`, error);
@@ -65,7 +65,7 @@ export const handleApiResponse = async ({
       description: errorDescription,
     });
     if (onError) onError(error);
-    return { success: false, messsage: errorDescription, details: error.message };
+    return { success: false, message: errorDescription, details: error.message };
   }
 };
 

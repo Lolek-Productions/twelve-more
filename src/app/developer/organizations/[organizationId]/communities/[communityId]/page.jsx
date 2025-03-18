@@ -160,7 +160,7 @@ export default function CommunityMembersPage() {
       // console.log('searching',organizationId, query)
       const results = await searchUsersInOrganization(organizationId, query);
       // console.log(results);
-      setSearchResults(results || []);
+      setSearchResults(results.users || []);
     } catch (error) {
       console.error("Error searching users:", error);
       toast({

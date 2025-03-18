@@ -60,7 +60,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
 
     return { success: true, message: "Organization created", organization: organization };
   } catch (error) {
-    return { success: false, messsage:error.message };
+    return { success: false, message:error.message };
   }
 }
 
@@ -133,7 +133,7 @@ export async function searchOrganizations(query) {
     if (!query || typeof query !== "string" || query.trim().length < 2) {
       return {
         success: false,
-        messsage:"Query must be a string with at least 2 characters",
+        message:"Query must be a string with at least 2 characters",
       };
     }
 
@@ -168,7 +168,7 @@ export async function searchOrganizations(query) {
     console.error("Error searching organizations:", error);
     return {
       success: false,
-      messsage:"Failed to search organizations",
+      message:"Failed to search organizations",
     };
   }
 }

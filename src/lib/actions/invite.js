@@ -5,8 +5,8 @@ import { NextResponse } from 'next/server';
 import twilioService from '@/lib/services/twilioService';
 import {
   addCommunityToUser,
-  addOrganizationToUser,
-  getUserByClerkId,
+  addOrganizationToUser, getPrivateUserById,
+  getUserByClerkId, getUserById,
   setSelectedOrganizationOnUser
 } from '@/lib/actions/user';
 import {handleClerkError, normalizePhoneNumber} from "@/lib/utils";
@@ -66,13 +66,13 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) =
     } catch (error) {
       console.error(`Attempt ${attempt} failed:`, error);
       if (attempt === maxAttempts) {
-        return { success: false, messsage: `Failed to find MongoDB user after ${maxAttempts} attempts: ${error.message}` };
+        return { success: false, message: `Failed to find MongoDB user after ${maxAttempts} attempts: ${error.message}` };
       }
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
 
-  return { success: false, messsage: `MongoDB user not found after ${maxAttempts} attempts` };
+  return { success: false, message: `MongoDB user not found after ${maxAttempts} attempts` };
 };
 
 // Send SMS invitation
@@ -87,12 +87,32 @@ const sendCommunityInvitation = async (firstName, phoneNumber, communityId, appU
   } else {
     console.log('SMS result:', smsResult.message);
   }
-  return smsResult.success;
+  return smsResult;
 };
 
-export async function inviteToCommunity(invitee, communityId, appUser) {
-  throw new Error('Not implemented');
+export async function inviteCurrentUserToCommunity(userId, communityId, appUser){
 
+  const user = await getPrivateUserById(userId);
+  if(!user.id){
+    return {success: false, message: "Problem finding user"};
+  }
+
+  const response = await addCommunityToUser(communityId, userId);
+  if(!response.success){
+    return {success: false, message: "Problem adding user to community"};
+  }
+
+  const smsResult = await sendCommunityInvitation(user.firstName, user.phoneNumber, communityId, appUser)
+  if (!smsResult.success){
+    return {success: false, message: "Problem sending the SMS"};
+  }
+
+  return {success: true, message: "User invited successfully."};
+}
+
+
+export async function inviteNewUserToCommunity(invitee, communityId, appUser) {
+  throw new Error('Not implemented');
 
   try {
     const body = await req.json();
@@ -122,6 +142,7 @@ export async function inviteToCommunity(invitee, communityId, appUser) {
       );
     }
 
+    //TODOOOOOOOO
     const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a'; // Hardcoded for St. Leo at this point!
 
     // 3. Add community, organization, and set selected organization
@@ -138,5 +159,4 @@ export async function inviteToCommunity(invitee, communityId, appUser) {
   } catch (error) {
     return handleClerkError(error);
   }
-
 }

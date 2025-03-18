@@ -7,7 +7,7 @@ export async function sendSMS({ phoneNumber, message }) {
     if (!phoneNumber || !message) {
       return {
         success: false,
-        messsage:'Phone number and message are required',
+        message:'Phone number and message are required',
       };
     }
 
@@ -21,7 +21,7 @@ export async function sendSMS({ phoneNumber, message }) {
     console.error('Error in sendSMS server action:', error.message);
     return {
       success: false,
-      messsage:`Failed to send SMS: ${error.message}`,
+      message:`Failed to send SMS: ${error.message}`,
     };
   }
 }

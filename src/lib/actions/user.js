@@ -107,7 +107,7 @@ export async function getUserById(userId) {
       stack: error.stack,
       name: error.name,
     });
-    return { success: false, messsage:'Failed to fetch users', details: error.message };
+    return { success: false, message:'Failed to fetch users', details: error.message };
   }
 }
 
@@ -149,7 +149,7 @@ export const getUserByClerkId = async (clerkId) => {
       .lean();
 
     if (!user) {
-      return { success: false, messsage:'User not found' };
+      return { success: false, message:'User not found' };
     }
 
     return {
@@ -179,7 +179,7 @@ export async function updateUser(user) {
     if (!user || !user.id) {
       return {
         success: false,
-        messsage:'User not found or invalid input',
+        message:'User not found or invalid input',
       };
     }
 
@@ -200,7 +200,7 @@ export async function updateUser(user) {
     if (!updatedUser) {
       return {
         success: false,
-        messsage:'User not found',
+        message:'User not found',
       };
     }
 
@@ -218,7 +218,7 @@ export async function updateUser(user) {
     console.error('Error updating user:', error);
     return {
       success: false,
-      messsage:'Error updating user',
+      message:'Error updating user',
     };
   }
 }
@@ -247,12 +247,12 @@ export async function addOrganizationToUser(organizationId, userId, role = 'memb
     );
 
     if (!user) {
-      return { success: false, messsage:"User not found" };
+      return { success: false, message:"User not found" };
     }
 
     return { success: true, message: "User added to organization" };
   } catch (error) {
-    return { success: false, messsage:error.message };
+    return { success: false, message:error.message };
   }
 }
 
@@ -268,12 +268,12 @@ export async function removeOrganizationFromUserByMembershipId(organizationMembe
     );
 
     if (!user) {
-      return { success: false, messsage:"User or organization not found" };
+      return { success: false, message:"User or organization not found" };
     }
 
     return { success: true, message: "User removed from organization" };
   } catch (error) {
-    return { success: false, messsage:error.message };
+    return { success: false, message:error.message };
   }
 }
 
@@ -290,7 +290,7 @@ export const deleteUser = async (id) => {
   try {
     // Validate input
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return { success: false, messsage:"Invalid or missing user ID" };
+      return { success: false, message:"Invalid or missing user ID" };
     }
 
     await connect();
@@ -298,7 +298,7 @@ export const deleteUser = async (id) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return { success: false, messsage:"User not found" };
+      return { success: false, message:"User not found" };
     }
 
     return {
@@ -309,7 +309,7 @@ export const deleteUser = async (id) => {
     console.error("Error deleting user:", error);
     return {
       success: false,
-      messsage:error.message,
+      message:error.message,
     };
   }
 };
@@ -337,7 +337,7 @@ export const getUsers = async () => {
       stack: error.stack,
       name: error.name,
     });
-    return { success: false, messsage:'Failed to fetch users', details: error.message };
+    return { success: false, message:'Failed to fetch users', details: error.message };
   }
 };
 
@@ -350,7 +350,7 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
     if (!user) {
       return {
         success: false,
-        messsage:"User not found with this phone number",
+        message:"User not found with this phone number",
       };
     }
 
@@ -376,13 +376,13 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
   }
 };
 
-export async function searchUsers(query) {
+export async function searchAllUsers(query) {
   try {
     // Input validation
     if (!query || typeof query !== "string" || query.trim().length < 2) {
       return {
         success: false,
-        messsage:"Query must be a string with at least 2 characters",
+        message: "Query must be a string with at least 2 characters",
       };
     }
 
@@ -415,31 +415,38 @@ export async function searchUsers(query) {
     console.error("Error searching users:", error);
     return {
       success: false,
-      messsage:"Failed to search users",
+      message:"Failed to search users",
     };
   }
 }
 
 export async function searchUsersInOrganization(organizationId, query) {
-  //exclude org search at this point
   try {
     await connect();
 
     const users = await User.find({
-      // "organizations.organizationId": organizationId,
+      "organizations.organization": organizationId,
       $or: [
         { firstName: { $regex: query, $options: "i" } },
         { lastName: { $regex: query, $options: "i" } },
+        { $expr: { $regexMatch: {
+              input: { $concat: ["$firstName", " ", "$lastName"] },
+              regex: query,
+              options: "i"
+            }}
+        }
       ],
     })
       .select("firstName lastName")
+      .limit(10)
       .lean();
 
-    return users.map((user) => ({
+    const mappedUsers = users.map((user) => ({
       id: user._id.toString(),
       firstName: user.firstName || "",
       lastName: user.lastName || "",
     }));
+    return { success: true, users: mappedUsers };
   } catch (error) {
     console.error("Error searching users in organization:", error);
     return [];
@@ -452,21 +459,21 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
 
     // Validate inputs
     if (!mongoose.Types.ObjectId.isValid(communityId)) {
-      return { success: false, messsage:"Invalid community ID" };
+      return { success: false, message:"Invalid community ID" };
     }
     if (!userId || typeof userId !== "string") {
-      return { success: false, messsage:"Invalid user ID" };
+      return { success: false, message:"Invalid user ID" };
     }
 
     // Check if user is already a member of the community
     const user = await User.findById(userId).lean();
     if (!user) {
-      return { success: false, messsage:"User not found" };
+      return { success: false, message:"User not found" };
     }
 
     const isAlreadyMember = user.communities.some(c => c.community.toString() === communityId);
     if (isAlreadyMember) {
-      return { success: false, messsage:"User is already a member of this community" };
+      return { success: false, message:"User is already a member of this community" };
     }
 
     // Update user by adding communityId to communities array
@@ -481,7 +488,7 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
     return { success: true, message: `Community added to user` };
   } catch (error) {
     console.error("Error adding community to user:", error.message);
-    return { success: false, messsage:"Failed to add community to user" };
+    return { success: false, message:"Failed to add community to user" };
   }
 }
 
@@ -491,13 +498,13 @@ export async function removeCommunityFromUserByMembershipId(communityMembershipI
     if (!communityMembershipId || !mongoose.isValidObjectId(communityMembershipId)) {
       return {
         success: false,
-        messsage:"Invalid or missing community ID",
+        message:"Invalid or missing community ID",
       };
     }
     if (!userId || typeof userId !== "string") { // Adjusted for Clerk ID string
       return {
         success: false,
-        messsage:"Invalid or missing user ID",
+        message:"Invalid or missing user ID",
       };
     }
 
@@ -515,7 +522,7 @@ export async function removeCommunityFromUserByMembershipId(communityMembershipI
     if (result.modifiedCount === 0) {
       return {
         success: false,
-        messsage:"Community not found in user's communities or user does not exist",
+        message:"Community not found in user's communities or user does not exist",
       };
     }
 
@@ -527,7 +534,7 @@ export async function removeCommunityFromUserByMembershipId(communityMembershipI
     console.error("Error removing community from user:", error);
     return {
       success: false,
-      messsage:"Failed to remove community from user",
+      message:"Failed to remove community from user",
     };
   }
 }
@@ -538,13 +545,13 @@ export async function removeCommunityFromUser(communityId, userId) {
     if (!communityId || !mongoose.isValidObjectId(communityId)) {
       return {
         success: false,
-        messsage:"Invalid or missing community ID",
+        message:"Invalid or missing community ID",
       };
     }
     if (!userId || typeof userId !== "string") { // Adjusted for Clerk ID string
       return {
         success: false,
-        messsage:"Invalid or missing user ID",
+        message:"Invalid or missing user ID",
       };
     }
 
@@ -560,7 +567,7 @@ export async function removeCommunityFromUser(communityId, userId) {
     if (result.modifiedCount === 0) {
       return {
         success: false,
-        messsage:"Community not found in user's communities or user does not exist",
+        message:"Community not found in user's communities or user does not exist",
       };
     }
 
@@ -572,7 +579,7 @@ export async function removeCommunityFromUser(communityId, userId) {
     console.error("Error removing community from user:", error);
     return {
       success: false,
-      messsage:"Failed to remove community from user",
+      message:"Failed to remove community from user",
     };
   }
 }
@@ -585,7 +592,7 @@ export async function getCommunityMembers(communityId) {
     if (!communityId || !mongoose.isValidObjectId(communityId)) {
       return {
         success: false,
-        messsage:"Invalid or missing community ID",
+        message:"Invalid or missing community ID",
       };
     }
 
@@ -622,7 +629,7 @@ export async function getCommunityMembers(communityId) {
     console.error("Error fetching community members:", error);
     return {
       success: false,
-      messsage:"Failed to fetch community members",
+      message:"Failed to fetch community members",
     };
   }
 }
@@ -632,10 +639,10 @@ export async function setSelectedOrganizationOnUser(organizationId, userId) {
     await connect();
 
     if (!mongoose.Types.ObjectId.isValid(organizationId)) {
-      return { success: false, messsage:"Invalid organization ID" };
+      return { success: false, message:"Invalid organization ID" };
     }
     if (!userId || typeof userId !== "string") {
-      return { success: false, messsage:"Invalid user ID" };
+      return { success: false, message:"Invalid user ID" };
     }
 
     const user = await User.findByIdAndUpdate(
@@ -645,13 +652,13 @@ export async function setSelectedOrganizationOnUser(organizationId, userId) {
     ).lean();
 
     if (!user) {
-      return { success: false, messsage:"User not found" };
+      return { success: false, message:"User not found" };
     }
 
     return { success: true, message: "Selected organization updated" };
   } catch (error) {
     console.error("Error setting selected organization:", error.message);
-    return { success: false, messsage:"Failed to set selected organization" };
+    return { success: false, message:"Failed to set selected organization" };
   }
 }
 
@@ -663,7 +670,7 @@ export async function getRecentOrganizationMembers(organizationId, limit = 5) {
     if (!organizationId || !mongoose.isValidObjectId(organizationId)) {
       return {
         success: false,
-        messsage:"Invalid or missing organization ID",
+        message:"Invalid or missing organization ID",
       };
     }
 
@@ -703,7 +710,7 @@ export async function getRecentOrganizationMembers(organizationId, limit = 5) {
     console.error("Error fetching recent community members:", error);
     return {
       success: false,
-      messsage: "Failed to fetch recent community members",
+      message: "Failed to fetch recent community members",
     };
   }
 }

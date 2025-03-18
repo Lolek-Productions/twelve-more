@@ -18,7 +18,7 @@ export default function MemberList({ community, members, hideInvite = false }) {
         </h4>
 
         {!hideInvite && (<Button asChild className="mt-3">
-          <Link href={`/communities/${community.id}/invite`}>Invite others to community</Link>
+          <Link href={`/communities/${community?.id}/invite`}>Invite others to community</Link>
         </Button>)}
       </div>
 
