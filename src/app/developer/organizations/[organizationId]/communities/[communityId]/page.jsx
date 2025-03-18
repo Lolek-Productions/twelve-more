@@ -54,8 +54,8 @@ export default function CommunityMembersPage() {
       const communityData = await getCommunityById(communityId);
       // console.log('community data', communityData);
 
-      if (communityData) {
-        setCommunity(communityData);
+      if (communityData.success) {
+        setCommunity(communityData.community);
       } else {
         toast({
           variant: "destructive",

@@ -107,7 +107,7 @@ export default function EditCommunityPage() {
         const response = await getCommunityById(communityId);
         // console.log(response);
 
-        setData(response);
+        setData(response.community);
 
         form.reset({
           name: response.name || "",

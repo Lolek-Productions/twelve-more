@@ -159,14 +159,17 @@ export const getCommunityById = async function (communityId) {
     }
 
     return {
-      id: community._id?.toString() || "",
-      name: community.name,
-      purpose: community.purpose,
-      visibility: community.visibility,
-      organization: {
-        name: community.organization?.name || "Unknown Organization",
-        id: community.organization?._id?.toString() || "",
-      },
+      success: true,
+      community: {
+        id: community._id?.toString() || "",
+        name: community.name,
+        purpose: community.purpose,
+        visibility: community.visibility,
+        organization: {
+          name: community.organization?.name || "Unknown Organization",
+          id: community.organization?._id?.toString() || "",
+        },
+      }
     };
   } catch (error) {
     console.error("Error fetching community by ID:", error);

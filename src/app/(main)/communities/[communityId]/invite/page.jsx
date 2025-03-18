@@ -65,7 +65,7 @@ export default function Invite() {
     // console.log('communityId', communityId);
     try {
       const communityData = await getCommunityById(communityId);
-      setCommunity(communityData);
+      setCommunity(communityData.community);
 
     } catch (error) {
       console.error("Error fetching community:", error);

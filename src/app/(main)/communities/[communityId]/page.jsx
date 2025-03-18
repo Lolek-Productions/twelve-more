@@ -20,7 +20,7 @@ export default function CommunitiesHome({ params }) {
       try {
         if (communityId) {
           const communityData = await getCommunityById(communityId);
-          setCommunity(communityData);
+          setCommunity(communityData.community);
         }
       } catch (error) {
         console.error("Error fetching community:", error);

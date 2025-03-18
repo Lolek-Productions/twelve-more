@@ -1,10 +1,9 @@
 'use client'
 
-import * as React from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { completeOnboarding } from './actions.js'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
@@ -14,8 +13,10 @@ import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import React, { useEffect, useState } from "react";
+import {getCommunityById} from "@/lib/actions/community.js";
+import {addCommunityToUser, addOrganizationToUser, setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
 
-// Form validation schema
 const formSchema = z.object({
   organizationName: z
     .string()
@@ -28,13 +29,16 @@ const formSchema = z.object({
 });
 
 export default function OnboardingComponent() {
-  const [error, setError] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  const [pendingCommunityId, setPendingCommunityId] = useState(null);
+  const [invitationError, setInvitationError] = useState(null);
+  const [communityData, setCommunityData] = useState(null);
 
-  // Initialize form with empty values in production
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,6 +46,61 @@ export default function OnboardingComponent() {
       description: "",
     },
   });
+
+  // Check for pending community invitation
+  useEffect(() => {
+    const checkForInvitation = async () => {
+      const storedCommunityId = localStorage.getItem('pendingCommunityJoin');
+      if (storedCommunityId) {
+        setPendingCommunityId(storedCommunityId);
+        try {
+          const response = await getCommunityById(storedCommunityId);
+          if (response.success) {
+            setCommunityData(response.community);
+          } else {
+            setInvitationError('Could not find any community invitation.');
+          }
+        } catch (error) {
+          console.error('Error fetching community details:', error);
+        }
+      }
+    };
+
+    checkForInvitation();
+  }, []);
+
+  const handleJoinCommunity = async () => {
+    if (!pendingCommunityId || !user) return;
+
+    setIsJoining(true);
+    setError('');
+
+    // console.log(communityData.organization.id);
+    // console.log(user.id);
+
+
+    try {
+      //Add the organization to the user.
+      await addOrganizationToUser(communityData.organization.id, user.id)
+
+      //Set the organization on the user
+      await setSelectedOrganizationOnUser(communityData.organization.id, user.id);
+
+      //Add the community to the user.
+      await addCommunityToUser(communityData.id, user.id)
+
+      //set the storage to null
+      localStorage.removeItem('pendingCommunityJoin');
+
+      //redirect to the community page
+      router.push(`/communities/${communityData.id}`);
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+      console.error(err);
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -91,12 +150,86 @@ export default function OnboardingComponent() {
     }
   };
 
+  // Render different content based on whether there's a pending invitation
+  if (pendingCommunityId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <Image
+              src="/logo.png"
+              alt="TwelveMore"
+              className={'mx-auto'}
+              width={45}
+              height={45}
+              priority
+            />
+            <CardTitle className="text-center text-2xl">Welcome to TwelveMore{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+
+            {invitationError && (<div className="text-center p-4 text-red-500">{invitationError}</div>)}
+
+            {communityData && (
+              <>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <h3 className="font-medium text-blue-900 mb-2 text-center">Community Invitation Found!</h3>
+                  <p className="text-blue-800 mb-3">
+                    You&#39;ve been invited to join{' '}
+                    <span className="font-semibold">
+                    {communityData?.name || 'a community'}
+                  </span>
+                    {communityData?.organizationName && ` in ${communityData.organizationName}`}
+                  </p>
+
+                  {communityData?.description && (
+                    <p className="text-sm text-blue-700 mt-2 mb-3">
+                      &#34;{communityData.description}&#34;
+                    </p>
+                  )}
+
+                  <p className="text-sm text-blue-600">
+                    Joining will connect you to this community.
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleJoinCommunity}
+                  className="w-full"
+                  size="lg"
+                  disabled={isJoining}
+                >
+                  {isJoining ? "Joining Community..." : "Accept Invitation"}
+                </Button>
+              </>
+            )}
+
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  // Just clear the pending invitation so they can create their own org
+                  localStorage.removeItem('pendingCommunityJoin');
+                  setPendingCommunityId(null);
+                }}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Create my own organization
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Regular onboarding flow (no invitation)
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <Image
-            src="/logo.png" // Use the path from the public folder
+            src="/logo.png"
             alt="TwelveMore"
             className={'mx-auto'}
             width={45}
@@ -108,7 +241,7 @@ export default function OnboardingComponent() {
 
         <CardContent>
           <div className="mb-6 text-center text-gray-600">
-            Let&#39;s get started with the name of your first organization.  It could be a church, a school, or some other type of organization.
+            Let&#39;s get started with the name of your first organization. It could be a church, a school, or some other type of organization.
           </div>
 
           <Form {...form}>
@@ -134,7 +267,7 @@ export default function OnboardingComponent() {
                 name="description"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Tell us about your organization"
@@ -172,5 +305,5 @@ export default function OnboardingComponent() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -175,7 +175,6 @@ export default function CommunitiesList() {
 
   return (
     <div className="p-4">
-
       <Button asChild className="mb-4" >
         <Link href={`/communities/create`}>Create New Community</Link>
       </Button>
