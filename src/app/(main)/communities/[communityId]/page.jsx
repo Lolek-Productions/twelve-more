@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { use } from 'react';
 import CommunityFeed from '@/components/CommunityFeed';
-import Input from '@/components/Input';
+import PostInput from '@/components/PostInput.jsx';
 import { getCommunityById } from "@/lib/actions/community.js";
 import { useContextContent } from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
@@ -57,7 +57,7 @@ export default function CommunitiesHome({ params }) {
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
         <h2 className='text-lg sm:text-xl font-bold'>{community.name}</h2>
       </div>
-      <Input communityId={communityId}/>
+      <PostInput communityId={communityId} placeholder={`Post to the ${community.name} community`} />
       <CommunityFeed communityId={communityId} />
     </>
   );

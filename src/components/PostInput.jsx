@@ -8,7 +8,7 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/
 import { Button } from "@/components/ui/button"
 import {useAppUser} from "@/hooks/useAppUser.js";
 
-export default function Input({communityId}) {
+export default function PostInput({communityId, placeholder}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const selectedOrganizationId = appUser?.selectedOrganization?.id;
@@ -182,7 +182,7 @@ export default function Input({communityId}) {
       <div className='w-full divide-y divide-gray-200'>
         <textarea
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700'
-          placeholder="What's happening?"
+          placeholder={placeholder}
           rows='2'
           value={text}
           onChange={(e) => setText(e.target.value)}

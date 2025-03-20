@@ -1,7 +1,7 @@
 "use client";
 
 import HomeFeed from '@/components/HomeFeed';
-import Input from '@/components/Input';
+import PostInput from '@/components/PostInput.jsx';
 import { useEffect, useCallback } from "react";
 import { useContextContent } from "@/components/ContextProvider";
 import HomeContextSidebar from "@/components/HomeContextSidebar";
@@ -27,7 +27,7 @@ export default function HomePage() {
       </div>
       {appUser?.selectedOrganization?.id &&
         <>
-          <Input/>
+          <PostInput placeholder={`Share a thought with EVERYONE`}/>
           <HomeFeed/>
         </>
       }
