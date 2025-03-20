@@ -16,12 +16,12 @@ import { Menu, EllipsisVertical } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import SessionWrapper from "@/components/SessionWrapper";
 import { ContextProvider, useContextContent } from "@/components/ContextProvider";
+import AutoClosingSidebar from "@/components/AutoClosingSidebarWrapper.jsx";
 
 // Inner layout component that has access to the context
 function InnerLayout({ children }) {
-  const { contentComponent, clearContextContent } = useContextContent();
+  const { contentComponent, isRightSheetOpen, setIsRightSheetOpen  } = useContextContent();
   const [isLeftSheetOpen, setIsLeftSheetOpen] = useState(false);
-  const [isRightSheetOpen, setIsRightSheetOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -109,7 +109,9 @@ function InnerLayout({ children }) {
                   </VisuallyHidden>
                   {/* Render the dynamic content component in the right sheet on mobile */}
                   <div className="pt-9 px-3 overflow-y-auto max-h-full flex-grow">
-                    {contentComponent}
+                    <AutoClosingSidebar>
+                      {contentComponent}
+                    </AutoClosingSidebar>
                   </div>
                 </SheetContent>
               </Sheet>
@@ -136,7 +138,7 @@ function InnerLayout({ children }) {
 
         {/* Right Context Column - Only on desktop and only if content exists */}
         {contentComponent && (
-          <div className="hidden md:block h-screen sticky top-0 w-64 flex-shrink-0 overflow-y-auto">
+          <div className="hidden md:block h-screen top-0 w-64 flex-shrink-0 overflow-y-auto">
             {contentComponent}
           </div>
         )}

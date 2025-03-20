@@ -9,6 +9,9 @@ export function ContextProvider({ children }) {
   // State to track which content component to render (for both sidebar and third column)
   const [contentComponent, setContentComponent] = useState(null);
 
+  // Add state for controlling the right sheet visibility
+  const [isRightSheetOpen, setIsRightSheetOpen] = useState(false);
+
   // Use useCallback to create stable function references
   const setContextContent = useCallback((component) => {
     setContentComponent(component);
@@ -16,13 +19,22 @@ export function ContextProvider({ children }) {
 
   const clearContextContent = useCallback(() => {
     setContentComponent(null);
+    setIsRightSheetOpen(false);
   }, []);
 
-  // Create a stable value object
+  // Add function to close the sheet without clearing content
+  const closeContextContent = useCallback(() => {
+    setIsRightSheetOpen(false);
+  }, []);
+
+  // Create a stable value object with all needed functions and state
   const contextValue = {
     contentComponent,
     setContextContent,
     clearContextContent,
+    closeContextContent,
+    isRightSheetOpen,
+    setIsRightSheetOpen
   };
 
   return (
