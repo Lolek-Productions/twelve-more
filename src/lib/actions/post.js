@@ -451,7 +451,7 @@ export async function setUserLikesAction(post, user) {
   }
 }
 
-export async function getPostsByUserId(userId, limit) {
+export async function getPostsByUserId(userId, limit, appUser) {
   try {
     await connect();
 
@@ -459,7 +459,20 @@ export async function getPostsByUserId(userId, limit) {
       throw new Error("User ID is required");
     }
 
-    const posts = await Post.find({user: userId})
+    const posts = await Post.find({
+      $or: [
+        {
+          organization: appUser.selectedOrganization.id,
+          community: null,
+          user: userId
+        },
+        {
+          community: { $in: appUser.communities.map(c => c.id) },
+          organization: appUser.selectedOrganization.id,
+          user: userId,
+        }
+      ]
+    })
       .populate({
         path: "comments",
         select: "comment profileImg createdAt",

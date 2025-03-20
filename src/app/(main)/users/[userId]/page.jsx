@@ -6,6 +6,7 @@ import { getUserById } from "@/lib/actions/user";
 import Link from "next/link"
 import Post from "@/components/Post.jsx";
 import {getPostsByUserId} from "@/lib/actions/post.js";
+import {useAppUser} from "@/hooks/useAppUser.js";
 
 export default function UserPage() {
   const params = useParams();
@@ -16,6 +17,7 @@ export default function UserPage() {
   const [error, setError] = useState(null);
   const [postNum, setPostNum] = useState(10);
   const [hasMore, setHasMore] = useState(false);
+  const { appUser } = useAppUser();
 
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function UserPage() {
 
     async function fetchUserPosts() {
       try {
-        const postData = await getPostsByUserId(userId, postNum);
+        const postData = await getPostsByUserId(userId, postNum, appUser);
         // console.log(postData);
 
         if (postData.success) {
@@ -65,7 +67,7 @@ export default function UserPage() {
       }
     }
     fetchUserPosts();
-  }, [userId]);
+  }, [userId, appUser]);
 
 
   if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
