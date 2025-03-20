@@ -487,6 +487,7 @@ export async function getPostsByUserId(userId, limit) {
         path: 'prayers.user',
       })
       .limit(limit)
+      .sort({ createdAt: -1 })
       .lean();
 
     if (!posts) {
