@@ -7,38 +7,14 @@ import Link from "next/link";
 import {createCommunity, deleteCommunities, getCommunitiesByOrganization} from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog.jsx";
-import {Input} from "@/components/ui/input.jsx";
-import {z} from "zod";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Label} from "@/components/ui/label.jsx";
-
-const communitySchema = z.object({
-  name: z.string().min(1, "Community name is required"),
-});
 
 export default function CommunitiesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [communityName, setCommunityName] = useState("");
-  const [serverResponse, setServerResponse] = useState(null);
   const [communities, setCommunities] = useState([]);
   const [joinStatus, setJoinStatus] = useState({});
   const { appUser } = useAppUser();
   const { toast } = useToast();
-
-  const createForm = useForm({
-    resolver: zodResolver(communitySchema),
-  });
 
   const fetchCommunities = async () => {
     if (!appUser) return;
@@ -61,47 +37,6 @@ export default function CommunitiesList() {
   useEffect(() => {
     fetchCommunities();
   }, [appUser]);
-
-  const onCreateSubmit = async (formData) => {
-    if (!appUser?.id || !appUser.selectedOrganization?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in and have an organization selected to create a community.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setModalOpen(false);
-    createForm.reset();
-
-    try {
-      const result = await createCommunity({
-        ...formData,
-        organizationId: appUser.selectedOrganization.id,
-      });
-
-      if (!result.success) {
-        return toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive",
-        });
-      }
-
-      toast({
-        title: "Community Created",
-        description: "Your new community has been created successfully!",
-      });
-      await fetchCommunities();
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Error",
-        description: "Failed to create community.",
-        variant: "destructive",
-      });
-    }
-  };
 
   async function handleAddCommunityToUser(communityId) {
     if (!appUser?.id) {
@@ -235,32 +170,6 @@ export default function CommunitiesList() {
         </ul>
       )}
 
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create a New Community</DialogTitle>
-            <DialogDescription>
-              This community will be a place where people within the given organization can come together.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              type="text"
-              name="name"
-              placeholder="Community Name"
-              defaultValue="Best Community Yet"
-              {...createForm.register("name")}
-            />
-            {serverResponse?.error && <p className="text-red-500 text-sm">{serverResponse.error}</p>}
-            {serverResponse?.success && <p className="text-green-500 text-sm">{serverResponse.success}</p>}
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

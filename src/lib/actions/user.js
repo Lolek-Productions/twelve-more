@@ -116,6 +116,15 @@ export async function getPrivateUserById(userId) {
     await connect();
 
     const user = await User.findById(userId)
+      .populate('organizations.organization')
+      .populate({
+        path: 'communities.community',
+        populate: {
+          path: 'organization',
+          select: '_id name'
+        }
+      })
+      .populate('selectedOrganization')
       .lean();
 
     return {
@@ -129,6 +138,30 @@ export async function getPrivateUserById(userId) {
         avatar: user.avatar,
         bio: user.bio,
         clerkId: user.clerkId,
+        organizations: user.organizations
+          ? user.organizations.map((org) => ({
+            id: org.organization?._id.toString(),
+            name: org.organization?.name || "Empty Organization",
+            role: org.role || "",
+            membershipId: org._id.toString(),
+          }))
+          : [],
+        selectedOrganization: {
+          id: user.selectedOrganization?._id.toString(),
+          name: user.selectedOrganization?.name,
+          description: user.selectedOrganization?.description,
+          role: user.selectedOrganization?.role,
+        },
+        communities: user.communities
+          ? user.communities.map((com) => ({
+            id: com.community?._id.toString(),       // Populated _id
+            name: com.community?.name || "Empty Community", // Populated name
+            role: com.role || "",
+            membershipId: com._id.toString(),
+            organizationId: com.community?.organization?._id.toString() || null,
+            organizationName: com.community?.organization?.name || null,
+          }))
+          : [],
       }
     };
   } catch (error) {

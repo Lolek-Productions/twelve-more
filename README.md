@@ -22,3 +22,6 @@ throw new Error("This is a test error message");
 2. Be invited to the organization via SMS: user receives a link to the assigned welcoming community
 3. Click on a physically published link so the user can join the welcoming community.
 4. Join the website as a completely new user. 
+
+# toast:
+const { showResponseToast, showErrorToast } = useApiToast();

@@ -75,9 +75,8 @@ export default function NewCommunityPage() {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      // console.log("Community data submitted:", data);
 
-      const response = await createCommunity(data, appUser.id, appUser.selectedOrganization.id);
+      const response = await createCommunity({ ...data, userId: appUser.id, organizationId: appUser.selectedOrganization.id });
 
       showResponseToast(response);
 
@@ -92,8 +91,7 @@ export default function NewCommunityPage() {
   };
 
   return (
-    <div className="flex w-full">
-      <div className='min-h-screen max-w-xl mx-auto border-r border-l'>
+      <>
         <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
           <h2 className='text-lg sm:text-xl font-bold'>Create a New Community</h2>
         </div>
@@ -178,7 +176,6 @@ export default function NewCommunityPage() {
             </form>
           </Form>
         </div>
-      </div>
-    </div>
+      </>
   );
 }

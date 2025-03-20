@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
 import { getCommunitiesByOrganization, createCommunity } from "@/lib/actions/community";
 import {deleteOrganization, getOrganizationById} from "@/lib/actions/organization";
 import { CommunityTable } from "./community-table";
@@ -23,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {useApiToast} from "@/lib/utils.js";
 
 export default function DeveloperCommunitiesPage() {
   const params = useParams();
@@ -33,7 +33,7 @@ export default function DeveloperCommunitiesPage() {
   const [organizationName, setOrganizationName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newCommunityName, setNewCommunityName] = useState("");
-  const { toast } = useToast();
+  const { showResponseToast, showErrorToast } = useApiToast();
 
   useEffect(() => {
     if (organizationId) {
@@ -67,42 +67,29 @@ export default function DeveloperCommunitiesPage() {
 
   const handleCreateCommunity = async () => {
     if (!newCommunityName.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Community name is required",
-      });
+      showErrorToast("Community name is required")
       return;
     }
 
     try {
       const response = await createCommunity({
         name: newCommunityName,
-        organizationId,
+        organizationId: organizationId,
       });
+
+      console.log(response);
 
       if (response?.success) {
         setNewCommunityName("");
         setDialogOpen(false);
         fetchCommunities(); // Refresh the community list
-        toast({
-          title: "Success",
-          description: "Community created successfully",
-        });
+        showResponseToast(response)
       } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: response?.error || "Failed to create community",
-        });
+        showErrorToast(response?.message)
       }
     } catch (error) {
       console.error("Error creating community:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create community",
-      });
+      showErrorToast(error)
     }
   };
 
@@ -111,21 +98,13 @@ export default function DeveloperCommunitiesPage() {
       const response = await deleteOrganization(organizationId);
 
       if (response?.success) {
-        router.push("/developer/organizations"); // Redirect after deletion
+        router.push("/developer/organizations");
       } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: response?.error || "Failed to delete organization",
-        });
+        showResponseToast(response);
       }
     } catch (error) {
       console.error("Error deleting organization:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete organization",
-      });
+      showErrorToast(error);
     }
   };
 

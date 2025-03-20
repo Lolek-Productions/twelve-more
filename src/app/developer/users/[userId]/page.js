@@ -11,7 +11,7 @@ import {
   addCommunityToUser,
   removeCommunityFromUserByMembershipId,
   addOrganizationToUser,
-  removeOrganizationFromUserByMembershipId,
+  removeOrganizationFromUserByMembershipId, getPrivateUserById,
 } from "@/lib/actions/user";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,7 +56,7 @@ export default function UsersPage() {
 
   async function fetchUser() {
     try {
-      const data = await getUserById(userId);
+      const data = await getPrivateUserById(userId);
       console.log(data);
 
       if (data.user) {
@@ -216,11 +216,11 @@ export default function UsersPage() {
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-medium">User: {user?.firstName}</h3>
+          <h3 className="text-lg font-medium">User: {user?.firstName} {user?.lastName}</h3>
           <p className="text-sm text-muted-foreground">Id: {user?.id}</p>
           <p className="text-sm text-muted-foreground">ClerkId: {user?.clerkId}</p>
           <p className="text-sm text-muted-foreground">Selected Organization: {user?.selectedOrganization?.id}</p>
-          <p className="text-sm text-muted-foreground">Bio: {user?.bio}</p>
+          <p className="text-sm text-muted-foreground">Phone Number: {user?.phoneNumber}</p>
         </div>
 
         <div className="space-x-2 flex justify-between items-center">
@@ -254,17 +254,28 @@ export default function UsersPage() {
               />
               <div className="max-h-60 overflow-y-auto">
                 {searchResults.length > 0 ? (
-                  searchResults.map((community) => (
-                    <div
-                      key={community.id}
-                      className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
-                      onClick={() => handleAddCommunity(community.id)}
-                    >
-                      <span>{community.name}</span>
-                    </div>
-                  ))
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="text-left p-2 font-medium text-gray-600">Community</th>
+                      <th className="text-left p-2 font-medium text-gray-600">Organization</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {searchResults.map((community) => (
+                      <tr
+                        key={community.id}
+                        className="hover:bg-gray-100 cursor-pointer border-b border-gray-100"
+                        onClick={() => handleAddCommunity(community.id)}
+                      >
+                        <td className="p-2">{community.name}</td>
+                        <td className="p-2 text-gray-600">{community.organization.name}</td>
+                      </tr>
+                    ))}
+                    </tbody>
+                  </table>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500 p-2">
                     {searchQuery.length < 2 ? "Type at least 2 characters to search." : "No communities found."}
                   </p>
                 )}

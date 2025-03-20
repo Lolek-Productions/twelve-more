@@ -10,17 +10,17 @@ import {removeCommunitiesFromAllUsers} from "@/lib/actions/user.js";
 /**
  * Creates a new community
  */
-export async function createCommunity(formData, userId, organizationId) {
-  if (!userId) return { success: false, message: "User is required." };
+export async function createCommunity(data) {
 
   try {
-    const name = formData.name?.trim();
-    const purpose = formData.purpose?.trim();
-    const visibility = formData.visibility?.trim();
+    const name = data.name?.trim();
+    const purpose = data.purpose?.trim();
+    const visibility = data.visibility?.trim() ?? 'public';
+    const userId = data.userId?.trim();
+    const organizationId = data.organizationId?.trim();
 
     if (!name) return { success: false, message: "Community name is required." };
-    if (!purpose) return { success: false, message: "Purpose is required." };
-    if (!visibility) return { success: false, message: "Visibility is required." };
+    if (!organizationId) return { success: false, message: "Organization ID is required." };
 
     await connect();
 
@@ -235,13 +235,18 @@ export async function searchCommunities(query) {
     const communities = await Community.find({
       name: { $regex: regex }
     })
-      .select("name")
-      .limit(10)
-      .lean();
+    .populate('organization')
+    .select("name")
+    .limit(10)
+    .lean();
 
     const formattedCommunities = communities.map((community) => ({
       id: community._id.toString(),
       name: community.name.trim(),
+      organization: {
+        id: community.organization?._id.toString(),
+        name: community.organization?.name || "Unknown Organization",
+      }
     }));
 
     return {
