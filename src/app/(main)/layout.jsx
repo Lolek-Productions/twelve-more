@@ -108,7 +108,7 @@ function InnerLayout({ children }) {
                     <SheetTitle>Context Information</SheetTitle>
                   </VisuallyHidden>
                   {/* Render the dynamic content component in the right sheet on mobile */}
-                  <div className="pt-9 px-3">
+                  <div className="pt-9 px-3 overflow-y-auto max-h-full flex-grow">
                     {contentComponent}
                   </div>
                 </SheetContent>
