@@ -66,13 +66,31 @@ export default function LeftSidebar({ onLinkClick }) {
     href: '/communities/',
   };
 
-  // Filter communities to only include those with an id, then decide on fallback
-  const validCommunities = appUser?.communities?.filter((community) =>
-    community.id && typeof community.id === 'string' && community.id.trim() !== '' && community.organizationId === appUser.selectedOrganization.id
+  console.log(appUser.selectedOrganization?.welcomingCommunity?.id);
+
+  const WELCOMING_COMMITTEE_ID = appUser.selectedOrganization?.welcomingCommunity?.id;
+
+// Get all communities from the organization without validity filtering
+  const orgCommunities = appUser?.communities?.filter(community =>
+    community.organizationId === appUser.selectedOrganization.id
   ) || [];
 
-  const communitiesToRender = validCommunities.length > 0
-    ? validCommunities
+// Sort communities to ensure welcoming committee is first
+  const sortedCommunities = orgCommunities.sort((a, b) => {
+    // Check if community is the welcoming committee by ID
+    const isWelcomingCommitteeA = a.id === WELCOMING_COMMITTEE_ID;
+    const isWelcomingCommitteeB = b.id === WELCOMING_COMMITTEE_ID;
+
+    // If a is welcoming committee, it comes first
+    if (isWelcomingCommitteeA && !isWelcomingCommitteeB) return -1;
+    // If b is welcoming committee, it comes first
+    if (!isWelcomingCommitteeA && isWelcomingCommitteeB) return 1;
+    // Otherwise maintain original order
+    return 0;
+  });
+
+  const communitiesToRender = sortedCommunities.length > 0
+    ? sortedCommunities
     : [fallbackLink];
 
   // Sample organizations data - replace with actual data from appUser
@@ -80,11 +98,6 @@ export default function LeftSidebar({ onLinkClick }) {
   const fallbackOrg = { id: 'create-org', name: 'Create an Organization', href: '/organizations/create' };
 
   const orgsToRender = organizations.length > 0 ? organizations : [fallbackOrg];
-
-  // Check if current path includes an organization ID
-  const currentOrgId = pathname.includes('/organizations/')
-    ? pathname.split('/organizations/')[1]?.split('/')[0]
-    : null;
 
   return (
     <div className="flex flex-col h-full">

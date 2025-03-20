@@ -27,6 +27,7 @@ function SessionInitializer({ initialUser }) {
       // Check if the response was successful and extract the user object
       if (appUserResponse.success) {
         setUser(appUserResponse.user); // Set only the 'user' part
+        // console.log(appUserResponse.user);
       } else {
         console.error('Failed to fetch user:', appUserResponse.error);
         setUser(null); // Or handle the error case as needed

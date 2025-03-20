@@ -172,3 +172,25 @@ export async function searchOrganizations(query) {
     };
   }
 }
+
+export async function setWelcomingCommunity(organizationId, communityId) {
+  try {
+    await connect();
+
+    await Organization.findByIdAndUpdate(
+      organizationId,
+      { welcomingCommunity: communityId }
+    );
+
+    return {
+      success: true,
+      message: "Successfully updated Welcoming Community"
+    };
+  } catch (error) {
+    console.error("Error updating Welcoming Community:", error);
+    return {
+      success: false,
+      message:"Failed to update Welcoming Community",
+    };
+  }
+}

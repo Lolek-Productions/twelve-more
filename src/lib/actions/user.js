@@ -62,7 +62,12 @@ export async function getUserById(userId) {
           select: '_id name'
         }
       })
-      .populate('selectedOrganization')
+      .populate({
+        path: 'selectedOrganization',
+        populate: {
+          path: 'welcomingCommunity'
+        }
+      })
       .lean();
 
     return {
@@ -88,6 +93,7 @@ export async function getUserById(userId) {
           name: user.selectedOrganization?.name,
           description: user.selectedOrganization?.description,
           role: user.selectedOrganization?.role,
+          welcomingCommunity: { id: user.selectedOrganization?.welcomingCommunity?._id.toString()},
         },
         communities: user.communities
           ? user.communities.map((com) => ({

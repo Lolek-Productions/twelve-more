@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import {useParams, useRouter} from "next/navigation";
 
-export function CommunityTable({ data, deleteEntity, onManageMembers }) {
+export function CommunityTable({ data, deleteEntity, onManageMembers, handleSetWelcomingCommittee }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
 
@@ -36,22 +36,28 @@ export function CommunityTable({ data, deleteEntity, onManageMembers }) {
         </Button>
       ),
     },
-    // {
-    //   accessorKey: "members",
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //     >
-    //       Members
-    //       <ArrowUpDown className="ml-2 h-4 w-4" />
-    //     </Button>
-    //   ),
-    //   cell: ({ row }) => {
-    //     const members = row.getValue("members") || [];
-    //     return <div>{members.length}</div>;
-    //   },
-    // },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const community = row.original;
+
+        return (
+          <div className="flex items-center justify-end space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetWelcomingCommittee(community.id)
+              }}
+            >
+              Set as Welcoming Committee
+            </Button>
+          </div>
+        );
+      },
+      header: "Actions",
+    },
 
   ];
 

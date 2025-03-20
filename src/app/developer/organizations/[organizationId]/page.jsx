@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCommunitiesByOrganization, createCommunity } from "@/lib/actions/community";
-import {deleteOrganization, getOrganizationById} from "@/lib/actions/organization";
+import {deleteOrganization, getOrganizationById, setWelcomingCommunity} from "@/lib/actions/organization";
 import { CommunityTable } from "./community-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,6 +93,16 @@ export default function DeveloperCommunitiesPage() {
     }
   };
 
+  const handleSetWelcomingCommittee = async (communityId) => {
+    try {
+      const response = await setWelcomingCommunity(organizationId, communityId);
+      showResponseToast(response);
+    } catch (error) {
+      console.error("Error updating organization:", error);
+      showErrorToast(error);
+    }
+  }
+
   const handleDeleteOrganization = async () => {
     try {
       const response = await deleteOrganization(organizationId);
@@ -150,8 +160,10 @@ export default function DeveloperCommunitiesPage() {
         data={communities}
         deleteEntity={(id) => console.log("Delete community", id)}
         onManageMembers={(community) => console.log("Manage members for", community)}
+        handleSetWelcomingCommittee={handleSetWelcomingCommittee}
       />
 
+      {/*Create a new community*/}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -195,8 +207,6 @@ export default function DeveloperCommunitiesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
     </div>
   );
 }
