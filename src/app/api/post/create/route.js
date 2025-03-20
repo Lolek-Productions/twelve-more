@@ -70,7 +70,7 @@ export const POST = async (req) => {
 
         const truncatedText = truncateText(data.text, 150);
 
-        const communityLink = `${process.env.APP_URL}/communities/${data.communityId}`;
+        const communityLink = `https://twelvemore.social/communities/${data.communityId}`;
         const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
 
         // Send batch SMS using Twilio Notify
