@@ -100,7 +100,7 @@ export const deleteCommunities = async (ids) => {
 /**
  * Gets all communities for an organization
  */
-export const getCommunitiesByOrganization = async function (organizationId, user = null) {
+export const getCommunitiesByOrganization = async function (organizationId) {
   try {
     if (!organizationId) {
       return { success: false, message: "Organization ID is required." };
@@ -108,9 +108,46 @@ export const getCommunitiesByOrganization = async function (organizationId, user
 
     await connect();
 
-    const userCommunityIds = user?.communities.map(c => c.id) || [];
+    const communitiesData = await Community.find({
+      $or: [
+        {
+          organization: organizationId,
+        },
+      ]
+    })
+      .populate({
+        path: "organization",
+        select: "name",
+      })
+      .lean();
 
-    const communities = await Community.find({
+    return {
+      success: true,
+      communities: communitiesData.map((community) => ({
+          id: community._id?.toString() || "",
+          name: community.name,
+          purpose: community.purpose,
+          visibility: community.visibility,
+          organization: {name: community.organization?.name || "Unknown Organization"},
+        }))
+      }
+  } catch (error) {
+    console.error("Error fetching communities by organization:", error);
+    return [];
+  }
+};
+
+export const getCommunitiesByOrganizationForUser = async function (organizationId, appUser) {
+  try {
+    if (!organizationId) {
+      return { success: false, message: "Organization ID is required." };
+    }
+
+    await connect();
+
+    const userCommunityIds = appUser?.communities.map(c => c.id) || [];
+
+    const communitiesData = await Community.find({
       $or: [
         {
           organization: organizationId,
@@ -128,13 +165,16 @@ export const getCommunitiesByOrganization = async function (organizationId, user
       })
       .lean();
 
-    return communities.map((community) => ({
-      id: community._id?.toString() || "",
-      name: community.name,
-      purpose: community.purpose,
-      visibility: community.visibility,
-      organization: { name: community.organization?.name || "Unknown Organization" },
-    }));
+    return {
+      success: true,
+      communities: communitiesData.map((community) => ({
+        id: community._id?.toString() || "",
+        name: community.name,
+        purpose: community.purpose,
+        visibility: community.visibility,
+        organization: {name: community.organization?.name || "Unknown Organization"},
+      }))
+    }
   } catch (error) {
     console.error("Error fetching communities by organization:", error);
     return [];

@@ -70,7 +70,9 @@ export async function deleteOrganization(organizationId) {
 
   const organizationToDelete = await getOrganizationById(organizationId);
 
-  const communitiesToDelete = await getCommunitiesByOrganization(organizationId);
+  const communitiesResponse = await getCommunitiesByOrganization(organizationId);
+  const communitiesToDelete = communitiesResponse.communities;
+
   const communitiesToDeleteArray = communitiesToDelete.map((com) => {
     return com.id;
   })
@@ -117,13 +119,16 @@ export const getOrganizationById = async function (organizationId) {
     }
 
     return {
-      id: organization._id?.toString() || "",
-      name: organization.name,
-      description: organization.description,
+      success: true,
+      organization: {
+        id: organization._id?.toString() || "",
+        name: organization.name,
+        description: organization.description,
+      }
     };
   } catch (error) {
     console.error("Error fetching organization by ID:", error);
-    return null;
+    return {success: false, message: error.message};
   }
 };
 

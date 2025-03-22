@@ -49,9 +49,9 @@ export default function DeveloperCommunitiesPage() {
         setCommunities(communitiesData);
         setOrganizationName(communitiesData[0].organization?.name || "Unknown Organization");
       } else {
-        const organization = await getOrganizationById(organizationId);
+        const organizationData = await getOrganizationById(organizationId);
         setCommunities([]);
-        setOrganizationName(organization?.name || "Unknown Organization");
+        setOrganizationName(organizationData.organization?.name || "Unknown Organization");
       }
     } catch (error) {
       console.error("Error fetching communities:", error);

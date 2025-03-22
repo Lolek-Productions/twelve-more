@@ -154,13 +154,13 @@ export default function LeftSidebar({ onLinkClick }) {
                   {orgsToRender.map((org) => (
                     <div key={org.id} className="space-y-1">
                       <div className="flex items-center">
-                        <Button
+                        <Link
                           variant={'ghost'}
+                          href={`/organizations/${org.id}`}
                           className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
-                          onClick={() => handleOrganizationClick(org.id)}
                         >
                           <span className="text-sm">{org.name}</span>
-                        </Button>
+                        </Link>
 
                         {/* Expand/collapse button for communities */}
                         <button

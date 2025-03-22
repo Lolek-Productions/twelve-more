@@ -2,7 +2,7 @@
 
 import HomeFeed from '@/components/HomeFeed';
 import PostInput from '@/components/PostInput.jsx';
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useContextContent } from "@/components/ContextProvider";
 import HomeContextSidebar from "@/components/HomeContextSidebar";
 import {useAppUser} from "@/hooks/useAppUser.js";
