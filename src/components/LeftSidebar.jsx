@@ -11,13 +11,14 @@ import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
 import {useState} from "react";
-import {setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
+// No longer need the setSelectedOrganizationOnUser action
 import { useApiToast } from "@/lib/utils";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
   const {appUser, isLoaded} = useAppUser();
   const [organizationsOpen, setOrganizationsOpen] = useState(false);
+  const [expandedOrgs, setExpandedOrgs] = useState({});
   const { showResponseToast, showErrorToast } = useApiToast();
   const router = useRouter();
 
@@ -26,17 +27,18 @@ export default function LeftSidebar({ onLinkClick }) {
     if (onLinkClick) onLinkClick(); // Only call if provided (mobile case)
   };
 
-  const handleOrganizationClick = async (organizationId) => {
-    try {
-      const response = await setSelectedOrganizationOnUser(organizationId, appUser.id);
-      showResponseToast(response);
-      if (response.success) {
-        router.push('/home');
-        location.reload();
-      }
-    } catch (error) {
-      showErrorToast(error);
-    }
+  // No longer need to track selected organization
+  const handleOrganizationClick = (organizationId) => {
+    // Expand/collapse communities for this organization
+    toggleOrgExpansion(organizationId, { stopPropagation: () => {} });
+  };
+
+  const toggleOrgExpansion = (orgId, event) => {
+    event.stopPropagation(); // Prevent triggering organization selection
+    setExpandedOrgs(prev => ({
+      ...prev,
+      [orgId]: !prev[orgId]
+    }));
   };
 
   const sidebarNavItems = [
@@ -66,28 +68,30 @@ export default function LeftSidebar({ onLinkClick }) {
     href: '/communities/',
   };
 
-  const WELCOMING_COMMITTEE_ID = appUser.selectedOrganization?.welcomingCommunity?.id;
+  // No longer using selectedOrganization
+  const WELCOMING_COMMITTEE_ID = null; // You might want to implement a different way to find welcoming communities
 
-// Get all communities from the organization without validity filtering
-  const orgCommunities = appUser?.communities || [];
+  // Get communities for a specific organization
+  const getOrgCommunities = (orgId) => {
+    // This is a placeholder - you'll need to adapt this to match your data structure
+    // It should filter communities that belong to the specific organization
+    const orgCommunities = appUser?.communities?.filter(community =>
+      community.organizationId === orgId
+    ) || [];
 
-// Sort communities to ensure welcoming committee is first
-  const sortedCommunities = orgCommunities.sort((a, b) => {
-    // Check if community is the welcoming committee by ID
-    const isWelcomingCommitteeA = a.id === WELCOMING_COMMITTEE_ID;
-    const isWelcomingCommitteeB = b.id === WELCOMING_COMMITTEE_ID;
+    return orgCommunities.sort((a, b) => {
+      // Check if community is the welcoming committee by ID
+      const isWelcomingCommitteeA = a.id === WELCOMING_COMMITTEE_ID;
+      const isWelcomingCommitteeB = b.id === WELCOMING_COMMITTEE_ID;
 
-    // If a is welcoming committee, it comes first
-    if (isWelcomingCommitteeA && !isWelcomingCommitteeB) return -1;
-    // If b is welcoming committee, it comes first
-    if (!isWelcomingCommitteeA && isWelcomingCommitteeB) return 1;
-    // Otherwise maintain original order
-    return 0;
-  });
-
-  const communitiesToRender = sortedCommunities.length > 0
-    ? sortedCommunities
-    : [fallbackLink];
+      // If a is welcoming committee, it comes first
+      if (isWelcomingCommitteeA && !isWelcomingCommitteeB) return -1;
+      // If b is welcoming committee, it comes first
+      if (!isWelcomingCommitteeA && isWelcomingCommitteeB) return 1;
+      // Otherwise maintain original order
+      return 0;
+    });
+  };
 
   // Sample organizations data - replace with actual data from appUser
   const organizations = appUser?.organizations || [];
@@ -146,21 +150,54 @@ export default function LeftSidebar({ onLinkClick }) {
               </button>
 
               {organizationsOpen && (
-                <div className="ml-8 mt-1 space-y-1">
+                <div className="ml-4 mt-1 space-y-1">
                   {orgsToRender.map((org) => (
-                    <Button
-                      variant={'ghost'}
-                      key={org.id}
-                      className={cn(
-                        "flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 w-full justify-start",
-                        appUser?.selectedOrganization?.id === org.id
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : "hover:bg-gray-100"
+                    <div key={org.id} className="space-y-1">
+                      <div className="flex items-center">
+                        <Button
+                          variant={'ghost'}
+                          className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
+                          onClick={() => handleOrganizationClick(org.id)}
+                        >
+                          <span className="text-sm">{org.name}</span>
+                        </Button>
+
+                        {/* Expand/collapse button for communities */}
+                        <button
+                          className="p-1 hover:bg-gray-100 rounded-md"
+                          onClick={(e) => toggleOrgExpansion(org.id, e)}
+                        >
+                          {expandedOrgs[org.id] ? (
+                            <HiChevronDown className="w-4 h-4" />
+                          ) : (
+                            <HiChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Communities for this organization */}
+                      {expandedOrgs[org.id] && (
+                        <div className="pl-6 space-y-1">
+                          {getOrgCommunities(org.id).length > 0 ? (
+                            getOrgCommunities(org.id).map(community => (
+                              <Link
+                                key={community.id}
+                                href={community.href || `/communities/${community.id}`}
+                                className="flex items-center p-1 hover:bg-gray-100 rounded-md text-sm"
+                                onClick={handleLinkClick}
+                              >
+                                <span className="text-xl mr-1">·</span>
+                                <span>{community.name}</span>
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="flex items-center p-1 text-gray-500 text-sm">
+                              <span>No communities</span>
+                            </div>
+                          )}
+                        </div>
                       )}
-                      onClick={() => handleOrganizationClick(org.id)}
-                    >
-                      <span className="text-sm">{org.name}</span>
-                    </Button>
+                    </div>
                   ))}
 
                   <Link
@@ -176,6 +213,7 @@ export default function LeftSidebar({ onLinkClick }) {
             </div>
           </nav>
 
+          {/* Optional: Keep the original Communities section or remove it */}
           <div className="p-3 bg-gray-100 rounded-md mt-2">
             <div className="flex items-center">
               <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
@@ -184,17 +222,28 @@ export default function LeftSidebar({ onLinkClick }) {
               </Link>
             </div>
             <div>
-              {communitiesToRender.map((community) => (
+              {appUser?.communities?.length > 0 ? (
+                appUser.communities.map((community) => (
+                  <Link
+                    key={community.id}
+                    href={community.href || `/communities/${community.id}`}
+                    className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
+                    onClick={handleLinkClick}
+                  >
+                    <span className="text-xl mr-2">·</span>
+                    <span>{community.name}</span>
+                  </Link>
+                ))
+              ) : (
                 <Link
-                  key={community.id}
-                  href={community.href || `/communities/${community.id}`}
+                  href={fallbackLink.href}
                   className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
                   onClick={handleLinkClick}
                 >
                   <span className="text-xl mr-2">·</span>
-                  <span>{community.name}</span>
+                  <span>{fallbackLink.name}</span>
                 </Link>
-              ))}
+              )}
             </div>
           </div>
         </div>
