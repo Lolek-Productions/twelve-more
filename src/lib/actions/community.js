@@ -141,6 +141,45 @@ export const getCommunitiesByOrganization = async function (organizationId, user
   }
 };
 
+export const getCommunitiesByUser = async function (appUser) {
+  if (!appUser) {return;}
+
+  try {
+    await connect();
+
+    const userCommunityIds = appUser.communities.map(c => c.id) || [];
+    const userOrganizationIds = appUser.organizations.map(c => c.id) || [];
+
+    const communities = await Community.find({
+      $or: [
+        {
+          organization: { $in: userOrganizationIds },
+          visibility: "public"
+        },
+        {
+          _id: { $in: userCommunityIds }
+        }
+      ]
+    })
+      .populate({
+        path: "organization",
+        select: "name",
+      })
+      .lean();
+
+    return communities.map((community) => ({
+      id: community._id?.toString() || "",
+      name: community.name,
+      purpose: community.purpose,
+      visibility: community.visibility,
+      organization: { name: community.organization?.name || "Unknown Organization" },
+    }));
+  } catch (error) {
+    console.error("Error fetching communities by organization:", error);
+    return [];
+  }
+};
+
 /**
  * Gets a community by ID
  */

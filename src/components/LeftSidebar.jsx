@@ -12,7 +12,7 @@ import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
 import {useState} from "react";
 import {setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
-import { useApiToast } from "@/lib/utils"; // Import your utility
+import { useApiToast } from "@/lib/utils";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
@@ -66,14 +66,10 @@ export default function LeftSidebar({ onLinkClick }) {
     href: '/communities/',
   };
 
-  console.log(appUser.selectedOrganization?.welcomingCommunity?.id);
-
   const WELCOMING_COMMITTEE_ID = appUser.selectedOrganization?.welcomingCommunity?.id;
 
 // Get all communities from the organization without validity filtering
-  const orgCommunities = appUser?.communities?.filter(community =>
-    community.organizationId === appUser.selectedOrganization.id
-  ) || [];
+  const orgCommunities = appUser?.communities || [];
 
 // Sort communities to ensure welcoming committee is first
   const sortedCommunities = orgCommunities.sort((a, b) => {

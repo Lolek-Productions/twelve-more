@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
-import {createCommunity, deleteCommunities, getCommunitiesByOrganization} from '@/lib/actions/community';
+import {
+  deleteCommunities,
+  getCommunitiesByUser
+} from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
 
@@ -25,7 +28,7 @@ export default function CommunitiesList() {
     }
     try {
       setLoading(true);
-      const orgCommunities = await getCommunitiesByOrganization(appUser.selectedOrganization.id, appUser);
+      const orgCommunities = await getCommunitiesByUser(appUser);
       setCommunities(orgCommunities);
     } catch (err) {
       setError(err.message);
@@ -130,7 +133,7 @@ export default function CommunitiesList() {
                       {community?.visibility?.charAt(0).toUpperCase() + community?.visibility?.slice(1)}
                     </span>
                   </h4>
-                  <p className="text-muted-foreground">{community.purpose}</p>
+                  <p className="text-muted-foreground">{community.organization.name}</p>
                 </Link>
                 <div className="flex items-center gap-2 mt-2">
                   {!isMember ? (
@@ -169,7 +172,6 @@ export default function CommunitiesList() {
           })}
         </ul>
       )}
-
     </div>
   );
 }
