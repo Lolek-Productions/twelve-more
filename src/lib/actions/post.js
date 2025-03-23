@@ -123,6 +123,10 @@ export async function getPostsForCommunityFeed(limit = 10, user, communityId) {
         select: 'name',
       })
       .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
         path: 'user',
         select: 'firstName lastName',
       })
@@ -157,6 +161,10 @@ export async function getPostsForCommunityFeed(limit = 10, user, communityId) {
       community: {
         id: post.community?._id.toString(),
         name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
       },
       profileImg: post.profileImg,
       comments: post.comments?.map((comment) => ({
