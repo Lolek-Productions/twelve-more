@@ -13,6 +13,7 @@ import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
 import {useAppUser} from "@/hooks/useAppUser";
 import {sayPrayerAction, setUserLikesAction} from "@/lib/actions/post.js";
+import {useApiToast} from "@/lib/utils.js";
 
 export default function Icons({ post }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -23,6 +24,7 @@ export default function Icons({ post }) {
   const [postId, setPostId] = useAtom(postIdState);
   const router = useRouter();
   const {appUser} = useAppUser();
+  const { showResponseToast, showErrorToast } = useApiToast();
 
   const likePost = async () => {
     if (!appUser || !post) return;
@@ -63,10 +65,11 @@ export default function Icons({ post }) {
       if(response.success) {
         setPrayers(response.prayers);
         checkUserPrayed();
+        showResponseToast(response)
       }
-
     } catch (error) {
       console.error('Failed to add prayer:', error);
+      showErrorToast(error)
     }
   };
 

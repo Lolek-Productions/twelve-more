@@ -5,7 +5,8 @@ import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';
 import twilioService from "@/lib/services/twilioService.js";
 import {getPrivateUserById} from "@/lib/actions/user.js";
-import {truncateText} from "@/lib/utils.js";  //Keep even though WebStorm doesn't think it is being used!!!
+import {truncateText} from "@/lib/utils.js";
+import {sendSMS} from "@/lib/actions/sms.js";  //Keep even though WebStorm doesn't think it is being used!!!
 
 export async function getPostsForHomeFeed(limit = 10, user) {
   try {
@@ -341,25 +342,23 @@ export async function getPostById(postId) {
   }
 }
 
-export async function sayPrayerAction(post, user) {
-  console.log('hello sayPrayer');
-  console.log('post.id', post.id, 'user.id', user.id);
+export async function sayPrayerAction(post, appUser) {
 
   try {
     await connect();
 
-    const existingPost = await Post.findById(post.id);
+    const existingPost = await Post.findById(post.id).populate('user');
 
     if (!existingPost) {
       console.log('Post not found');
       return { success: false, message: 'Post not found' };
     }
 
-    const hasPrayed = existingPost.prayers.includes(user.id);
+    const hasPrayed = existingPost.prayers.includes(appUser.id);
 
     const updateOperation = hasPrayed
-      ? { $pull: { prayers: user.id } }
-      : { $addToSet: { prayers: user.id } };
+      ? { $pull: { prayers: appUser.id } }
+      : { $addToSet: { prayers: appUser.id } };
 
     const updatedPost = await Post.findByIdAndUpdate(
       post.id,
@@ -374,10 +373,27 @@ export async function sayPrayerAction(post, user) {
       return { success: false, message: 'Failed to update post' };
     }
 
+    if (!hasPrayed) {
+      try {
+        // Only send if this isn't the user's own post
+        const phoneNumber = existingPost?.user?.phoneNumber;
+        if (phoneNumber && existingPost.user._id.toString() !== appUser.id) {
+
+          const message = `${appUser.firstName} ${appUser.lastName} is praying for you. https://twelvemore.social/posts/${existingPost._id.toString()}`
+          // console.log(phoneNumber, message);
+
+          await sendSMS({phoneNumber, message});
+          // console.log('Prayer notification SMS sent to post creator');
+        }
+      } catch (notificationError) {
+        console.error('Failed to send prayer notification:', notificationError);
+        return { success: false, message: 'Failed to send prayer notification' };
+      }
+    }
+
     const actionMessage = hasPrayed
       ? 'Prayer removed successfully'
-      : 'Prayer added successfully';
-    console.log(actionMessage);
+      : 'Message sent';
 
     return {
       success: true,

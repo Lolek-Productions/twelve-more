@@ -41,7 +41,7 @@ export default function PostPage() {
 
   return (
     <>
-      <div className='flex items-center space-x-2 py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
+      <div className='flex items-center space-x-2 py-2 px-3 top-0 z-50 bg-white border-b border-gray-200'>
         <button
           onClick={() => router.back()}
           className='hover:bg-gray-100 rounded-full p-2'
