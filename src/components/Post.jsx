@@ -109,15 +109,25 @@ export default function Post({ post, clickableText = true }) {
                 </span>
               </div>
             </div>
-            {post?.community?.id && (
+
+            <div className="flex items-center gap-2 -mt-1">
               <div className="flex items-center mt-0.5">
                 <h4 className="font-bold text-xs truncate max-w-[200px]">
-                  <Link href={`/communities/${post?.community?.id}`} className="block truncate">
-                    {post?.community?.name}
+                  <Link href={`/organizations/${post?.organization?.id}`} className="block truncate">
+                    {post?.organization?.name}
                   </Link>
                 </h4>
               </div>
-            )}
+              {post?.community?.id && (
+                <div className="flex items-center mt-0.5">
+                  <h4 className="font-bold text-xs truncate max-w-[200px]">
+                    <Link href={`/communities/${post?.community?.id}`} className="block truncate">
+                      {post?.community?.name}
+                    </Link>
+                  </h4>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Use the custom text rendering function */}

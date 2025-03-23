@@ -33,6 +33,10 @@ export async function getPostsForHomeFeed(limit = 10, user) {
       select: 'name',
     })
     .populate({
+      path: 'organization',
+      select: 'name',
+    })
+    .populate({
       path: 'user',
       select: 'firstName lastName',
     })
@@ -67,6 +71,10 @@ export async function getPostsForHomeFeed(limit = 10, user) {
       community: {
         id: post.community?._id.toString(),
         name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
       },
       profileImg: post.profileImg,
       comments: post.comments?.map((comment) => ({
