@@ -47,13 +47,19 @@ export default function OnboardingComponent() {
   });
 
   useEffect(() => {
-    if (!hasRefreshed) {
-      // Mark as refreshed to prevent infinite loop
-      setHasRefreshed(true);
-      // Trigger a full page refresh
-      window.location.reload();
-    }
-  }, [hasRefreshed]);
+    const refreshUser = async () => {
+      if (user && !hasRefreshed) {
+        try {
+          await user.reload();
+          setHasRefreshed(true);
+          console.log('User refreshed:', user);
+        } catch (err) {
+          console.error('Failed to reload user:', err);
+        }
+      }
+    };
+    refreshUser();
+  }, [user, hasRefreshed]);
 
   // Check for pending community invitation
   useEffect(() => {
@@ -199,7 +205,7 @@ export default function OnboardingComponent() {
                   onClick={handleJoinCommunity}
                   className="w-full"
                   size="lg"
-                  disabled={isJoining || !user}
+                  disabled={isJoining || !hasRefreshed}
                 >
                   {isJoining ? "Joining Community..." : "Accept Invitation"}
                 </Button>
