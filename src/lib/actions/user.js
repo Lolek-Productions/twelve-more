@@ -701,29 +701,20 @@ export async function setSelectedOrganizationOnUser(organizationId, userId) {
   }
 }
 
-export async function getRecentOrganizationMembers(organizationId, limit = 5) {
-  console.log('organizationId', organizationId);
+export async function getRecentOrganizationsMembers(organizationIds, limit = 7) {
 
   try {
     // Input validation
-    if (!organizationId || !mongoose.isValidObjectId(organizationId)) {
-      return {
-        success: false,
-        message:"Invalid or missing organization ID",
-      };
-    }
 
     await connect(); // Ensure database connection
 
     // Find the 10 most recent users in the organization, sorted by createdAt descending
     const members = await User.find({
-        "organizations.organization": organizationId,
+        "organizations.organization": { $in: organizationIds },
       })
       .select("firstName lastName avatar createdAt") // Include createdAt for sorting
       .sort({ createdAt: -1 }) // -1 for descending (newest first)
       .limit(limit)
-
-    // console.log('Members:', members);
 
     // Check if any members were found
     if (!members || members.length === 0) {

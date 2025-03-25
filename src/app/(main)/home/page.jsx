@@ -19,18 +19,13 @@ export default function HomePage() {
     <>
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
         <h2 className='text-lg sm:text-xl font-bold'>
-          {appUser?.selectedOrganization?.id ?
-            <>Home: {appUser?.selectedOrganization?.name}</> :
-            'Select An Organization'
-          }
+          <div>Home</div>
         </h2>
       </div>
-      {appUser?.selectedOrganization?.id &&
-        <>
-          <PostInput placeholder={`Share a thought with EVERYONE`}/>
-          <HomeFeed/>
-        </>
-      }
+      <div>
+        {/*<PostInput placeholder={`Share a thought today`}/>*/}
+        <HomeFeed/>
+      </div>
     </>
   );
 }

@@ -231,7 +231,9 @@ export const getCommunityById = async function (communityId) {
 
     await connect();
 
-    const community = await Community.findById(communityId).lean();
+    const community = await Community.findById(communityId)
+      .populate('organization')
+      .lean();
 
     if (!community) {
       return { success: false, message: "Community not found." };

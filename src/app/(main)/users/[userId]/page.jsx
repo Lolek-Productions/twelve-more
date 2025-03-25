@@ -78,7 +78,18 @@ export default function UserPage() {
       <div className="py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">
         <h2 className="text-lg sm:text-xl font-bold">Profile: {user.firstName} {user.lastName}</h2>
       </div>
-      <div className={'p-6'}>
+
+      <div className="pt-3 pl-3">
+        {user.avatar && (
+          <img
+            src={user.avatar}
+            alt={`${user.firstName} ${user.lastName}'s avatar`}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        )}
+      </div>
+
+      <div className="p-3">
         <h3 className="text-lg font-semibold">Communities ({user.communities.length})</h3>
         {user.communities.length === 0 ? (
           <p className="text-gray-500">No communities yet.</p>
@@ -93,17 +104,32 @@ export default function UserPage() {
             ))}
           </div>
         )}
+
+        <h3 className="text-lg font-semibold pt-3">Organizations ({user.organizations.length})</h3>
+        {user.organizations.length === 0 ? (
+          <p className="text-gray-500">No organizations yet.</p>
+        ) : (
+          <div className="mt-2 space-y-2">
+            {user.organizations.map((organization) => (
+              <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">
+                <Link href={`/communities/${organization?.id}`}>
+                  <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="mt-5 p-6">
+      <div className="p-3">
         <h3 className="text-lg font-semibold">Posts</h3>
       </div>
+
       {posts &&
         posts.map((post) => {
           return <Post key={post.id} post={post}/>;
         })
       }
-
       {posts.length > 0 && !loading && hasMore && (
         <button
           onClick={() => setPostNum(postNum + 10)}

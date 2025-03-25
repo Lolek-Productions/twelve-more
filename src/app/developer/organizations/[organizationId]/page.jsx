@@ -45,9 +45,11 @@ export default function DeveloperCommunitiesPage() {
     try {
       const communitiesData = await getCommunitiesByOrganization(organizationId);
 
-      if (Array.isArray(communitiesData) && communitiesData.length > 0) {
-        setCommunities(communitiesData);
-        setOrganizationName(communitiesData[0].organization?.name || "Unknown Organization");
+      console.log('communitiesData', communitiesData);
+
+      if (Array.isArray(communitiesData.communities) && communitiesData.communities.length > 0) {
+        setCommunities(communitiesData.communities);
+        setOrganizationName(communitiesData.communities[0].organization?.name || "Unknown Organization");
       } else {
         const organizationData = await getOrganizationById(organizationId);
         setCommunities([]);
@@ -129,7 +131,7 @@ export default function DeveloperCommunitiesPage() {
   ];
 
   return (
-    <div className="">
+    <>
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -207,6 +209,6 @@ export default function DeveloperCommunitiesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

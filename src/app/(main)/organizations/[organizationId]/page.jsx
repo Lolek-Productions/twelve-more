@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link"
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {getOrganizationById} from "@/lib/actions/organization.js";
-import {getCommunitiesByOrganizationForUser} from "@/lib/actions/community.js";
 import {useContextContent} from "@/components/ContextProvider.jsx";
 import OrganizationContextSidebar from "@/components/OrganizationContextSidebar";
+import OrganizationCommunityList from "@/components/OrganizationCommunityList.jsx";
+import {Button} from "@/components/ui/button.jsx";
 
 export default function UserPage() {
   const params = useParams();
@@ -46,30 +47,6 @@ export default function UserPage() {
 
   }, [organizationId]);
 
-
-  useEffect(() => {
-    if (!organizationId) {
-      return;
-    }
-
-    async function fetchCommunities() {
-      try {
-        const comData = await getCommunitiesByOrganizationForUser(organizationId, appUser);
-        // console.log("communities data", comData);
-
-        if (comData.success) {
-          setCommunities(comData.communities);
-        } else {
-          setError("Communities not found");
-        }
-      } catch (err) {
-        setError("Failed to fetch communities");
-      }
-    }
-    fetchCommunities();
-  }, [organizationId]);
-
-
   if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
   if (error) return <div className="p-4 text-red-500 w-[30rem]">{error}</div>;
 
@@ -80,23 +57,16 @@ export default function UserPage() {
         <div>{organization.description}</div>
       </div>
       <div className={'p-6'}>
-        <h3 className="text-lg font-semibold">Communities ({communities?.length})</h3>
         {communities?.length === 0 ? (
           <p className="text-gray-500">No communities yet.</p>
         ) : (
           <div className="mt-2 space-y-2">
-            {communities?.map((community) => (
-              <div key={community.id} className="px-2 rounded-md flex justify-start items-center">
-                <Link className={'flex gap-3 items-center'} href={`/communities/${community?.id}`}>
-                  <div className="">{`${community?.name}` || "Unknown"}</div>
-                  <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
-                    {community?.visibility
-                      ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
-                      : ""}
-                  </span>
-                </Link>
-              </div>
-            ))}
+
+            <Button asChild className="mb-4" >
+              <Link href={`/organizations/${organization.id}/community/create`}>Create New Community</Link>
+            </Button>
+
+            <OrganizationCommunityList organization={organization} />
           </div>
         )}
       </div>

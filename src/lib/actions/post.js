@@ -8,7 +8,7 @@ import {getPrivateUserById} from "@/lib/actions/user.js";
 import {truncateText} from "@/lib/utils.js";
 import {sendSMS} from "@/lib/actions/sms.js";  //Keep even though WebStorm doesn't think it is being used!!!
 
-export async function getPostsForHomeFeed(limit = 10, user) {
+export async function getPostsForHomeFeed(limit = 10, appUser) {
   try {
     await connect();
 
@@ -16,10 +16,9 @@ export async function getPostsForHomeFeed(limit = 10, user) {
     const posts = await Post.find(
       {
         $or: [
-          { organization: user.selectedOrganization.id, community: null },  // Get posts without a community
+          { organization: { $in: appUser.organizations.map(c => c.id) }, community: null },  // Get posts without a community
           {
-            community: { $in: user.communities.map(c => c.id) }, // Posts from communities user belongs to
-            organization: user.selectedOrganization.id // Within the selected organization
+            community: { $in: appUser.communities.map(c => c.id) }, // Posts from communities user belongs to
           }
         ]
       }

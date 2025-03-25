@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import RecentMembersToOrganization from "@/components/RecentMembersToOrganization.jsx";
+import RecentMembersToOrganization from "@/components/RecentMembersToOrganizations.jsx";
 
 export default function HomeContextSidebar() {
   const [input, setInput] = useState('');

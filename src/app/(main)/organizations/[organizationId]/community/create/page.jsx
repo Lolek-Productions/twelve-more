@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,13 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {updateCommunity, getCommunityById, deleteCommunities} from "@/lib/actions/community.js";
-import {useAppUser} from "@/hooks/useAppUser.js";
-import {useParams, useRouter} from 'next/navigation'
-import {useToast} from "@/hooks/use-toast.js";
+import { createCommunity } from "@/lib/actions/community.js";
+import { useAppUser } from "@/hooks/useAppUser.js";
+import { useRouter } from 'next/navigation';
+import { useApiToast } from "@/lib/utils";
 import {useEffect, useState} from "react";
-import {Breadcrumb} from "@/components/ui/breadcrumb.jsx";
-import Link from "next/link";
+import {getUsers} from "@/lib/actions/user.js";
+import {getOrganizationById} from "@/lib/actions/organization.js";
+import {useParams} from "next/navigation.js";
 
 const communityFormSchema = z.object({
   name: z
@@ -56,20 +57,37 @@ const communityFormSchema = z.object({
     }),
 });
 
-// Default values for the form
 const defaultValues = {
   name: "",
   purpose: "",
-  visibility: "",
+  visibility: "public", //public or private
 };
 
-export default function EditCommunityPage() {
-  const {appUser} = useAppUser();
-  const[data, setData] = useState({});
+export default function NewCommunityPage() {
+  const { appUser } = useAppUser();
   const router = useRouter();
+  const { showResponseToast, showErrorToast } = useApiToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [organization, setOrganization] = useState(false);
   const params = useParams();
-  const communityId = params.communityId;
-  const { toast } = useToast();
+  const { organizationId } = params;
+
+  useEffect(() => {
+    if (!organizationId) {
+      return;
+    }
+    async function fetchOrganizationData() {
+      try {
+        const orgData = await getOrganizationById(organizationId);
+        if (orgData.success) {
+          setOrganization(orgData.organization);
+        }
+      } catch (error) {
+        showErrorToast(error);
+      }
+    }
+    fetchOrganizationData();
+  }, [organizationId]);
 
   const form = useForm({
     resolver: zodResolver(communityFormSchema),
@@ -77,81 +95,25 @@ export default function EditCommunityPage() {
     mode: "onChange",
   });
 
-  const onSubmit = async (formData) => {
-    const updatedData = {
-      ...formData, // Spread existing formData (id, name, purpose, visibility)
-      id: communityId,
-    };
-    // console.log("Community formData submitted:", updatedData);
-
-    const response = await updateCommunity(updatedData)
-
-    if(!response.success) {
-      toast({
-        title: "Error",
-        description: `${response.error}`,
-      });
-      return console.error(response.error);
+  const onSubmit = async (data) => {
+    try {
+      setIsSubmitting(true);
+      const response = await createCommunity({ ...data, userId: appUser.id, organizationId: organizationId });
+      showResponseToast(response);
+      if (response.success) {
+        window.location.href = `/organizations/${organizationId}`;
+      }
+    } catch (error) {
+      showErrorToast(error);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast({
-      title: "Success",
-      description: "Community saved successfully.",
-    });
-  }
-
-  useEffect(() => {
-    if (!communityId) return;
-
-    const fetchCommunity = async () => {
-      try {
-        const response = await getCommunityById(communityId);
-        console.log('getCommunityById', response);
-
-        setData(response.community);
-
-        form.reset({
-          name: response.community.name || "",
-          purpose: response.community.purpose || "",
-          visibility: response.community.visibility || "",
-        });
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    };
-
-    fetchCommunity();
-  }, [communityId]);
-
-  const onDeleteCommunity = async () => {
-      const response = await deleteCommunities(communityId);
-      if(response.success) {
-        router.push("/developer/communities")
-      }
-      console.log('deleting', communityId);
-  }
-
-  const breadcrumbItems = [
-    { href: "/developer", label: "Developer" },
-    { href: "/developer/communities", label: `Communities` },
-    { label: `${data.name}` },
-  ];
+  };
 
   return (
     <>
-      <Breadcrumb items={breadcrumbItems} />
-      <h2 className='py-2 text-lg sm:text-xl font-bold'>Edit the Community: {data.name || ''}</h2>
-      <div>
-        <Link href={`/developer/organizations/${data.organization?.id}`}>
-          Organization: {data.organization?.name}
-        </Link>
-      </div>
-      <div className="flex justify-end">
-        <Button variant="destructive" onClick={() => {
-          if (window.confirm('Are you sure you want to delete this community?')) {
-            onDeleteCommunity();
-          }
-        }}>Delete Community</Button>
+      <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
+        <h2 className='text-lg sm:text-xl font-bold'>Create a New Community within {organization?.name}</h2>
       </div>
       <div className="p-7">
         <Form {...form}>
@@ -205,7 +167,7 @@ export default function EditCommunityPage() {
               render={({field}) => (
                 <FormItem>
                   <FormLabel>Visibility</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select visibility"/>
@@ -225,7 +187,12 @@ export default function EditCommunityPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Save Community</Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Community"}
+            </Button>
           </form>
         </Form>
       </div>

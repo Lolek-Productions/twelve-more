@@ -66,7 +66,7 @@ export default function UsersPage() {
   ];
 
   return (
-    <div>
+    <>
       <Breadcrumb items={breadcrumbItems}/>
       <div className="flex flex-row items-center justify-between">
         <div>
@@ -104,6 +104,6 @@ export default function UsersPage() {
         </Dialog>
         <UserTable data={users} />
       </div>
-    </div>
+    </>
   );
 }

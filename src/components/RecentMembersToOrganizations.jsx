@@ -3,7 +3,7 @@
 import Link from "next/link"
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useEffect, useState} from "react";
-import {getRecentOrganizationMembers} from "@/lib/actions/user.js";
+import {getRecentOrganizationsMembers} from "@/lib/actions/user.js";
 import moment from "moment/moment.js";
 
 export default function MemberList() {
@@ -19,7 +19,9 @@ export default function MemberList() {
     const fetchMembers = async () => {
       setIsLoading(true);
       try {
-        const data = await getRecentOrganizationMembers(appUser?.selectedOrganization?.id);
+        const organizationIds = appUser.organizations.map(org => org.id);
+
+        const data = await getRecentOrganizationsMembers(organizationIds);
         // console.log(data.data)
         setMembers(data.data || []);
       } catch (error) {
@@ -34,7 +36,7 @@ export default function MemberList() {
 
   return (
     <div className="mt-3 text-gray-700 space-y-3 bg-gray-100 rounded-xl py-2">
-      <h4 className="font-bold px-4">Recent Members: {appUser?.selectedOrganization?.name}</h4>
+      <h4 className="font-bold px-4">Recent Members</h4>
       <div className="px-4 pb-2">
         {members.length > 0 ? (
           <ul className="space-y-4 pl-4">

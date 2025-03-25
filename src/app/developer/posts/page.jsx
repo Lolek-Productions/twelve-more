@@ -39,7 +39,7 @@ export default function PostsPage() {
   ];
 
   return (
-    <div>
+    <>
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex flex-row items-center justify-between">
         <div>
@@ -52,6 +52,6 @@ export default function PostsPage() {
       <div className="mt-3">
         <PostTable data={posts} />
       </div>
-    </div>
+    </>
   );
 }

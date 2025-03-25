@@ -23,6 +23,7 @@ import {
   getOrganizations
 } from "@/lib/actions/organization";
 import {Breadcrumb} from "@/components/ui/breadcrumb";
+import {useApiToast} from "@/lib/utils.js";
 
 const organizationSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
@@ -34,6 +35,7 @@ export default function AdminOrganizationsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [serverResponse, setServerResponse] = useState(null);
   const { toast } = useToast();
+  const { showResponseToast, showErrorToast } = useApiToast();
 
   useEffect(() => {
     fetchData();
@@ -44,7 +46,7 @@ export default function AdminOrganizationsPage() {
       const organizations = await getOrganizations();
       setData(organizations); // Add owner enrichment if needed
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to fetch organizations" });
+      showErrorToast(error);
     }
   }
 
@@ -54,13 +56,15 @@ export default function AdminOrganizationsPage() {
       toast({ title: "Organization Deleted", description: "The organization has been deleted successfully." });
       fetchData();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete organization" });
+      showErrorToast(error);
     }
   };
 
   const createForm = useForm({
     resolver: zodResolver(organizationSchema),
-    defaultValues: { name: "" },
+    defaultValues: {
+      name: "",
+    },
   });
 
   const onCreateSubmit = async (formData) => {
@@ -74,7 +78,7 @@ export default function AdminOrganizationsPage() {
       fetchData();
       toast({ title: "Success", description: "Organization created successfully" });
     } else {
-      toast({ variant: "destructive", title: "Error", description: response?.error || "Unknown error" });
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete organization" });
     }
     setModalOpen(false);
     setIsSaving(false);
@@ -86,7 +90,7 @@ export default function AdminOrganizationsPage() {
   ];
 
   return (
-    <div>
+    <>
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex flex-row items-center justify-between">
         <div>
@@ -125,6 +129,6 @@ export default function AdminOrganizationsPage() {
         </Dialog>
         <OrganizationTable data={data} deleteEntity={deleteEntity} />
       </div>
-    </div>
+    </>
   );
 }

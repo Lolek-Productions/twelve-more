@@ -42,8 +42,7 @@ export default function LeftSidebar({ onLinkClick }) {
   };
 
   const sidebarNavItems = [
-    { title: 'Home', href: '/home', icon: <HiHome className="w-6 h-6" /> },
-    { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
+    // { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
     // { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
     // { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
     // { title: 'Admin', href: '/admin', icon: <HiOutlineServer className="w-6 h-6" />, isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)) },
@@ -118,108 +117,27 @@ export default function LeftSidebar({ onLinkClick }) {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto p-3 pt-0">
         <div className="flex flex-col gap-3">
-          <nav className="space-y-2">
-            {visibleNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  pathname === item.href ? 'bg-muted' : 'hover:bg-muted/50',
-                  'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
-                )}
-                onClick={handleLinkClick}
-              >
-                {item.icon}
-                <span className="font-bold">{item.title}</span>
-              </Link>
-            ))}
+          {/*<Link*/}
+          {/*  href='/home'*/}
+          {/*  className={cn(*/}
+          {/*    pathname === '/home' ? 'bg-muted' : 'hover:bg-muted/50',*/}
+          {/*    'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'*/}
+          {/*  )}*/}
+          {/*  onClick={handleLinkClick}*/}
+          {/*>*/}
+          {/*  <HiHome className="w-6 h-6" />*/}
+          {/*  <span className="font-bold">Home</span>*/}
+          {/*</Link>*/}
 
-            {/* Organizations dropdown */}
-            <div className="mt-2">
-              <button
-                onClick={() => setOrganizationsOpen(!organizationsOpen)}
-                className="flex items-center p-2 rounded-md w-full hover:bg-muted/50 transition-all duration-200"
-              >
-                <HiBriefcase className="w-6 h-6 mr-2" />
-                <span className="font-bold">Organizations</span>
-                {organizationsOpen ? (
-                  <HiChevronDown className="ml-auto w-5 h-5" />
-                ) : (
-                  <HiChevronRight className="ml-auto w-5 h-5" />
-                )}
-              </button>
 
-              {organizationsOpen && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {orgsToRender.map((org) => (
-                    <div key={org.id} className="space-y-1">
-                      <div className="flex items-center">
-                        <Link
-                          variant={'ghost'}
-                          href={`/organizations/${org.id}`}
-                          className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
-                        >
-                          <span className="text-sm">{org.name}</span>
-                        </Link>
-
-                        {/* Expand/collapse button for communities */}
-                        <button
-                          className="p-1 hover:bg-gray-100 rounded-md"
-                          onClick={(e) => toggleOrgExpansion(org.id, e)}
-                        >
-                          {expandedOrgs[org.id] ? (
-                            <HiChevronDown className="w-4 h-4" />
-                          ) : (
-                            <HiChevronRight className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Communities for this organization */}
-                      {expandedOrgs[org.id] && (
-                        <div className="pl-6 space-y-1">
-                          {getOrgCommunities(org.id).length > 0 ? (
-                            getOrgCommunities(org.id).map(community => (
-                              <Link
-                                key={community.id}
-                                href={community.href || `/communities/${community.id}`}
-                                className="flex items-center p-1 hover:bg-gray-100 rounded-md text-sm"
-                                onClick={handleLinkClick}
-                              >
-                                <span className="text-xl mr-1">·</span>
-                                <span>{community.name}</span>
-                              </Link>
-                            ))
-                          ) : (
-                            <div className="flex items-center p-1 text-gray-500 text-sm">
-                              <span>No communities</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  <Link
-                    href="/organizations/create"
-                    className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
-                    onClick={handleLinkClick}
-                  >
-                    <HiOutlinePlus className="w-3 h-3 mr-1" />
-                    <span className="text-xs">New Organization</span>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </nav>
 
           {/* Optional: Keep the original Communities section or remove it */}
-          <div className="p-3 bg-gray-100 rounded-md mt-2">
+          <div className="p-3 bg-gray-100 rounded-md">
             <div className="flex items-center">
               <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
-              <Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>
-                <HiOutlinePlus className='h-5 w-5'/>
-              </Link>
+              {/*<Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>*/}
+              {/*  <HiOutlinePlus className='h-5 w-5'/>*/}
+              {/*</Link>*/}
             </div>
             <div>
               {appUser?.communities?.length > 0 ? (
@@ -246,6 +164,105 @@ export default function LeftSidebar({ onLinkClick }) {
               )}
             </div>
           </div>
+
+          {/* Organizations dropdown */}
+          <div className="mt-2">
+            <div className="flex items-center  justify-between">
+              <Link href="/organizations/" className="p-2 flex-1 flex items-center hover:bg-gray-100 rounded-md">
+                <HiBriefcase className="w-6 h-6 mr-2" />
+                <span className="font-bold">Organizations</span>
+              </Link>
+
+              <button
+                onClick={() => setOrganizationsOpen(!organizationsOpen)}
+
+                className="p-1 hover:bg-gray-100 rounded-md"
+              >
+                {organizationsOpen ? (
+                  <HiChevronDown className="ml-auto w-5 h-5" />
+                ) : (
+                  <HiChevronRight className="ml-auto w-5 h-5" />
+                )}
+              </button>
+            </div>
+
+            {organizationsOpen && (
+              <div className="ml-4 mt-1 space-y-1">
+                {orgsToRender.map((org) => (
+                  <div key={org.id} className="space-y-1">
+                    <div className="flex items-center">
+                      <Link
+                        variant={'ghost'}
+                        href={`/organizations/${org.id}`}
+                        className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
+                      >
+                        <span className="text-sm">{org.name}</span>
+                      </Link>
+
+                      {/* Expand/collapse button for communities */}
+                      <button
+                        className="p-1 hover:bg-gray-100 rounded-md"
+                        onClick={(e) => toggleOrgExpansion(org.id, e)}
+                      >
+                        {expandedOrgs[org.id] ? (
+                          <HiChevronDown className="w-4 h-4" />
+                        ) : (
+                          <HiChevronRight className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Communities for this organization */}
+                    {expandedOrgs[org.id] && (
+                      <div className="pl-6 space-y-1">
+                        {getOrgCommunities(org.id).length > 0 ? (
+                          getOrgCommunities(org.id).map(community => (
+                            <Link
+                              key={community.id}
+                              href={community.href || `/communities/${community.id}`}
+                              className="flex items-center p-1 hover:bg-gray-100 rounded-md text-sm"
+                              onClick={handleLinkClick}
+                            >
+                              <span className="text-xl mr-1">·</span>
+                              <span>{community.name}</span>
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="flex items-center p-1 text-gray-500 text-sm">
+                            <span>No communities</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                <Link
+                  href="/organizations/create"
+                  className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
+                  onClick={handleLinkClick}
+                >
+                  <HiOutlinePlus className="w-3 h-3 mr-1" />
+                  <span className="text-xs">New Organization</span>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          { appUser?.id && DEV_IDS.includes(appUser.id) &&
+            <Link
+              href='/developer'
+              className={cn(
+                pathname === '/developer' ? 'bg-muted' : 'hover:bg-muted/50',
+                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+              )}
+              onClick={handleLinkClick}
+            >
+              <HiCommandLine className="w-6 h-6" />
+              <span className="font-bold">Developer</span>
+            </Link>
+          }
+
         </div>
       </div>
 
