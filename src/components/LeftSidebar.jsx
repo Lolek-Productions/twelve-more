@@ -117,19 +117,17 @@ export default function LeftSidebar({ onLinkClick }) {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto p-3 pt-0">
         <div className="flex flex-col gap-3">
-          {/*<Link*/}
-          {/*  href='/home'*/}
-          {/*  className={cn(*/}
-          {/*    pathname === '/home' ? 'bg-muted' : 'hover:bg-muted/50',*/}
-          {/*    'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'*/}
-          {/*  )}*/}
-          {/*  onClick={handleLinkClick}*/}
-          {/*>*/}
-          {/*  <HiHome className="w-6 h-6" />*/}
-          {/*  <span className="font-bold">Home</span>*/}
-          {/*</Link>*/}
-
-
+          <Link
+            href='/home'
+            className={cn(
+              pathname === '/home' ? 'bg-muted' : 'hover:bg-muted/50',
+              'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+            )}
+            onClick={handleLinkClick}
+          >
+            <HiHome className="w-6 h-6" />
+            <span className="font-bold">Home</span>
+          </Link>
 
           {/* Optional: Keep the original Communities section or remove it */}
           <div className="p-3 bg-gray-100 rounded-md">

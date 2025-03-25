@@ -53,7 +53,7 @@ export default function HomeFeed() {
             post && post.id ? <Post key={post.id} post={post} /> : null
           )
         ) : (
-          <div className={'p-5 w-full'}>Create a post above!</div>
+          <div className={'p-5 w-full'}>Get started by inviting someone to your first community!</div>
         )}
       </div>
       <div>
