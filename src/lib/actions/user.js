@@ -500,9 +500,11 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
 
     // Validate inputs
     if (!mongoose.Types.ObjectId.isValid(communityId)) {
+      console.error('Missing communityId');
       return { success: false, message:"Invalid community ID" };
     }
     if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('Missing userId');
       return { success: false, message:"Invalid user ID" };
     }
 

@@ -78,12 +78,9 @@ export default function OnboardingComponent() {
     setError('');
 
     try {
-      //Add the organization to the user.
-      await addOrganizationToUser(communityData.organization.id, user.publicMetadata.userMongoId)
-
-      //Add the community to the user.
-      // console.log('addCommunityToUser', communityData.id, user.publicMetadata.userMongoId)
-      await addCommunityToUser(communityData.id, user.publicMetadata.userMongoId)
+      const userId = user.publicMetadata.userMongoId;
+      await addOrganizationToUser(communityData.organization.id, userId);
+      await addCommunityToUser(communityData.id, userId);
 
       //set the storage to null
       localStorage.removeItem('pendingCommunityJoin');
