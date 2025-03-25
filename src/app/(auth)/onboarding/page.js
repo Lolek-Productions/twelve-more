@@ -79,7 +79,13 @@ export default function OnboardingComponent() {
 
     try {
       const userId = user.publicMetadata.userMongoId;
+
+      console.warn('user before:', userId);
       await addOrganizationToUser(communityData.organization.id, userId);
+      console.warn('user after:', userId);
+
+
+      // await addOrganizationToUser(communityData.organization.id, userId);
       await addCommunityToUser(communityData.id, userId);
 
       //set the storage to null
@@ -118,7 +124,7 @@ export default function OnboardingComponent() {
         await user?.reload();
 
         // Redirect to home page
-        router.push('/home');
+        window.location.href = `/home`;
       } else {
         // Show error message
         setError(res.error || "Something went wrong. Please try again.");
