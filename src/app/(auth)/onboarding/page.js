@@ -70,9 +70,8 @@ export default function OnboardingComponent() {
   }, []);
 
   const handleJoinCommunity = async () => {
-    // console.warn('handleJoinCommunity', pendingCommunityId, communityData.organization.id, user.publicMetadata.userMongoId);
-
-    if (!pendingCommunityId || !user) return;
+    if (!pendingCommunityId) return console.error('Pending community ID is missing');
+    if (!user) return console.error('User object is not available');
 
     const userId = user.publicMetadata.userMongoId;
 
@@ -216,11 +215,11 @@ export default function OnboardingComponent() {
           </CardContent>
         </Card>
 
-        <Button onClick={() => {
-          console.log('user', user)
-        }}>
-          xxx
-        </Button>
+        {/*<Button onClick={() => {*/}
+        {/*  console.log('user', user)*/}
+        {/*}}>*/}
+        {/*  xxx*/}
+        {/*</Button>*/}
 
       </div>
     );
