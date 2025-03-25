@@ -6,7 +6,112 @@ import User from '@/lib/models/user.model';
 import twilioService from "@/lib/services/twilioService.js";
 import {getPrivateUserById} from "@/lib/actions/user.js";
 import {truncateText} from "@/lib/utils.js";
-import {sendSMS} from "@/lib/actions/sms.js";  //Keep even though WebStorm doesn't think it is being used!!!
+import {sendSMS} from "@/lib/actions/sms.js";
+import {currentUser} from "@clerk/nextjs/server";
+import {getCommunityById} from "@/lib/actions/community.js";  //Keep even though WebStorm doesn't think it is being used!!!
+
+export async function createPost(postData) {
+  const user = await currentUser();
+
+  try {
+    await connect();
+
+    // Extract data from postData object
+    const userMongoId = postData.userMongoId;
+    const text = postData.text;
+    const profileImg = postData.profileImg;
+    const image = postData.image;
+    const audio = postData.audio;
+    const communityId = postData.communityId;
+    const organizationId = postData.organizationId;
+
+    if (!user?.publicMetadata?.userMongoId) {
+      console.error('Warning: Missing userMongoId in publicMetadata');
+      return { success: false, message: 'User Id missing' };
+    }
+
+    if (!user || user.publicMetadata.userMongoId !== userMongoId) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    // Create and save in one operation
+    const newPost = await Post.create({
+      user: userMongoId,
+      text,
+      profileImg,
+      image,
+      audio,
+      community: communityId,
+      organization: organizationId,
+    });
+
+    if (communityId) {
+      try {
+        // Verify the community exists
+        const communityResponse = await getCommunityById(communityId);
+        if (!communityResponse.success) {
+          console.log('Community not found:', communityId);
+          return { success: true, message: "Community not found", notificationSent: false };
+        }
+
+        // Access the community data correctly
+        const community = communityResponse.community;
+
+        // Find users who are members of this community
+        const members = await User.find(
+          { 'communities.community': communityId },
+          { phoneNumber: 1, _id: 1 }
+        ).lean();
+
+        if (!members?.length) {
+          console.log('No members found in community:', communityId);
+          return { success: true, message: "No members found in community", notificationSent: false };
+        }
+
+        // Filter out the current user and ensure valid phone numbers
+        const otherMembersPhoneNumbers = members
+          .filter((member) => member._id.toString() !== userMongoId)
+          .filter((member) => member.phoneNumber && typeof member.phoneNumber === 'string' && member.phoneNumber.trim() !== '')
+          .map((member) => member.phoneNumber);
+
+        if (!otherMembersPhoneNumbers.length) {
+          console.log('No other members with valid phone numbers to notify in community:', communityId);
+          return { success: true, message: "No other members with valid phone numbers to notify in community", notificationSent: false };
+        }
+
+        const truncatedText = truncateText(text, 150);
+
+        const communityLink = `https://twelvemore.social/communities/${communityId}`;
+        const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
+
+        // Send batch SMS using Twilio Notify
+        const batchResult = await twilioService.sendBatchSMS(otherMembersPhoneNumbers, messageBody);
+
+        console.log('Community Notification Result:', {
+          success: batchResult.success,
+          message: batchResult.message,
+          sid: batchResult.sid,
+        });
+
+        if (!batchResult.success) {
+          console.error('Notification failed but post created:', batchResult.message);
+          return { success: true, message: "Notification failed but post created" };
+        }
+
+        return { success: true, message: "Post Created"};
+      } catch (error) {
+        console.error('Error in community notification:', error);
+        return { success: true, message: "Error in community notification" };
+      }
+    } else {
+      console.log('No communityId provided, skipping notification');
+      return { success: true, data: newPost, notificationSent: false };
+    }
+  } catch (error) {
+    console.log('Error creating post:', error);
+    return { success: false, message: error.message || 'Error creating post' };
+  }
+}
 
 export async function getPostsForHomeFeed(limit = 10, appUser) {
   try {

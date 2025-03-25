@@ -7,12 +7,16 @@ import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
 import {useAppUser} from "@/hooks/useAppUser.js";
+import {createPost} from "@/lib/actions/post.js";
+import {useApiToast} from "@/lib/utils.js";
+import {getCommunityById} from "@/lib/actions/community.js";
 
 export default function PostInput({communityId, placeholder}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
-  const selectedOrganizationId = appUser?.selectedOrganization?.id;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showResponseToast, showErrorToast } = useApiToast();
+  const [ community, setCommunity ] = useState(null);
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -43,6 +47,27 @@ export default function PostInput({communityId, placeholder}) {
       uploadImageToStorage();
     }
   }, [selectedFile]);
+
+  useEffect(() => {
+    const fetchCommunity = async () => {
+      if (!communityId) return;
+
+      try {
+        const response = await getCommunityById(communityId);
+
+        if (response.success) {
+          setCommunity(response.community);
+          // console.log(response.community);
+        } else {
+          console.log('Failed to fetch community data');
+        }
+      } catch (err) {
+        console.error('Error fetching community:', err);
+      }
+    };
+
+    fetchCommunity();
+  }, [communityId]);
 
   const uploadImageToStorage = async () => {
     setImageFileUploading(true);
@@ -143,21 +168,21 @@ export default function PostInput({communityId, placeholder}) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    const response = await fetch('/api/post/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userMongoId: user.publicMetadata.userMongoId,
-        communityId: communityId,
-        text,
-        profileImg: user.imageUrl,
-        image: imageFileUrl,
-        audio: recordedURL,
-        organizationId: selectedOrganizationId,
-      }),
-    });
+    const response = await createPost({
+      userMongoId: user.publicMetadata.userMongoId,
+      communityId: communityId,
+      text,
+      profileImg: user.imageUrl,
+      image: imageFileUrl,
+      audio: recordedURL,
+      organizationId: community.organization.id,
+    })
+
+    if(!response.success) {
+      return showErrorToast(response.message);
+    }
+
+    showResponseToast(response)
     setIsSubmitting(false);
     setText('');
     setSelectedFile(null);
