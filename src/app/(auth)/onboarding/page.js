@@ -36,7 +36,7 @@ export default function OnboardingComponent() {
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
   const [invitationError, setInvitationError] = useState(null);
   const [communityData, setCommunityData] = useState(null);
-  const [hasRefreshed, setHasRefreshed] = useState(false); // Track refresh
+  const [hasRefreshed, setHasRefreshed] = useState(false); // Track metadata loading status
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -47,19 +47,37 @@ export default function OnboardingComponent() {
   });
 
   useEffect(() => {
-    const refreshUser = async () => {
-      if (user && !hasRefreshed) {
-        try {
-          await user.reload();
+    const checkUserMetadata = async () => {
+      if (user && isLoaded) {
+        // Check if publicMetadata and specifically userMongoId is loaded
+        if (!user.publicMetadata || !user.publicMetadata.userMongoId) {
+          try {
+            console.log('User metadata not yet loaded, refreshing user...');
+            await user.reload();
+            console.log('User refreshed:', user);
+
+            // Verify if metadata is now available
+            if (user.publicMetadata && user.publicMetadata.userMongoId) {
+              console.log('User metadata loaded successfully');
+              setHasRefreshed(true);
+            } else {
+              // If still not available, set up a retry mechanism
+              console.log('User metadata still not available after refresh');
+              setTimeout(checkUserMetadata, 1000); // Retry after 1 second
+            }
+          } catch (err) {
+            console.error('Failed to reload user:', err);
+          }
+        } else {
+          // Metadata is already available
+          console.log('User metadata already loaded:', user.publicMetadata);
           setHasRefreshed(true);
-          console.log('User refreshed:', user);
-        } catch (err) {
-          console.error('Failed to reload user:', err);
         }
       }
     };
-    refreshUser();
-  }, [user, hasRefreshed]);
+
+    checkUserMetadata();
+  }, [user, isLoaded]);
 
   // Check for pending community invitation
   useEffect(() => {
@@ -84,8 +102,15 @@ export default function OnboardingComponent() {
   }, []);
 
   const handleJoinCommunity = async () => {
-    if (!pendingCommunityId) return console.error('Pending community ID is missing');
-    if (!user) return console.error('User object is not available');
+    if (!pendingCommunityId) {
+      setError('Pending community ID is missing');
+      return;
+    }
+
+    if (!user || !user.publicMetadata || !user.publicMetadata.userMongoId) {
+      setError('User data is not fully loaded. Please try again.');
+      return;
+    }
 
     const userId = user.publicMetadata.userMongoId;
 
@@ -94,13 +119,12 @@ export default function OnboardingComponent() {
 
     try {
       await addOrganizationToUser(communityData.organization.id, userId);
-
       await addCommunityToUser(communityData.id, userId);
 
-      //set the storage to null
+      // Clear the storage
       localStorage.removeItem('pendingCommunityJoin');
 
-      //redirect to the community page
+      // Redirect to the community page
       window.location.href = `/communities/${communityData.id}`;
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -115,6 +139,11 @@ export default function OnboardingComponent() {
     setError('');
 
     try {
+      // Check if user metadata is loaded
+      if (!user || !user.publicMetadata || !user.publicMetadata.userMongoId) {
+        throw new Error('User data is not fully loaded. Please try again.');
+      }
+
       // Create FormData for the server action
       const formData = new FormData();
       formData.append('organizationName', data.organizationName);
@@ -129,9 +158,6 @@ export default function OnboardingComponent() {
           description: res.message || "Organization created successfully!",
         });
 
-        // Reload user data to reflect organization changes
-        await user?.reload();
-
         // Redirect to home page
         window.location.href = `/home`;
       } else {
@@ -145,12 +171,12 @@ export default function OnboardingComponent() {
         });
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      setError(err.message || 'Something went wrong. Please try again.');
       console.error(err);
 
       toast({
         title: "Error",
-        description: "An unexpected error occurred.",
+        description: err.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -205,9 +231,10 @@ export default function OnboardingComponent() {
                   onClick={handleJoinCommunity}
                   className="w-full"
                   size="lg"
-                  disabled={isJoining || !hasRefreshed}
+                  disabled={isJoining || !hasRefreshed || !user?.publicMetadata?.userMongoId}
                 >
-                  {isJoining ? "Joining Community..." : "Accept Invitation"}
+                  {isJoining ? "Joining Community..." :
+                    !hasRefreshed || !user?.publicMetadata?.userMongoId ? "Loading..." : "Accept Invitation"}
                 </Button>
               </>
             )}
@@ -224,15 +251,10 @@ export default function OnboardingComponent() {
                 Create my own organization
               </button>
             </div>
+
+            {error && (<div className="mt-4 text-center text-red-500">{error}</div>)}
           </CardContent>
         </Card>
-
-        {/*<Button onClick={() => {*/}
-        {/*  console.log('user', user)*/}
-        {/*}}>*/}
-        {/*  xxx*/}
-        {/*</Button>*/}
-
       </div>
     );
   }
@@ -310,16 +332,15 @@ export default function OnboardingComponent() {
                 type="submit"
                 className="mt-6 w-full"
                 size="lg"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !hasRefreshed || !user?.publicMetadata?.userMongoId}
               >
-                {isSubmitting ? "Getting Started..." : "Get Started"}
+                {isSubmitting ? "Getting Started..." :
+                  !hasRefreshed || !user?.publicMetadata?.userMongoId ? "Loading..." : "Get Started"}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
-
-
     </div>
   );
 }
