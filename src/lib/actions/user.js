@@ -494,7 +494,7 @@ export async function searchUsersInOrganization(organizationId, query) {
 
 export async function addCommunityToUser(communityId, userId, role = 'member') {
 
-  console.warn('adding community to user', communityId, userId, role);
+  // console.warn('adding community to user', communityId, userId, role);
 
   try {
     await connect();

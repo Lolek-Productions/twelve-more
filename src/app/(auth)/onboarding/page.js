@@ -1,7 +1,6 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 import { completeOnboarding } from './actions.js'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
@@ -32,8 +31,7 @@ export default function OnboardingComponent() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-  const { user } = useUser();
-  const router = useRouter();
+  const { user, isLoaded } = useUser();
   const { toast } = useToast();
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
   const [invitationError, setInvitationError] = useState(null);
@@ -79,9 +77,7 @@ export default function OnboardingComponent() {
     setError('');
 
     try {
-      // console.warn('userId before', userId);
       await addOrganizationToUser(communityData.organization.id, userId);
-      // console.warn('userId after', userId);
 
       await addCommunityToUser(communityData.id, userId);
 
@@ -193,7 +189,7 @@ export default function OnboardingComponent() {
                   onClick={handleJoinCommunity}
                   className="w-full"
                   size="lg"
-                  disabled={isJoining}
+                  disabled={isJoining || !isLoaded || !user} // Disable until loaded
                 >
                   {isJoining ? "Joining Community..." : "Accept Invitation"}
                 </Button>
