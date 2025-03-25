@@ -80,9 +80,10 @@ export default function OnboardingComponent() {
     try {
       const userId = user.publicMetadata.userMongoId;
 
-      console.warn('user before:', userId);
+      console.log("mongo", user.publicMetadata.userMongoId)
+      console.warn('user before:', user);
       await addOrganizationToUser(communityData.organization.id, userId);
-      console.warn('user after:', userId);
+      console.warn('user after:', user);
 
 
       // await addOrganizationToUser(communityData.organization.id, userId);
