@@ -77,9 +77,13 @@ export default function OnboardingComponent() {
     setIsJoining(true);
     setError('');
 
+    const userId = user.publicMetadata.userMongoId;
+
     try {
-      const userId = user.publicMetadata.userMongoId;
+      console.warn('userId before', userId);
       await addOrganizationToUser(communityData.organization.id, userId);
+      console.warn('userId after', userId);
+
       await addCommunityToUser(communityData.id, userId);
 
       //set the storage to null
