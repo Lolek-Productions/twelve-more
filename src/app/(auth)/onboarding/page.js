@@ -80,9 +80,10 @@ export default function OnboardingComponent() {
       await addOrganizationToUser(communityData.organization.id, user.publicMetadata.userMongoId)
 
       //Set the organization on the user
-      await setSelectedOrganizationOnUser(communityData.organization.id, user.publicMetadata.userMongoId);
+      // await setSelectedOrganizationOnUser(communityData.organization.id, user.publicMetadata.userMongoId);
 
       //Add the community to the user.
+      console.log('addCommunityToUser', communityData.id, user.publicMetadata.userMongoId)
       await addCommunityToUser(communityData.id, user.publicMetadata.userMongoId)
 
       //set the storage to null
