@@ -300,6 +300,12 @@ export default function OnboardingComponent() {
           </Form>
         </CardContent>
       </Card>
+
+      <Button onClick={() => {
+        console.log('user', user)
+      }}>
+        x
+      </Button>
     </div>
   );
 }
