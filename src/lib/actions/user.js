@@ -493,6 +493,8 @@ export async function searchUsersInOrganization(organizationId, query) {
 }
 
 export async function addCommunityToUser(communityId, userId, role = 'member') {
+  console.warn('adding community to user', communityId, userId, role);
+
   try {
     await connect();
 
@@ -500,18 +502,20 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
     if (!mongoose.Types.ObjectId.isValid(communityId)) {
       return { success: false, message:"Invalid community ID" };
     }
-    if (!userId || typeof userId !== "string") {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
       return { success: false, message:"Invalid user ID" };
     }
 
     // Check if user is already a member of the community
     const user = await User.findById(userId).lean();
     if (!user) {
+      console.error("User not found with that id", userId);
       return { success: false, message:"User not found" };
     }
 
     const isAlreadyMember = user.communities.some(c => c.community.toString() === communityId);
     if (isAlreadyMember) {
+      console.warn('User is already a member of that community');
       return { success: false, message:"User is already a member of this community" };
     }
 

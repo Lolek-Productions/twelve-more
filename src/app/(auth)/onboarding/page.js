@@ -70,7 +70,7 @@ export default function OnboardingComponent() {
   }, []);
 
   const handleJoinCommunity = async () => {
-    console.warn('handleJoinCommunity', pendingCommunityId, communityData.organization.id, user.publicMetadata.userMongoId);
+    // console.warn('handleJoinCommunity', pendingCommunityId, communityData.organization.id, user.publicMetadata.userMongoId);
 
     if (!pendingCommunityId || !user) return;
 
@@ -81,18 +81,15 @@ export default function OnboardingComponent() {
       //Add the organization to the user.
       await addOrganizationToUser(communityData.organization.id, user.publicMetadata.userMongoId)
 
-      //Set the organization on the user
-      // await setSelectedOrganizationOnUser(communityData.organization.id, user.publicMetadata.userMongoId);
-
       //Add the community to the user.
-      console.log('addCommunityToUser', communityData.id, user.publicMetadata.userMongoId)
+      // console.log('addCommunityToUser', communityData.id, user.publicMetadata.userMongoId)
       await addCommunityToUser(communityData.id, user.publicMetadata.userMongoId)
 
       //set the storage to null
       localStorage.removeItem('pendingCommunityJoin');
 
       //redirect to the community page
-      window.location.href = `/organizations/${communityData.id}`;
+      window.location.href = `/communities/${communityData.id}`;
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       console.error(err);
