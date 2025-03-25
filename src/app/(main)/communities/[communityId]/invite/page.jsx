@@ -29,7 +29,7 @@ import {
 import {useContextContent} from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useApiToast} from "@/lib/utils.js";
-import {inviteCurrentUserToCommunity, inviteNewUserToCommunity} from "@/lib/actions/invite.js";
+import {inviteCurrentUserToCommunity, sendCommunityInvitation} from "@/lib/actions/invite.js";
 
 // User lookup schema
 const userLookupSchema = z.object({
@@ -40,14 +40,6 @@ const userLookupSchema = z.object({
 
 // Profile form schema
 const profileFormSchema = z.object({
-  // firstName: z
-  //   .string()
-  //   .min(1, { message: "First name is required." })
-  //   .max(50, { message: "First name must not exceed 50 characters." }),
-  // lastName: z
-  //   .string()
-  //   .min(1, { message: "Last name is required." })
-  //   .max(50, { message: "Last name must not exceed 50 characters." }),
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
@@ -59,8 +51,6 @@ const profileFormSchema = z.object({
 });
 
 const defaultValues = {
-  // firstName: "",
-  // lastName: "",
   phoneNumber: "",
   smsOptIn: false,
 };
@@ -165,10 +155,9 @@ export default function Invite() {
     }
   };
 
-  async function inviteUser(userId, communityId) {
+  async function inviteExistingUser(userId) {
     try {
-      const response = inviteCurrentUserToCommunity(userId, communityId, appUser);
-      // console.log(response);
+      const response = inviteCurrentUserToCommunity(userId, community, appUser);
       showResponseToast(response);
     } catch (error) {
       showErrorToast(error)
@@ -176,7 +165,7 @@ export default function Invite() {
   }
 
   const onSelectUserToInvite = (user) => {
-    const result = inviteUser(user.id, communityId);
+    const result = inviteExistingUser(user.id);
   };
 
   const createNewUser = () => {
@@ -189,7 +178,7 @@ export default function Invite() {
     try {
       setIsSubmitting(true);
 
-      const response = await inviteNewUserToCommunity(data.phoneNumber, community, appUser)
+      const response = await sendCommunityInvitation(data.phoneNumber, community, appUser)
       showResponseToast(response);
 
       if (response.success) {
@@ -259,34 +248,6 @@ export default function Invite() {
             <AccordionContent className="px-4 pb-4">
               <Form {...inviteForm}>
                 <form onSubmit={inviteForm.handleSubmit(onSubmitInvite)} className="space-y-4">
-                  {/*<FormField*/}
-                  {/*  control={inviteForm.control}*/}
-                  {/*  name="firstName"*/}
-                  {/*  render={({field}) => (*/}
-                  {/*    <FormItem>*/}
-                  {/*      <FormLabel>First Name</FormLabel>*/}
-                  {/*      <FormControl>*/}
-                  {/*        <Input placeholder="e.g., John" {...field} />*/}
-                  {/*      </FormControl>*/}
-                  {/*      <FormMessage/>*/}
-                  {/*    </FormItem>*/}
-                  {/*  )}*/}
-                  {/*/>*/}
-
-                  {/*<FormField*/}
-                  {/*  control={inviteForm.control}*/}
-                  {/*  name="lastName"*/}
-                  {/*  render={({field}) => (*/}
-                  {/*    <FormItem>*/}
-                  {/*      <FormLabel>Last Name</FormLabel>*/}
-                  {/*      <FormControl>*/}
-                  {/*        <Input placeholder="e.g., Smith" {...field} />*/}
-                  {/*      </FormControl>*/}
-                  {/*      <FormMessage/>*/}
-                  {/*    </FormItem>*/}
-                  {/*  )}*/}
-                  {/*/>*/}
-
                   <FormField
                     control={inviteForm.control}
                     name="phoneNumber"
