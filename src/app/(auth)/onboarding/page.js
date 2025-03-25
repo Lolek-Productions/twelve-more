@@ -70,6 +70,8 @@ export default function OnboardingComponent() {
   }, []);
 
   const handleJoinCommunity = async () => {
+    console.warn('handleJoinCommunity', pendingCommunityId, communityData.organization.id, user.publicMetadata.userMongoId);
+
     if (!pendingCommunityId || !user) return;
 
     setIsJoining(true);
@@ -90,7 +92,7 @@ export default function OnboardingComponent() {
       localStorage.removeItem('pendingCommunityJoin');
 
       //redirect to the community page
-      router.push(`/communities/${communityData.id}`);
+      window.location.href = `/organizations/${communityData.id}`;
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       console.error(err);
