@@ -36,6 +36,7 @@ export default function OnboardingComponent() {
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
   const [invitationError, setInvitationError] = useState(null);
   const [communityData, setCommunityData] = useState(null);
+  const [hasRefreshed, setHasRefreshed] = useState(false); // Track refresh
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -44,6 +45,15 @@ export default function OnboardingComponent() {
       description: "",
     },
   });
+
+  useEffect(() => {
+    if (!hasRefreshed) {
+      // Mark as refreshed to prevent infinite loop
+      setHasRefreshed(true);
+      // Trigger a full page refresh
+      window.location.reload();
+    }
+  }, [hasRefreshed]);
 
   // Check for pending community invitation
   useEffect(() => {
@@ -189,7 +199,7 @@ export default function OnboardingComponent() {
                   onClick={handleJoinCommunity}
                   className="w-full"
                   size="lg"
-                  disabled={isJoining || !isLoaded || !user} // Disable until loaded
+                  disabled={isJoining || !user}
                 >
                   {isJoining ? "Joining Community..." : "Accept Invitation"}
                 </Button>
