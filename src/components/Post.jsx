@@ -102,7 +102,7 @@ export default function Post({ post, clickableText = true }) {
               <div className="flex items-center space-x-1 min-w-0 max-w-full">
                 <h4 className="font-bold text-xs truncate max-w-[120px] xs:max-w-[150px] sm:max-w-[180px]">
                   <Link href={`/users/${post?.user?.id}`} className="block truncate">
-                    {post?.user?.firstName} {post?.user?.lastName}
+                    {post?.user?.firstName ?? "empty"} {post?.user?.lastName}
                   </Link>
                 </h4>
                 <span className="text-lg text-gray-500 mx-0.5 flex-shrink-0">·</span>
