@@ -74,15 +74,15 @@ export default function OnboardingComponent() {
 
     if (!pendingCommunityId || !user) return;
 
+    const userId = user.publicMetadata.userMongoId;
+
     setIsJoining(true);
     setError('');
 
-    const userId = user.publicMetadata.userMongoId;
-
     try {
-      console.warn('userId before', userId);
+      // console.warn('userId before', userId);
       await addOrganizationToUser(communityData.organization.id, userId);
-      console.warn('userId after', userId);
+      // console.warn('userId after', userId);
 
       await addCommunityToUser(communityData.id, userId);
 
