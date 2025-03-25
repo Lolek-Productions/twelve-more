@@ -10,7 +10,7 @@ import {
   addCommunityToUser,
   getCommunityMembers,
   removeCommunityFromUserByMembershipId,
-  searchUsersInOrganization
+  searchUsersInUserOrganizations
 } from "@/lib/actions/user";
 import {Input} from "@/components/ui/input";
 import {
@@ -158,7 +158,10 @@ export default function CommunityMembersPage() {
     }
     try {
       // console.log('searching',organizationId, query)
-      const results = await searchUsersInOrganization(organizationId, query);
+
+
+      //TODO not going to work
+      const results = await searchUsersInUserOrganizations(organizationId, query);
       // console.log(results);
       setSearchResults(results.users || []);
     } catch (error) {

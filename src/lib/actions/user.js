@@ -459,12 +459,12 @@ export async function searchAllUsers(query) {
   }
 }
 
-export async function searchUsersInOrganization(organizationId, query) {
+export async function searchUsersInUserOrganizations(appUser, query) {
   try {
     await connect();
 
     const users = await User.find({
-      "organizations.organization": organizationId,
+      "organizations.organization": { $in: appUser.organizations.map(c => c.id) },
       $or: [
         { firstName: { $regex: query, $options: "i" } },
         { lastName: { $regex: query, $options: "i" } },

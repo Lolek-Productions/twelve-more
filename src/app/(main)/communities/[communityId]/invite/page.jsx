@@ -10,8 +10,8 @@ import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {createCommunity, getCommunityById} from "@/lib/actions/community";
-import {addCommunityToUser, getCommunityMembers, searchUsersInOrganization} from "@/lib/actions/user.js";
+import {getCommunityById} from "@/lib/actions/community";
+import {getCommunityMembers, searchUsersInUserOrganizations} from "@/lib/actions/user.js";
 import { useAppUser } from "@/hooks/useAppUser.js";
 import {
   Dialog,
@@ -138,8 +138,8 @@ export default function Invite() {
   const searchUsers = async (data) => {
     setIsSearching(true);
     try {
-      const result = await searchUsersInOrganization(
-        appUser.selectedOrganization.id,
+      const result = await searchUsersInUserOrganizations(
+        appUser,
         data.query
       );
       if (result.success) {
