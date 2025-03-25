@@ -6,6 +6,7 @@ import { connect } from '../mongodb/mongoose';
 import mongoose from "mongoose";
 import Community from '../models/community.model';
 import Post from "@/lib/models/post.model";
+import twilioService from "@/lib/services/twilioService.js";
 
 export const createOrUpdateUser = async (
   id,
@@ -493,9 +494,6 @@ export async function searchUsersInUserOrganizations(appUser, query) {
 }
 
 export async function addCommunityToUser(communityId, userId, role = 'member') {
-
-  // console.warn('adding community to user', communityId, userId, role);
-
   try {
     await connect();
 
@@ -528,8 +526,22 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
       { $addToSet: { communities: { community: communityId, role: role } } },
       { new: true }
     ).lean();
+    // console.log('updated user', updatedUser);
 
-    console.log('updated user', updatedUser);
+    //Notify the leaders of this organization that someone has joined
+    const leadersResponse = await getPrivateLeadersByCommunityId(communityId);
+
+    if(leadersResponse.success && leadersResponse.leaders?.length > 0) {
+      const leadersPhoneNumbers = leadersResponse.leaders
+        .map((leader) => leader.phoneNumber)
+        .filter(phoneNumber => phoneNumber && typeof phoneNumber === 'string' && phoneNumber.trim() !== '');
+
+      if (leadersPhoneNumbers.length > 0) {
+        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community!`;
+        const smsResponse = await twilioService.sendBatchSMS(leadersPhoneNumbers, message);
+        // console.log('SMS notification to leaders:', smsResponse);
+      }
+    }
 
     return { success: true, message: `Community added to user` };
   } catch (error) {
@@ -752,8 +764,7 @@ export async function getRecentOrganizationsMembers(organizationIds, limit = 7) 
   }
 }
 
-//This works for a single id too!!
-export const removeCommunitiesFromAllUsers = async (communityIds) => {
+export async function removeCommunitiesFromAllUsers(communityIds) {
   try {
     await connect();
 
@@ -784,9 +795,9 @@ export const removeCommunitiesFromAllUsers = async (communityIds) => {
     console.error("Error removing community references:", error);
     return { success: false, message: "Failed to remove community references from users." };
   }
-};
+}
 
-export const removeOrganizationsFromAllUsers = async (organizationIds) => {
+export async function removeOrganizationsFromAllUsers(organizationIds) {
   try {
     await connect();
 
@@ -817,6 +828,41 @@ export const removeOrganizationsFromAllUsers = async (organizationIds) => {
     console.error("Error removing organization references:", error);
     return { success: false, message: "Failed to remove organization references from users." };
   }
-};
+}
 
+export async function getPrivateLeadersByCommunityId(communityId) {
+  try {
+    if (!communityId) {
+      return { success: false, message: "Community ID is required" };
+    }
+
+    await connect();
+
+    const leaders = await User.find({
+      communities: {
+        $elemMatch: {
+          community: communityId,
+          role: "leader"
+        }
+      }
+    }).select('firstName lastName email phoneNumber avatar username bio');
+
+    return {
+      success: true,
+      leaders: leaders.map(leader => ({
+        id: leader._id.toString(),
+        firstName: leader.firstName,
+        lastName: leader.lastName,
+        phoneNumber: leader.phoneNumber,
+        avatar: leader.avatar,
+      }))
+    };
+  } catch (error) {
+    console.error("Error fetching community leaders:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to fetch community leaders"
+    };
+  }
+}
 
