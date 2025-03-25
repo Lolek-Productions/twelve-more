@@ -116,7 +116,7 @@ export default function Invite() {
       setCommunity(communityData.community);
     } catch (error) {
       console.error("Error fetching community:", error);
-      showErrorToast(e)
+      showErrorToast(error)
     }
   }
 
@@ -157,9 +157,11 @@ export default function Invite() {
 
   async function inviteExistingUser(userId) {
     try {
-      const response = inviteCurrentUserToCommunity(userId, community, appUser);
+      const response = await inviteCurrentUserToCommunity(userId, community, appUser);
       showResponseToast(response);
+      setShowLookupModal(false);
     } catch (error) {
+      console.error(error)
       showErrorToast(error)
     }
   }
@@ -170,7 +172,6 @@ export default function Invite() {
 
   const createNewUser = () => {
     inviteForm.reset();
-    setShowLookupModal(false);
     setAccordionValue("invite-form");
   };
 

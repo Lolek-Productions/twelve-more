@@ -21,17 +21,17 @@ export async function sendCommunityInvitation(phoneNumber, community, appUser) {
 
 export async function inviteCurrentUserToCommunity(userId, community, appUser){
 
-  const user = await getPrivateUserById(userId);
-  if(!user.id){
+  const userData = await getPrivateUserById(userId);
+
+  if(!userData.success) return {success: false, message: "Problem gathering userData"};
+  const user = userData.user;
+
+  if(!user){
     return {success: false, message: "Problem finding user"};
   }
 
-  const response = await addCommunityToUser(community.id, userId);
-  if(!response.success){
-    return {success: false, message: "Problem adding user to community"};
-  }
+  const smsResult = await sendCommunityInvitation(user.phoneNumber, community, appUser);
 
-  const smsResult = await sendCommunityInvitation(user.phoneNumber, community, appUser)
   if (!smsResult.success){
     return {success: false, message: "Problem sending the SMS"};
   }

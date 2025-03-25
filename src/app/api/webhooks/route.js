@@ -78,24 +78,6 @@ export async function POST(req) {
           const mongoUserId = user._id.toString();
           console.log('mongoUserId:', mongoUserId);
 
-          const DEFAULT_ORGANIZATION_ID = '67c3776011f461e755fab65a';
-          const updatedUser = await User.findByIdAndUpdate(
-            mongoUserId,
-            {
-              $addToSet: {
-                organizations: {
-                  organization: DEFAULT_ORGANIZATION_ID,
-                  role: 'member',
-                },
-              },
-              $set: {
-                selectedOrganization: DEFAULT_ORGANIZATION_ID,
-              },
-            },
-            { new: true }
-          );
-          console.log('User updated with organization:', updatedUser);
-
           const client = await clerkClient()
           const response = await client.users.updateUserMetadata(id, {
             publicMetadata: {
