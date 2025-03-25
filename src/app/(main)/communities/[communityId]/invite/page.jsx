@@ -10,7 +10,7 @@ import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getCommunityById } from "@/lib/actions/community";
+import {createCommunity, getCommunityById} from "@/lib/actions/community";
 import {addCommunityToUser, getCommunityMembers, searchUsersInOrganization} from "@/lib/actions/user.js";
 import { useAppUser } from "@/hooks/useAppUser.js";
 import {
@@ -40,14 +40,14 @@ const userLookupSchema = z.object({
 
 // Profile form schema
 const profileFormSchema = z.object({
-  firstName: z
-    .string()
-    .min(1, { message: "First name is required." })
-    .max(50, { message: "First name must not exceed 50 characters." }),
-  lastName: z
-    .string()
-    .min(1, { message: "Last name is required." })
-    .max(50, { message: "Last name must not exceed 50 characters." }),
+  // firstName: z
+  //   .string()
+  //   .min(1, { message: "First name is required." })
+  //   .max(50, { message: "First name must not exceed 50 characters." }),
+  // lastName: z
+  //   .string()
+  //   .min(1, { message: "Last name is required." })
+  //   .max(50, { message: "Last name must not exceed 50 characters." }),
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
@@ -59,8 +59,8 @@ const profileFormSchema = z.object({
 });
 
 const defaultValues = {
-  firstName: "",
-  lastName: "",
+  // firstName: "",
+  // lastName: "",
   phoneNumber: "",
   smsOptIn: false,
 };
@@ -139,7 +139,7 @@ export default function Invite() {
       }
     } catch (error) {
       console.error('Error fetching members:', error);
-      showErrorToast(e)
+      showErrorToast(error)
     } finally {
       setIsLoading(false);
     }
@@ -168,54 +168,38 @@ export default function Invite() {
   async function inviteUser(userId, communityId) {
     try {
       const response = inviteCurrentUserToCommunity(userId, communityId, appUser);
-      console.log(response);
+      // console.log(response);
       showResponseToast(response);
-    } catch (e) {
-      showErrorToast(e)
+    } catch (error) {
+      showErrorToast(error)
     }
   }
 
   const onSelectUserToInvite = (user) => {
     const result = inviteUser(user.id, communityId);
-
   };
 
   const createNewUser = () => {
-    // Reset the form
     inviteForm.reset();
-    // Close the lookup modal
     setShowLookupModal(false);
-    // Open the accordion
     setAccordionValue("invite-form");
   };
 
   const sendInvite = async (data) => {
     try {
-      const res = await fetch('/api/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phoneNumber: data.phoneNumber,
-          communityId: communityId,
-          appUser: appUser,
-        }),
-      });
+      setIsSubmitting(true);
 
-      const responseData = await res.json();
-      if (!res.ok) {
-        throw new Error(responseData.error || 'Failed to send invitation');
+      const response = await inviteNewUserToCommunity(data.phoneNumber, community, appUser)
+      showResponseToast(response);
+
+      if (response.success) {
+        inviteForm.reset();
+        setAccordionValue("");
       }
-
-      showResponseToast(responseData);
-
-      inviteForm.reset();
-      // Close the accordion
-      setAccordionValue("");
     } catch (error) {
-      console.error('Error sending invite:', error);
-      showErrorToast(e)
+      showErrorToast(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -269,41 +253,39 @@ export default function Invite() {
           <AccordionItem value="invite-form" className="border rounded-md">
             <AccordionTrigger className="px-4">
               <span className="text-md font-medium">
-                {inviteForm.getValues("firstName") || inviteForm.getValues("lastName")
-                  ? `Invite ${inviteForm.getValues("firstName")} ${inviteForm.getValues("lastName")}`
-                  : "Invite New Member"}
+                Invite New Member
               </span>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
               <Form {...inviteForm}>
                 <form onSubmit={inviteForm.handleSubmit(onSubmitInvite)} className="space-y-4">
-                  <FormField
-                    control={inviteForm.control}
-                    name="firstName"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., John" {...field} />
-                        </FormControl>
-                        <FormMessage/>
-                      </FormItem>
-                    )}
-                  />
+                  {/*<FormField*/}
+                  {/*  control={inviteForm.control}*/}
+                  {/*  name="firstName"*/}
+                  {/*  render={({field}) => (*/}
+                  {/*    <FormItem>*/}
+                  {/*      <FormLabel>First Name</FormLabel>*/}
+                  {/*      <FormControl>*/}
+                  {/*        <Input placeholder="e.g., John" {...field} />*/}
+                  {/*      </FormControl>*/}
+                  {/*      <FormMessage/>*/}
+                  {/*    </FormItem>*/}
+                  {/*  )}*/}
+                  {/*/>*/}
 
-                  <FormField
-                    control={inviteForm.control}
-                    name="lastName"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Smith" {...field} />
-                        </FormControl>
-                        <FormMessage/>
-                      </FormItem>
-                    )}
-                  />
+                  {/*<FormField*/}
+                  {/*  control={inviteForm.control}*/}
+                  {/*  name="lastName"*/}
+                  {/*  render={({field}) => (*/}
+                  {/*    <FormItem>*/}
+                  {/*      <FormLabel>Last Name</FormLabel>*/}
+                  {/*      <FormControl>*/}
+                  {/*        <Input placeholder="e.g., Smith" {...field} />*/}
+                  {/*      </FormControl>*/}
+                  {/*      <FormMessage/>*/}
+                  {/*    </FormItem>*/}
+                  {/*  )}*/}
+                  {/*/>*/}
 
                   <FormField
                     control={inviteForm.control}
@@ -332,7 +314,7 @@ export default function Invite() {
                             id="smsOptIn"
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            className="mt-1"
+                            className="mt-5"
                           />
                         </FormControl>
                         <div>

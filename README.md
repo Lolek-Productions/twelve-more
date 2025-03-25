@@ -25,3 +25,15 @@ throw new Error("This is a test error message");
 
 # toast:
 const { showResponseToast, showErrorToast } = useApiToast();
+
+# Example from public meta data in Clerk:
+smsOptIn:true
+userMongoId:"67c4d7308e1ad29f8673701b"
+onboardingComplete:true
+
+# testing
+In order to totally remove a user, that needs to happen FIRST within Clerk
+https://dashboard.clerk.com
+
+Remember that there are two instances of Clerk: a production instance and a development instance
+This should be kept in mind when testing

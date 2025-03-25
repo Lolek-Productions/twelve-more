@@ -75,19 +75,15 @@ export default function OnboardingComponent() {
     setIsJoining(true);
     setError('');
 
-    // console.log(communityData.organization.id);
-    // console.log(user.id);
-
-
     try {
       //Add the organization to the user.
-      await addOrganizationToUser(communityData.organization.id, user.id)
+      await addOrganizationToUser(communityData.organization.id, user.publicMetadata.userMongoId)
 
       //Set the organization on the user
-      await setSelectedOrganizationOnUser(communityData.organization.id, user.id);
+      await setSelectedOrganizationOnUser(communityData.organization.id, user.publicMetadata.userMongoId);
 
       //Add the community to the user.
-      await addCommunityToUser(communityData.id, user.id)
+      await addCommunityToUser(communityData.id, user.publicMetadata.userMongoId)
 
       //set the storage to null
       localStorage.removeItem('pendingCommunityJoin');
@@ -168,7 +164,6 @@ export default function OnboardingComponent() {
           </CardHeader>
 
           <CardContent>
-
             {invitationError && (<div className="text-center p-4 text-red-500">{invitationError}</div>)}
 
             {communityData && (
