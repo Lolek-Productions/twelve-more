@@ -215,6 +215,13 @@ export default function OnboardingComponent() {
             </div>
           </CardContent>
         </Card>
+
+        <Button onClick={() => {
+          console.log('user', user)
+        }}>
+          xxx
+        </Button>
+
       </div>
     );
   }
@@ -301,11 +308,7 @@ export default function OnboardingComponent() {
         </CardContent>
       </Card>
 
-      <Button onClick={() => {
-        console.log('user', user)
-      }}>
-        x
-      </Button>
+
     </div>
   );
 }
