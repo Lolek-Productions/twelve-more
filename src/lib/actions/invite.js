@@ -3,11 +3,12 @@
 import twilioService from '@/lib/services/twilioService';
 import { getPrivateUserById } from '@/lib/actions/user';
 import {normalizePhoneNumber} from "@/lib/utils.js";
+import {PUBLIC_APP_URL} from "@/lib/constants.js";
 
 
 // Send SMS invitation
 export async function sendCommunityInvitation(phoneNumber, community, appUser) {
-  const communityLink = `https://twelvemore.social/join/${community.id}`;
+  const communityLink = `${PUBLIC_APP_URL}/join/${community.id}`;
   const messageBody = `${appUser.firstName} ${appUser.lastName} invited to join the ${community.name} community at TwelveMore! Click here to join: ${communityLink}`;
 
   const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);

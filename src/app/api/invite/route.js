@@ -75,7 +75,7 @@ const pollForMongoUser = async (clerkUserId, maxAttempts = 10, delayMs = 2000) =
 
 // Send SMS invitation
 const sendCommunityInvitation = async (firstName, phoneNumber, communityId, appUser) => {
-  const communityLink = `https://twelvemore.social/communities/${communityId}`;
+  const communityLink = `${PUBLIC_APP_URL}/communities/${communityId}`;
 
   const messageBody = `${appUser.firstName} ${appUser.lastName} invited to join a community at TwelveMore! Click here to check it out: ${communityLink}`;
 

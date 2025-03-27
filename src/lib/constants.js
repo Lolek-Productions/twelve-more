@@ -1,3 +1,5 @@
+export const PUBLIC_APP_URL = "https://twelvemore.social";
+
 export const DEV_PHONE_NUMBERS = [
   '+12709858824',
   '+15126535621',

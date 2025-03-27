@@ -8,7 +8,8 @@ import {getPrivateUserById} from "@/lib/actions/user.js";
 import {truncateText} from "@/lib/utils.js";
 import {sendSMS} from "@/lib/actions/sms.js";
 import {currentUser} from "@clerk/nextjs/server";
-import {getCommunityById} from "@/lib/actions/community.js";  //Keep even though WebStorm doesn't think it is being used!!!
+import {getCommunityById} from "@/lib/actions/community.js";
+import {PUBLIC_APP_URL} from "@/lib/constants.js";
 
 export async function createPost(postData) {
   const user = await currentUser();
@@ -81,7 +82,7 @@ export async function createPost(postData) {
 
         const truncatedText = truncateText(text, 150);
 
-        const communityLink = `https://twelvemore.social/communities/${communityId}`;
+        const communityLink = `${PUBLIC_APP_URL}/communities/${communityId}`;
         const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
 
         // Send batch SMS using Twilio Notify
@@ -499,7 +500,7 @@ export async function sayPrayerAction(post, appUser) {
         const phoneNumber = existingPost?.user?.phoneNumber;
         if (phoneNumber && existingPost.user._id.toString() !== appUser.id) {
 
-          const message = `${appUser.firstName} ${appUser.lastName} is praying for you. https://twelvemore.social/posts/${existingPost._id.toString()}`
+          const message = `${appUser.firstName} ${appUser.lastName} is praying for you. ${PUBLIC_APP_URL}/posts/${existingPost._id.toString()}`
           // console.log(phoneNumber, message);
 
           await sendSMS({phoneNumber, message});
@@ -740,7 +741,7 @@ export async function notifyOnNewComment(post, commentData) {
 
     const truncatedComment = truncateText(commentData.comment, 150);
 
-    const messageBody = `${commenterName} has commented on your post: "${truncatedComment}".    Check out the post here: https://twelvemore.social/posts/${post.id}`;
+    const messageBody = `${commenterName} has commented on your post: "${truncatedComment}".    Check out the post here: ${PUBLIC_APP_URL}/posts/${post.id}`;
 
     const batchResult = await twilioService.sendSMS(postOwner.phoneNumber, messageBody);
     console.log('Notification sent successfully', batchResult);

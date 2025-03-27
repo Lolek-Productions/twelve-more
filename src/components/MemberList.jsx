@@ -3,7 +3,7 @@
 import Link from "next/link"
 import {Button} from "@/components/ui/button.jsx";
 import {useClipboard} from "@/hooks/useClipboard.js";
-
+import {PUBLIC_APP_URL} from "@/lib/constants.js";
 
 export default function MemberList({ community, members, hideInvite = false }) {
   const [isCopied, copyToClipboard] = useClipboard();
@@ -27,8 +27,8 @@ export default function MemberList({ community, members, hideInvite = false }) {
 
         <div className='mt-2'>
           <button
-            onClick={() => copyToClipboard(`https://twelvemore.social/join/${community?.id}/`)}
-            title={`https://twelvemore.social/join/${community?.id}/`}
+            onClick={() => copyToClipboard(`${PUBLIC_APP_URL}/join/${community?.id}/`)}
+            title={`${PUBLIC_APP_URL}/join/${community?.id}/`}
             className="px-2 py-1 text-sm text-blue-600 hover:text-gray-600
                bg-gray-100 hover:bg-gray-200 rounded
                flex items-center gap-1 transition-colors duration-200"
