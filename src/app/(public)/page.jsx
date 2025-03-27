@@ -1,10 +1,28 @@
-import React from 'react';
+'use client'
+
+import {useEffect} from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import Image from "next/image";
-
+import { useAuth } from "@clerk/nextjs";
+import {useRouter} from "next/navigation";
 
 export default function Landing() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
+
+  // Redirect if user is logged in
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/home');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // If authentication is still loading, you could show a loading state
+  if (!isLoaded) {
+    return <div className="max-w-4xl mx-auto px-12 py-10 text-center">Loading...</div>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-12 py-10 text-center bg-white rounded-lg">
       <div className="text-center">

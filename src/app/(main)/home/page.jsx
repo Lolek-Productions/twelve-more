@@ -1,7 +1,7 @@
 "use client";
 
 import HomeFeed from '@/components/HomeFeed';
-import PostInput from '@/components/PostInput.jsx';
+// import PostInput from '@/components/PostInput.jsx';
 import { useEffect, useState } from "react";
 import { useContextContent } from "@/components/ContextProvider";
 import HomeContextSidebar from "@/components/HomeContextSidebar";
