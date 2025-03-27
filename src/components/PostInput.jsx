@@ -10,6 +10,7 @@ import {useAppUser} from "@/hooks/useAppUser.js";
 import {createPost} from "@/lib/actions/post.js";
 import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
+import {useQueryClient} from "@tanstack/react-query";
 
 export default function PostInput({communityId, placeholder}) {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -17,6 +18,7 @@ export default function PostInput({communityId, placeholder}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showResponseToast, showErrorToast } = useApiToast();
   const [ community, setCommunity ] = useState(null);
+  const queryClient = useQueryClient();
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -188,7 +190,8 @@ export default function PostInput({communityId, placeholder}) {
     setSelectedFile(null);
     setImageFileUrl(null);
     setRecordedURL(null);
-    location.reload();
+
+    queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
   };
 
   if (!isSignedIn || !isLoaded) {
