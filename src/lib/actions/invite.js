@@ -5,7 +5,6 @@ import { getPrivateUserById } from '@/lib/actions/user';
 import {normalizePhoneNumber} from "@/lib/utils.js";
 import {PUBLIC_APP_URL} from "@/lib/constants.js";
 
-
 // Send SMS invitation
 export async function sendCommunityInvitation(phoneNumber, community, appUser) {
   const communityLink = `${PUBLIC_APP_URL}/join/${community.id}`;

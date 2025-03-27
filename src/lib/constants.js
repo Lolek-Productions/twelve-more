@@ -1,4 +1,4 @@
-export const PUBLIC_APP_URL = "https://twelvemore.social";
+export const PUBLIC_APP_URL = "https://12more.co";
 
 export const DEV_PHONE_NUMBERS = [
   '+12709858824',
