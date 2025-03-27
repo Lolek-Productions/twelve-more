@@ -4,6 +4,8 @@ import Link from "next/link"
 import {Button} from "@/components/ui/button.jsx";
 import {useClipboard} from "@/hooks/useClipboard.js";
 import {PUBLIC_APP_URL} from "@/lib/constants.js";
+import Image from "next/image.js";
+import React from "react";
 
 export default function MemberList({ community, members, hideInvite = false }) {
   const [isCopied, copyToClipboard] = useClipboard();
@@ -26,6 +28,16 @@ export default function MemberList({ community, members, hideInvite = false }) {
         </Button>)}
 
         <div className='mt-2'>
+          <Link title="Share this QR code with people so that they can join this group." target="_blank" href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}>
+            <Image
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}
+              alt="TwelveMore"
+              className={'mx-auto py-2'}
+              width={45}
+              height={45}
+              priority
+            />
+          </Link>
           <button
             onClick={() => copyToClipboard(`${PUBLIC_APP_URL}/join/${community?.id}/`)}
             title={`${PUBLIC_APP_URL}/join/${community?.id}/`}
