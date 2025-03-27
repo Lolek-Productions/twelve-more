@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DEV_PHONE_NUMBERS } from "@/lib/constants";
+import {DEV_IDS} from "@/lib/constants";
 import { useUser } from "@clerk/nextjs";
-import { getUserByPhoneNumber } from "@/lib/actions/user";
+import {getPrivateUserById, getUserById} from "@/lib/actions/user";
 
 export default function DevelopersPage() {
   const [developers, setDevelopers] = useState([]);
@@ -17,15 +17,13 @@ export default function DevelopersPage() {
       try {
         setLoading(true);
 
-        const developerPromises = DEV_PHONE_NUMBERS.map(async (phoneNumber) => {
-          const result = await getUserByPhoneNumber(phoneNumber);
-          return result.success ? result.data : null;
+        const developerPromises = DEV_IDS.map(async (id) => {
+          const result = await getPrivateUserById(id);
+          return result.success ? result.user : null;
         });
 
         const resolvedDevelopers = await Promise.all(developerPromises);
-        const validDevelopers = resolvedDevelopers.filter(dev => dev !== null);
-
-        setDevelopers(validDevelopers);
+        setDevelopers(resolvedDevelopers);
       } catch (err) {
         console.error("Error fetching developers:", err);
         setError("Failed to load developer data");
@@ -87,15 +85,15 @@ export default function DevelopersPage() {
             <li key={dev.id} className="border p-4 rounded-md">
               <p>
                 <strong>Name:</strong>{" "}
-                {dev.firstName && dev.lastName
+                {dev?.firstName && dev?.lastName
                   ? `${dev.firstName} ${dev.lastName}`
                   : "Unknown"}
               </p>
               <p>
-                <strong>Phone Number:</strong> {dev.phoneNumber}
+                <strong>Phone Number:</strong> {dev?.phoneNumber}
               </p>
               <p>
-                <strong>ID:</strong> {dev.id}
+                <strong>ID:</strong> {dev?.id}
               </p>
             </li>
           ))}

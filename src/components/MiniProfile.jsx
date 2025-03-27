@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useClerk, useUser, SignOutButton } from '@clerk/nextjs';
-import { DEV_PHONE_NUMBERS } from '@/lib/constants';
+import {DEV_IDS} from '@/lib/constants';
 import { Button } from "@/components/ui/button.jsx";
 import {
   Popover,
@@ -26,9 +26,7 @@ export default function MiniProfile() {
   }
 
   // Check developer status
-  const isDeveloper = user.phoneNumbers?.some(phone =>
-    DEV_PHONE_NUMBERS.includes(phone.phoneNumber)
-  ) || false;
+  const isDeveloper = DEV_IDS.includes(user.publicMetadata.userMongoId) || false;
 
   // Get user's display name
   const displayName = user.firstName && user.lastName
