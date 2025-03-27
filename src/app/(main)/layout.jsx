@@ -17,6 +17,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import SessionWrapper from "@/components/SessionWrapper";
 import { ContextProvider, useContextContent } from "@/components/ContextProvider";
 import AutoClosingSidebar from "@/components/AutoClosingSidebarWrapper.jsx";
+import TanstackQueryProvider from "@/components/TanstackQueryProvider.jsx";
 
 // Inner layout component that has access to the context
 function InnerLayout({ children }) {
@@ -160,9 +161,11 @@ export default function RootLayout({ children }) {
       </SignedOut>
       <SignedIn>
         <SessionWrapper>
-          <ContextProvider>
-            <InnerLayout>{children}</InnerLayout>
-          </ContextProvider>
+          <TanstackQueryProvider>
+            <ContextProvider>
+              <InnerLayout>{children}</InnerLayout>
+            </ContextProvider>
+          </TanstackQueryProvider>
         </SessionWrapper>
       </SignedIn>
     </div>

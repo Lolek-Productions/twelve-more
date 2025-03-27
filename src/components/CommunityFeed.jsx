@@ -1,39 +1,78 @@
 'use client'
 
 import Post from './Post';
-import { useEffect, useState } from "react";
+import { useRef, useCallback } from "react";
 import { getPostsForCommunityFeed } from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton"
-import {useAppUser} from "@/hooks/useAppUser.js";
+import { useAppUser } from "@/hooks/useAppUser.js";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export default function CommunityFeed({ communityId }) {
-  const [posts, setPosts] = useState([]); // Stores fetched posts
-  const [postNum, setPostNum] = useState(10); // Default number of posts to fetch
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
-  const [hasMore, setHasMore] = useState(false);
-  const {appUser} = useAppUser();
+  const { appUser } = useAppUser();
+  const observerRef = useRef(null);
 
-  useEffect(() => {
-    if (!appUser) {
-      setIsLoading(true);
-      return;
+  // Set up function to fetch posts with pagination
+  const fetchPosts = async ({ pageParam = 0 }) => {
+    const limit = 10;
+    // Calculate the offset by multiplying the page number by the limit
+    const offset = pageParam * limit;
+
+    // Check if we have the required data
+    if (!appUser || !communityId) {
+      return {
+        posts: [],
+        nextPage: undefined,
+        hasMore: false
+      };
     }
 
-    const fetchPosts = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getPostsForCommunityFeed(postNum, appUser, communityId);
-        setPosts(data.posts);
-        setHasMore(data.hasMore);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Call the API with the calculated offset
+    const result = await getPostsForCommunityFeed(limit, appUser, communityId, offset);
 
-    fetchPosts();
-  }, [appUser, postNum, communityId]);
+    return {
+      posts: result.posts,
+      nextPage: result.hasMore ? pageParam + 1 : undefined,
+      hasMore: result.hasMore
+    };
+  };
+
+  // Set up infinite query
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error
+  } = useInfiniteQuery({
+    queryKey: ['infiniteCommunityFeed', communityId, appUser?.id],
+    queryFn: fetchPosts,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    enabled: !!appUser && !!communityId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Flatten post data from all pages
+  const posts = data?.pages.flatMap(page => page.posts) || [];
+
+  // Set up intersection observer for infinite scrolling
+  const lastPostRef = useCallback(
+    (node) => {
+      if (isLoading || isFetchingNextPage) return;
+
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [isLoading, isFetchingNextPage, fetchNextPage, hasNextPage]
+  );
 
   // Skeleton loading component
   const LoadingSkeleton = () => (
@@ -44,30 +83,35 @@ export default function CommunityFeed({ communityId }) {
     </div>
   );
 
+  // Handle error state
+  if (isError) {
+    return <div className="p-5">Error loading posts: {error.message}</div>;
+  }
+
   return (
     <div>
       <div>
         {isLoading ? (
           <LoadingSkeleton />
         ) : posts.length > 0 ? (
-          posts.map((post) =>
-            post && post.id ? <Post key={post.id} post={post} /> : null
-          )
+          posts.map((post, index) => {
+            // Apply ref to last post for infinite scrolling
+            if (index === posts.length - 1) {
+              return post && post.id ? (
+                <div key={post.id} ref={lastPostRef}>
+                  <Post post={post} />
+                </div>
+              ) : null;
+            }
+
+            return post && post.id ? <Post key={post.id} post={post} /> : null;
+          })
         ) : (
           <div className={'p-5 w-full'}>Create a post above!</div>
         )}
-      </div>
-      <div>
 
-        {posts.length > 0 && !isLoading && hasMore && (
-          <button
-            onClick={() => setPostNum(postNum + 10)}
-            className='text-blue-500 pl-4 pb-6 pt-3 hover:text-blue-700 text-sm'
-            disabled={isLoading}
-          >
-            Load more
-          </button>
-        )}
+        {/* Loading indicator for next page */}
+        {isFetchingNextPage && <LoadingSkeleton />}
       </div>
     </div>
   );

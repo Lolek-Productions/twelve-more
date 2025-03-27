@@ -114,57 +114,52 @@ export async function createPost(postData) {
   }
 }
 
-export async function getPostsForHomeFeed(limit = 10, appUser) {
+export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
   try {
     await connect();
 
-    //Get the posts where the communityId is null OR get the posts where the communityId matches the users selected organization and where the user is a member of that community.
     const posts = await Post.find(
       {
         $or: [
-          { organization: { $in: appUser.organizations.map(c => c.id) }, community: null },  // Get posts without a community
-          {
-            community: { $in: appUser.communities.map(c => c.id) }, // Posts from communities user belongs to
-          }
+          { organization: { $in: appUser.organizations.map(c => c.id) }, community: null },
+          { community: { $in: appUser.communities.map(c => c.id) } }
         ]
       }
     )
-    .populate({
-      path: "comments",
-      select: "text author createdAt",
-    })
-    .populate({
-      path: 'community',
-      select: 'name',
-    })
-    .populate({
-      path: 'organization',
-      select: 'name',
-    })
-    .populate({
-      path: 'user',
-      select: 'firstName lastName',
-    })
-    .populate({
-      path: 'likes',
-    })
-    .populate({
-      path: 'prayers.user',
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit + 1)
-    .lean();
+      .populate({
+        path: "comments",
+        select: "text author createdAt",
+      })
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+      })
+      .populate({
+        path: 'prayers.user',
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit + 1) // Request one extra post to determine if there are more
+      .skip(offset)
+      .lean();
 
-    // Determine if there are more posts
+    // Check if we got more posts than the limit
     const hasMore = posts.length > limit;
-    // Trim the extra post if it exists, returning only the requested limit
-    const limitedPosts = posts.slice(0, limit);
 
-    if (!limitedPosts || limitedPosts.length === 0) {
-      return { posts: [], hasMore: false }; // No posts found
-    }
+    // Only return the requested number of posts
+    const postsToReturn = hasMore ? posts.slice(0, limit) : posts;
 
-    const mappedPosts = limitedPosts.map((post) => ({
+    const mappedPosts = postsToReturn.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -194,7 +189,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser) {
         },
       })) || [],
       likes: post.likes?.map((like) => ({
-        userId: like._id.toString(), //this is the id of the user
+        userId: like._id.toString(),
       })) || [],
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
@@ -202,19 +197,15 @@ export async function getPostsForHomeFeed(limit = 10, appUser) {
       createdAt: post.createdAt,
     }));
 
-    return { posts: mappedPosts, hasMore }
+    return { posts: mappedPosts, hasMore };
   } catch (error) {
     console.error("Error fetching posts by community ID:", error);
-    return [];
+    return { posts: [], hasMore: false };
   }
 }
 
-export async function getPostsForCommunityFeed(limit = 10, user, communityId) {
-
+export async function getPostsForCommunityFeed(limit = 10, appUser, communityId, offset = 0) {
   try {
-    // console.log(selectedOrganizationId);
-    // console.log(';lkj;kljk');
-
     await connect();
     const posts = await Post.find(
         { community: communityId },
@@ -243,6 +234,7 @@ export async function getPostsForCommunityFeed(limit = 10, user, communityId) {
       })
       .sort({ createdAt: -1 })
       .limit(limit + 1)
+      .skip(offset)
       .lean();
 
     // Determine if there are more posts
