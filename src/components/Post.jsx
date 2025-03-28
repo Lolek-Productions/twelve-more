@@ -74,7 +74,7 @@ export default function Post({ post, clickableText = true, showComments = false 
               {post?.community?.id && (
                 <div className="flex items-center mt-0.5">
                   <h4 className="font-bold text-xs truncate max-w-[200px]">
-                    <Link href={`/communities/${post?.community?.id}`} className="block truncate">
+                    <Link href={`/communities/${post?.community?.id}/posts`} className="block truncate">
                       {post?.community?.name}
                     </Link>
                   </h4>

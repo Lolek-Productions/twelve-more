@@ -126,6 +126,7 @@ export default function CommunitiesList() {
             const isMember = isUserInCommunity(community.id);
             return (
               <li key={community.id} className="border p-4 rounded-md">
+                {/*TODO: not sure about this one*/}
                 <Link href={`/communities/${community.id}`}>
                   <h4 className="text-lg font-medium">
                     {community.name}{" "}

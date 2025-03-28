@@ -113,7 +113,7 @@ export async function createPost(postData) {
 
         const truncatedText = truncateText(text, 150);
 
-        const communityLink = `${PUBLIC_APP_URL}/communities/${communityId}`;
+        const communityLink = `${PUBLIC_APP_URL}/communities/${communityId}/posts`;
         const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
 
         // Send batch SMS using Twilio Notify

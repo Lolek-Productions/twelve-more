@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { use } from 'react';
-import CommunityFeed from '@/components/CommunityFeed';
+import CommunityFeed from '@/components/CommunityFeed.jsx';
 import PostInput from '@/components/PostInput.jsx';
 import { getCommunityById } from "@/lib/actions/community.js";
 import { useContextContent } from "@/components/ContextProvider.jsx";

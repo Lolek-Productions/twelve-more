@@ -97,7 +97,7 @@ export default function UserPage() {
           <div className="mt-2 space-y-2">
             {user.communities.map((community) => (
               <div key={community.id} className="px-2 rounded-md flex justify-start items-center">
-                <Link href={`/communities/${community?.id}`}>
+                <Link href={`/communities/${community?.id}/posts`}>
                   <p className="text-sm">{`${community?.name}` || "Unknown"}</p>
                 </Link>
               </div>
@@ -112,7 +112,7 @@ export default function UserPage() {
           <div className="mt-2 space-y-2">
             {user.organizations.map((organization) => (
               <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">
-                <Link href={`/communities/${organization?.id}`}>
+                <Link href={`/communities/${organization?.id}/posts`}>
                   <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>
                 </Link>
               </div>

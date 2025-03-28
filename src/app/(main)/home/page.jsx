@@ -82,7 +82,7 @@ export default function HomePage() {
       setShowModal(false);
 
       // Redirect to the community page
-      router.push(`/communities/${communityData.id}`);
+      router.push(`/communities/${communityData.id}/posts`);
     } catch (err) {
       setError(err.message || 'Something went wrong joining the community.');
       console.error('Error joining community:', err);

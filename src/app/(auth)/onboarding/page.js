@@ -125,7 +125,7 @@ export default function OnboardingComponent() {
       localStorage.removeItem('pendingCommunityJoin');
 
       // Redirect to the community page
-      window.location.href = `/communities/${communityData.id}`;
+      window.location.href = `/communities/${communityData.id}/posts`;
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       console.error(err);

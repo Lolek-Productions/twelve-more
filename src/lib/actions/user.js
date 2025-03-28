@@ -545,7 +545,7 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
         );
         const addedCommunityName = addedCommunity ? addedCommunity.community.name : null;
 
-        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}  ${PUBLIC_APP_URL}/communities/${communityId}`;
+        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}  ${PUBLIC_APP_URL}/communities/${communityId}/posts`;
         const smsResponse = await twilioService.sendBatchSMS(leadersPhoneNumbers, message);
         // console.log('SMS notification to leaders:', smsResponse);
       }
