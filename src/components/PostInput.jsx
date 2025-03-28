@@ -12,7 +12,7 @@ import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {useQueryClient} from "@tanstack/react-query";
 
-export default function PostInput({communityId, placeholder}) {
+export default function PostInput({communityId, placeholder, parentId = null, onPostCreated = null}) {
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,30 +168,51 @@ export default function PostInput({communityId, placeholder}) {
   }
 
   const handleSubmit = async () => {
+    if (!community.organization.id) {
+      showErrorToast({message: 'Organization ID is required'});
+      return;
+    }
+
     setIsSubmitting(true);
 
     const response = await createPost({
-      userMongoId: user.publicMetadata.userMongoId,
+      userId: appUser.id,
       communityId: communityId,
       text,
-      profileImg: user.imageUrl,
+      profileImg: appUser.avatar,
       image: imageFileUrl,
       audio: recordedURL,
       organizationId: community.organization.id,
     })
 
     if(!response.success) {
-      return showErrorToast(response.message);
+      setIsSubmitting(false);
+      return showErrorToast({message: response.message || 'Error creating post'});
     }
 
-    showResponseToast(response)
+    showResponseToast(response);
     setIsSubmitting(false);
     setText('');
     setSelectedFile(null);
     setImageFileUrl(null);
     setRecordedURL(null);
 
-    queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
+    // Call the callback if provided (useful for comment handling)
+    if (onPostCreated && typeof onPostCreated === 'function') {
+      onPostCreated(response.data);
+    }
+
+    // Invalidate relevant queries
+    if (parentId) {
+      // If this is a comment, invalidate the comments query
+      queryClient.invalidateQueries(['comments', parentId]);
+    } else if (communityId) {
+      // If this is a post in a community
+      queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
+    } else {
+      // If this is a general post
+      queryClient.invalidateQueries(['infiniteHomeFeed']);
+    }
   };
 
   if (!isSignedIn || !isLoaded) {
@@ -210,8 +231,8 @@ export default function PostInput({communityId, placeholder}) {
       <div className='w-full divide-y divide-gray-200'>
         <textarea
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700'
-          placeholder={placeholder}
-          rows='2'
+          placeholder={placeholder || (parentId ? 'Write a comment...' : 'What\'s on your mind?')}
+          rows={parentId ? '2' : '3'}
           value={text}
           onChange={(e) => setText(e.target.value)}
         ></textarea>
@@ -249,8 +270,9 @@ export default function PostInput({communityId, placeholder}) {
           <Button
             onClick={handleSubmit}
             disabled={text.trim() === '' || imageFileUplaoding || isSubmitting}
+            size={parentId ? 'sm' : 'default'}
           >
-            {isSubmitting ? 'Posting...' : 'Post'}
+            {isSubmitting ? (parentId ? 'Commenting...' : 'Posting...') : (parentId ? 'Comment' : 'Post')}
           </Button>
         </div>
       </div>

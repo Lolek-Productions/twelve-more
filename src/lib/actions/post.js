@@ -18,41 +18,72 @@ export async function createPost(postData) {
     await connect();
 
     // Extract data from postData object
-    const userMongoId = postData.userMongoId;
+    const userId = postData.userId;
     const text = postData.text;
     const profileImg = postData.profileImg;
     const image = postData.image;
     const audio = postData.audio;
     const communityId = postData.communityId;
     const organizationId = postData.organizationId;
+    const parentId = postData.parentId ?? null;
 
-    if (!user?.publicMetadata?.userMongoId) {
+    if (!userId) {
       console.error('Warning: Missing userMongoId in publicMetadata');
       return { success: false, message: 'User Id missing' };
     }
 
-    if (!user || user.publicMetadata.userMongoId !== userMongoId) {
+    if (!user || user.publicMetadata.userMongoId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
 
     // Create and save in one operation
     const newPost = await Post.create({
-      user: userMongoId,
+      user: userId,
       text,
       profileImg,
       image,
       audio,
       community: communityId,
       organization: organizationId,
+      parentId: parentId,
     });
 
+    // If this is a comment (has parentId), notify the parent post owner
+    if (parentId) {
+      try {
+        const parentPost = await Post.findById(parentId).populate('user');
+
+        if (parentPost) {
+          // Don't notify if commenting on your own post
+          if (parentPost.user._id.toString() !== userId) {
+            const commentData = {
+              comment: text,
+              user: userId,
+            };
+
+            // Notify the parent post owner about the new comment
+            await notifyOnNewComment(
+              { id: parentId, user: { _id: parentPost.user._id } },
+              commentData
+            );
+          }
+        }
+
+        return { success: true, message: "Comment added successfully" };
+      } catch (error) {
+        console.error('Error handling comment notification:', error);
+        return { success: true, message: "Comment added but notification failed" };
+      }
+    }
+
+    // Continue with original community notification logic for new posts (not comments)
     if (communityId) {
       try {
         // Verify the community exists
         const communityResponse = await getCommunityById(communityId);
         if (!communityResponse.success) {
           console.log('Community not found:', communityId);
-          return { success: true, message: "Community not found", notificationSent: false };
+          return { success: true, message: "Community not found" };
         }
 
         // Access the community data correctly
@@ -66,12 +97,12 @@ export async function createPost(postData) {
 
         if (!members?.length) {
           console.log('No members found in community:', communityId);
-          return { success: true, message: "No members found in community", notificationSent: false };
+          return { success: true, message: "No members found in community" };
         }
 
         // Filter out the current user and ensure valid phone numbers
         const otherMembersPhoneNumbers = members
-          .filter((member) => member._id.toString() !== userMongoId)
+          .filter((member) => member._id.toString() !== userId)
           .filter((member) => member.phoneNumber && typeof member.phoneNumber === 'string' && member.phoneNumber.trim() !== '')
           .map((member) => member.phoneNumber);
 
@@ -106,7 +137,7 @@ export async function createPost(postData) {
       }
     } else {
       console.log('No communityId provided, skipping notification');
-      return { success: true, data: newPost, notificationSent: false };
+      return { success: true, notificationSent: false };
     }
   } catch (error) {
     console.log('Error creating post:', error);
@@ -118,18 +149,16 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
   try {
     await connect();
 
+    // Only fetch top-level posts (not comments)
     const posts = await Post.find(
       {
+        parentId: null, // Only get top-level posts
         $or: [
           { organization: { $in: appUser.organizations.map(c => c.id) }, community: null },
           { community: { $in: appUser.communities.map(c => c.id) } }
         ]
       }
     )
-      .populate({
-        path: "comments",
-        select: "text author createdAt",
-      })
       .populate({
         path: 'community',
         select: 'name',
@@ -159,7 +188,15 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
     // Only return the requested number of posts
     const postsToReturn = hasMore ? posts.slice(0, limit) : posts;
 
-    const mappedPosts = postsToReturn.map((post) => ({
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      postsToReturn.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
+    const mappedPosts = postsWithCommentCounts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -177,17 +214,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
         name: post.organization?.name,
       },
       profileImg: post.profileImg,
-      comments: post.comments?.map((comment) => ({
-        id: comment._id.toString(),
-        text: comment.text,
-        author: comment.author,
-        createdAt: comment.createdAt,
-        user: {
-          id: comment.user?._id.toString(),
-          firstName: comment.user?.firstName,
-          lastName: comment.user?.lastName,
-        },
-      })) || [],
+      commentCount: post.commentCount || 0, // Add comment count
       likes: post.likes?.map((like) => ({
         userId: like._id.toString(),
       })) || [],
@@ -208,12 +235,8 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
   try {
     await connect();
     const posts = await Post.find(
-        { community: communityId },
-      )
-      .populate({
-        path: "comments",
-        select: "text author createdAt",
-      })
+      { community: communityId, parentId: null }, // Only get top-level posts
+    )
       .populate({
         path: 'community',
         select: 'name',
@@ -246,7 +269,15 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
       return { posts: [], hasMore: false }; // No posts found
     }
 
-    const mappedPosts = limitedPosts.map((post) => ({
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      limitedPosts.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
+    const mappedPosts = postsWithCommentCounts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -264,17 +295,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
         name: post.organization?.name,
       },
       profileImg: post.profileImg,
-      comments: post.comments?.map((comment) => ({
-        id: comment._id.toString(),
-        text: comment.text,
-        author: comment.author,
-        createdAt: comment.createdAt,
-        user: {
-          id: comment.user?._id.toString(),
-          firstName: comment.user?.firstName,
-          lastName: comment.user?.lastName,
-        },
-      })) || [],
+      commentCount: post.commentCount || 0, // Add comment count
       likes: post.likes?.map((like) => ({
         userId: like._id.toString(), //this is the id of the user
       })) || [],
@@ -295,11 +316,7 @@ export async function getAllPosts({limit = 10}) {
   try {
     await connect();
 
-    const posts = await Post.find() // Query posts by communityId
-      .populate({
-        path: "comments",
-        select: "text author createdAt",
-      })
+    const posts = await Post.find({ parentId: null }) // Only get top-level posts
       .populate({
         path: 'community',
         select: 'name',
@@ -324,7 +341,15 @@ export async function getAllPosts({limit = 10}) {
       return []; // No posts found
     }
 
-    return posts.map((post) => ({
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      posts.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
+    return postsWithCommentCounts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       user: {
@@ -341,22 +366,11 @@ export async function getAllPosts({limit = 10}) {
         name: post.organization?.name,
       },
       profileImg: post.profileImg,
-      comments: post.comments?.map((comment) => ({
-        id: comment._id.toString(),
-        text: comment.text,
-        author: comment.author,
-        createdAt: comment.createdAt,
-        user: {
-          id: comment.user?._id.toString(),
-          firstName: comment.user?.firstName,
-          lastName: comment.user?.lastName,
-        },
-      })) || [],
+      commentCount: post.commentCount || 0, // Add comment count
       likes: post.likes?.map((like) => ({
         id: like._id.toString(), //this is the id of the user
       })) || [],
       createdAt: post.createdAt,
-      // Add other fields like author, createdAt if present
     }));
   } catch (error) {
     console.error("Error fetching posts by community ID:", error);
@@ -364,7 +378,7 @@ export async function getAllPosts({limit = 10}) {
   }
 }
 
-export async function getPostById(postId) {
+export async function getPostByIdWithComments(postId) {
   try {
     await connect();
 
@@ -372,15 +386,8 @@ export async function getPostById(postId) {
       throw new Error("Post ID is required");
     }
 
+    // Get the main post
     const post = await Post.findById(postId)
-      .populate({
-        path: "comments",
-        select: "comment profileImg createdAt",
-        populate: {
-          path: "user",
-          select: "firstName lastName",
-        },
-      })
       .populate({
         path: 'community',
         select: 'name',
@@ -405,7 +412,14 @@ export async function getPostById(postId) {
       throw new Error("Post not found");
     }
 
-    // console.log('post - post.js', post);
+    // Get comments for this post
+    const comments = await Post.find({ parentId: postId })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .sort({ createdAt: 1 })
+      .lean();
 
     const postData = {
       id: post._id.toString(),
@@ -425,9 +439,9 @@ export async function getPostById(postId) {
         name: post.organization?.name,
       },
       profileImg: post.profileImg,
-      comments: post.comments?.map((comment) => ({
+      comments: comments.map((comment) => ({
         id: comment._id.toString(),
-        comment: comment.comment,
+        text: comment.text,
         profileImg: comment.profileImg,
         createdAt: comment.createdAt,
         user: {
@@ -445,10 +459,7 @@ export async function getPostById(postId) {
       createdAt: post.createdAt,
     };
 
-    // console.log('postData Result', postData.prayers);
-    // console.log('postData Result', JSON.stringify(post.prayers, null, 2));
-
-    return postData;
+    return {success: true, post: postData};
   } catch (error) {
     console.error("Error fetching post:", error.message);
     return null;
@@ -456,7 +467,6 @@ export async function getPostById(postId) {
 }
 
 export async function sayPrayerAction(post, appUser) {
-
   try {
     await connect();
 
@@ -589,6 +599,7 @@ export async function getPostsByUserId(userId, limit, appUser) {
     }
 
     const posts = await Post.find({
+      parentId: null, // Only get top-level posts
       $or: [
         {
           organization: appUser.selectedOrganization.id,
@@ -602,14 +613,6 @@ export async function getPostsByUserId(userId, limit, appUser) {
         }
       ]
     })
-      .populate({
-        path: "comments",
-        select: "comment profileImg createdAt",
-        populate: {
-          path: "user",
-          select: "firstName lastName",
-        },
-      })
       .populate({
         path: 'community',
         select: 'name',
@@ -636,18 +639,24 @@ export async function getPostsByUserId(userId, limit, appUser) {
       throw new Error("Posts not found");
     }
 
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      posts.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
     // Determine if there are more posts
     const hasMore = posts.length > limit;
     // Trim the extra post if it exists, returning only the requested limit
-    const limitedPosts = posts.slice(0, limit);
+    const limitedPosts = postsWithCommentCounts.slice(0, limit);
 
     if (!limitedPosts || limitedPosts.length === 0) {
       return { posts: [], hasMore: false }; // No posts found
     }
 
-    // console.log('-----post - post.js', posts);
-
-    const mappedPosts = posts.map((post) => ({
+    const mappedPosts = limitedPosts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -665,17 +674,7 @@ export async function getPostsByUserId(userId, limit, appUser) {
         name: post.organization?.name,
       },
       profileImg: post.profileImg,
-      comments: post.comments?.map((comment) => ({
-        id: comment._id.toString(),
-        comment: comment.comment,
-        profileImg: comment.profileImg,
-        createdAt: comment.createdAt,
-        user: {
-          id: comment.user?._id.toString(),
-          firstName: comment.user?.firstName,
-          lastName: comment.user?.lastName,
-        },
-      })) || [],
+      commentCount: post.commentCount || 0, // Add comment count
       likes: post.likes?.map((like) => ({
         userId: like._id?.toString(),
       })) || [],
@@ -692,9 +691,59 @@ export async function getPostsByUserId(userId, limit, appUser) {
   }
 }
 
-export async function notifyOnNewComment(post, commentData) {
-  // console.error('post', post, 'commentData', commentData);
+// Add new function to get comments for a post
+export async function getCommentsForPost(postId, limit = 20, page = 1) {
+  try {
+    await connect();
 
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+
+    const skip = (page - 1) * limit;
+
+    const comments = await Post.find({ parentId: postId })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName profileImg',
+      })
+      .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalComments = await Post.countDocuments({ parentId: postId });
+
+    const mappedComments = comments.map(comment => ({
+      id: comment._id.toString(),
+      text: comment.text,
+      user: {
+        id: comment.user?._id.toString(),
+        firstName: comment.user?.firstName,
+        lastName: comment.user?.lastName,
+      },
+      profileImg: comment.profileImg || comment.user?.profileImg,
+      createdAt: comment.createdAt,
+    }));
+
+    return {
+      success: true,
+      comments: mappedComments,
+      totalComments,
+      totalPages: Math.ceil(totalComments / limit),
+      currentPage: page
+    };
+  } catch (error) {
+    console.error("Error fetching comments:", error.message);
+    return {
+      success: false,
+      message: error.message,
+      comments: []
+    };
+  }
+}
+
+export async function notifyOnNewComment(post, commentData) {
   // Make sure post and comment exist
   if (!post || !commentData) {
     console.error('Missing post or comment data for notification');
@@ -721,10 +770,6 @@ export async function notifyOnNewComment(post, commentData) {
       console.error(`No phone number available for notification with ownerId ${postOwner.id}`);
       return;
     }
-
-    // console.log(commentData.user)
-    // throw new Error()
-
 
     const commenterResponse = await getPrivateUserById(commentData.user);
     const commenter = commenterResponse.user;

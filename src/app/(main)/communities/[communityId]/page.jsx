@@ -21,6 +21,8 @@ export default function CommunitiesHome({ params }) {
         if (communityId) {
           const communityData = await getCommunityById(communityId);
           setCommunity(communityData.community);
+        } else {
+          console.error("Community Id not found");
         }
       } catch (error) {
         console.error("Error fetching community:", error);

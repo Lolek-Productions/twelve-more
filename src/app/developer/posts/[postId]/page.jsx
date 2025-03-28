@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getPostById } from "@/lib/actions/post";
+import {getPostByIdWithComments} from "@/lib/actions/post";
 import { Button } from "@/components/ui/button";
 
 export default function PostPage() {
@@ -23,7 +23,7 @@ export default function PostPage() {
     }
     async function fetchPostData() {
       try {
-        const postData = await getPostById(postId);
+        const postData = await getPostByIdWithComments(postId);
         // console.log(postData);
 
         if (!postData) {
@@ -100,7 +100,7 @@ export default function PostPage() {
                   <div>
                     <p
                       className="text-sm font-semibold">{`${comment.user?.firstName} ${comment.user?.lastName}` || "Unknown"}</p>
-                    <p className="text-gray-700">{comment.comment}</p>
+                    <p className="text-gray-700">{comment.text}</p>
                     <p className="text-gray-500 text-xs">{new Date(comment.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>

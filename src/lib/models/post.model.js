@@ -12,6 +12,12 @@ const postSchema = new mongoose.Schema(
     audio: {
       type: String,
     },
+    // Optional parent post reference (for comments)
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Post',
+      default: null,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

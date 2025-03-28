@@ -6,9 +6,12 @@ import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {useAppUser} from "@/hooks/useAppUser.js";
-import {linkifyText} from "@/lib/utils.js";
-import Link from "next/link.js";
+import { useAppUser } from "@/hooks/useAppUser.js";
+import { linkifyText } from "@/lib/utils.js";
+import { addCommentJSON } from "@/lib/actions/comment"; // Import the new server action
+import { useQueryClient } from '@tanstack/react-query';
+import {getPostByIdWithComments} from "@/lib/actions/post.js";
+import CommentInput from "@/components/CommentInput.jsx";
 
 export default function CommentModal() {
   const [open, setOpen] = useAtom(modalState);
@@ -16,34 +19,31 @@ export default function CommentModal() {
   const [post, setPost] = useState({});
   const [postLoading, setPostLoading] = useState(false);
   const [input, setInput] = useState('');
-  const {appUser} = useAppUser();
+  const { appUser } = useAppUser();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+
+  // const [comments, setComments] = useState([]);
+  // const [commentsLoading, setCommentsLoading] = useState(false);
 
   useEffect(() => {
     if (!postId) {
       setPost({});
       setPostLoading(false);
+      // setComments([]);
       return;
     }
-    // console.log('found post id in CommentModal');
 
     const fetchPost = async () => {
-      // console.log('trying from Atom', postId);
-
       if (postId !== '') {
         setPostLoading(true);
         setInput('');
-        const response = await fetch('/api/post/get', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ postId }),
-        });
-        if (response.ok) {
-          const postData = await response.json();
-          setPost(postData);
+        const postResponse = await getPostByIdWithComments(postId);
+        // console.log(postResponse);
+
+        if (postResponse.success) {
+          setPost(postResponse.post);
           setPostLoading(false);
         } else {
           setPostLoading(false);
@@ -51,45 +51,13 @@ export default function CommentModal() {
         }
       }
     };
+
     fetchPost();
-    return () => {
-      setPostLoading(false);
-    };
   }, [postId]);
 
-  const sendComment = async () => {
-    if (!appUser) {
-      return router.push('/sign-in');
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/post/comment', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          postId,
-          comment: input,
-          user: appUser.id,
-          profileImg: appUser.avatar,
-        }),
-      });
-      if (res.status === 200) {
-        setInput('');
-        setOpen(false);
-        setPostId(null);
-        router.push(`/posts/${postId}`);
-        setTimeout(() => {
-          router.refresh();
-        }, 100);
-      }
-    } catch (error) {
-      console.log('Error sending comment:', error);
-    } finally {
-      setSubmitting(false);
-    }
+  const afterCommentCreated = () => {
+    setOpen(false);
+    queryClient.invalidateQueries(['comments', postId]);
   };
 
   return (
@@ -120,7 +88,6 @@ export default function CommentModal() {
 
             {/* Post Content */}
             <div className="flex items-center space-x-1 relative mb-4">
-              {/*<span className="w-0.5 h-full z-[-1] absolute left-8 top-11 bg-gray-300" />*/}
               <img
                 src={
                   postLoading
@@ -135,7 +102,7 @@ export default function CommentModal() {
                   {postLoading ? 'Name' : `${post?.user?.firstName} ${post?.user?.lastName}`}
                 </h4>
                 <h4 className="font-bold text-xs">
-                    {post?.community?.name}
+                  {post?.community?.name}
                 </h4>
                 <p
                   className="mt-2 text-gray-500 text-[15px] sm:text-[16px] whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
@@ -155,10 +122,10 @@ export default function CommentModal() {
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
               </div>
-            ) : post?.comments?.length > 0 ? (
+            ) : post.comments?.length > 0 ? (
               <div className="space-y-4 mb-4">
-                {post.comments.map((comment, index) => (
-                  <div key={index} className="flex items-start space-x-3 group">
+                {post.comments?.map((comment) => (
+                  <div key={comment.id} className="flex items-start space-x-3 group">
                     <img
                       src={comment.profileImg || 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'}
                       alt="commenter"
@@ -178,7 +145,7 @@ export default function CommentModal() {
                         })}
                       </span>
                       </div>
-                      <p className="text-gray-700 text-sm mt-1">{comment.comment}</p>
+                      <p className="text-gray-700 text-sm mt-1">{comment.text}</p>
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -197,33 +164,35 @@ export default function CommentModal() {
             )}
 
             {/* Comment Input */}
-            <div className="flex p-3 space-x-3 bg-gray-50 rounded-lg mt-4">
-              <img
-                src={appUser?.avatar}
-                alt="user-img"
-                className="h-10 w-10 rounded-full cursor-pointer hover:brightness-95"
-              />
-              <div className="w-full divide-y divide-gray-200">
-                <div>
-                <textarea
-                  className="w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700 placeholder:text-gray-500 bg-transparent"
-                  placeholder="Reply to this..."
-                  rows="2"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                />
-                </div>
-                <div className="flex items-center justify-end pt-2.5">
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:bg-blue-600 disabled:opacity-50 transition-colors"
-                    disabled={input.trim() === '' || postLoading || submitting}
-                    onClick={sendComment}
-                  >
-                    {submitting ? "Sending..." : "Reply"}
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CommentInput post={post} onCommentCreated={() => afterCommentCreated()} />
+
+            {/*<div className="flex p-3 space-x-3 bg-gray-50 rounded-lg mt-4">*/}
+            {/*  <img*/}
+            {/*    src={appUser?.avatar}*/}
+            {/*    alt="user-img"*/}
+            {/*    className="h-10 w-10 rounded-full cursor-pointer hover:brightness-95"*/}
+            {/*  />*/}
+            {/*  <div className="w-full divide-y divide-gray-200">*/}
+            {/*    <div>*/}
+            {/*    <textarea*/}
+            {/*      className="w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700 placeholder:text-gray-500 bg-transparent"*/}
+            {/*      placeholder="Reply to this..."*/}
+            {/*      rows="2"*/}
+            {/*      value={input}*/}
+            {/*      onChange={(e) => setInput(e.target.value)}*/}
+            {/*    />*/}
+            {/*    </div>*/}
+            {/*    <div className="flex items-center justify-end pt-2.5">*/}
+            {/*      <button*/}
+            {/*        className="bg-blue-500 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:bg-blue-600 disabled:opacity-50 transition-colors"*/}
+            {/*        disabled={input.trim() === '' || postLoading || submitting}*/}
+            {/*        onClick={sendComment}*/}
+            {/*      >*/}
+            {/*        {submitting ? "Sending..." : "Reply"}*/}
+            {/*      </button>*/}
+            {/*    </div>*/}
+            {/*  </div>*/}
+            {/*</div>*/}
           </div>
         </div>
       </Modal>

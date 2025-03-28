@@ -5,7 +5,7 @@ import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
 import {useEffect, useState} from "react";
-import {getPostById} from "@/lib/actions/post.js";
+import {getPostByIdWithComments} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from "next/navigation";
 
@@ -26,9 +26,9 @@ export default function PostPage() {
       setIsLoading(true);
       // console.log(postId);
       try {
-        const postData = await getPostById(postId);
+        const postData = await getPostByIdWithComments(postId);
         // console.log(postData);
-        setPost(postData);
+        setPost(postData.post);
       } catch (error) {
         console.error('Error fetching post:', error);
       } finally {

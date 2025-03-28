@@ -26,7 +26,7 @@ export default function Comment({ comment, id }) {
           </div>
           {/*<HiDotsHorizontal className='text-sm' />*/}
         </div>
-        <p className='text-gray-800 text-xs my-3'>{comment?.comment}</p>
+        <p className='text-gray-800 text-xs my-3'>{comment?.text}</p>
       </div>
     </div>
   );

@@ -6,7 +6,8 @@ import Icons from './Icons';
 import { linkifyText } from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
-import Microlink from '@microlink/react'; // Use default import instead of named import
+import Microlink from '@microlink/react';
+import CommentsSection from './CommentsSection'; // Import the new CommentsSection component
 
 // Wrapper for Microlink that handles validation and string props
 const SafeMicrolink = ({ url }) => {
@@ -48,8 +49,9 @@ const SafeMicrolink = ({ url }) => {
   );
 }
 
-export default function Post({ post, clickableText = true }) {
+export default function Post({ post, clickableText = true, showComments = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(showComments);
 
   // Function to open image modal and prevent navigation to post
   const handleImageClick = (e) => {
@@ -61,6 +63,13 @@ export default function Post({ post, clickableText = true }) {
   // Function to close the modal
   const closeModal = () => {
     setIsImageModalOpen(false);
+  };
+
+  // Toggle comments visibility
+  const toggleComments = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsCommentsOpen(!isCommentsOpen);
   };
 
   // Function to extract and validate URLs from text
@@ -228,7 +237,21 @@ export default function Post({ post, clickableText = true }) {
               <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-opacity duration-200"></div>
             </div>
           )}
-          <Icons post={post} id={post?.id}/>
+
+          {/* Updated Icons component to include comment count */}
+          <Icons
+            post={post}
+            id={post?.id}
+            commentCount={post?.commentCount || 0}
+            onCommentClick={toggleComments}
+          />
+
+          {/* Conditionally render the comments section */}
+          {isCommentsOpen && (
+            <div className="mt-2 border-t pt-3">
+              <CommentsSection postId={post.id} />
+            </div>
+          )}
         </div>
       </div>
 

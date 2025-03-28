@@ -115,7 +115,7 @@ export async function getUserById(userId) {
       stack: error.stack,
       name: error.name,
     });
-    return { success: false, message:'Failed to fetch users', details: error.message };
+    return { success: false, message:`Failed to fetch users: ${error.message}` }
   }
 }
 
