@@ -71,7 +71,7 @@ export default function UsersPage() {
       <div className="flex flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Users</h3>
-          <p className="text-sm text-muted-foreground">Globally manage the TwelveMore users.</p>
+          <p className="text-sm text-muted-foreground">Globally manage the 12More users.</p>
         </div>
         {/*<Button onClick={() => setModalOpen(true)}>New User</Button>*/}
       </div>

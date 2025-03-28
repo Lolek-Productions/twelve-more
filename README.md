@@ -1,4 +1,4 @@
-# TwelveMore
+# 12More
 
 # Notes
 After changing the schema on the Post model, I had to restart the development server, before it would use the updated Post Model.
@@ -17,7 +17,7 @@ https://www.youtube.com/watch?v=gsysxSuTohA
 # Throwing an error:
 throw new Error("This is a test error message");
 
-# Ways of joining TwelveMore
+# Ways of joining 12More
 1. Be invited to a community via SMS: user receives a link to the community
 2. Be invited to the organization via SMS: user receives a link to the assigned welcoming community
 3. Click on a physically published link so the user can join the welcoming community.

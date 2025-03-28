@@ -10,14 +10,14 @@ export default function TermsOfService() {
 
       <h2 className="text-2xl font-semibold mt-6">1. Acceptance of Terms</h2>
       <p className="text-gray-700">
-        By accessing or using TwelveMore, you agree to be bound by these Terms of Service and our
+        By accessing or using 12More, you agree to be bound by these Terms of Service and our
         <a href="/privacy" className="text-blue-500"> Privacy Policy</a>.
         If you do not agree, please do not use our services.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6">2. Use of Our Services</h2>
       <p className="text-gray-700">
-        You agree to use TwelveMore in compliance with all applicable laws and regulations. You must not:
+        You agree to use 12More in compliance with all applicable laws and regulations. You must not:
       </p>
       <ul className="list-disc list-inside text-gray-700">
         <li>Use the platform for illegal or unauthorized purposes.</li>
@@ -28,7 +28,7 @@ export default function TermsOfService() {
 
       <h2 className="text-2xl font-semibold mt-6">3. User Accounts & Responsibilities</h2>
       <p className="text-gray-700">
-        If you create an account, you are responsible for keeping your login credentials secure. TwelveMore is not
+        If you create an account, you are responsible for keeping your login credentials secure. 12More is not
         liable for any unauthorized use of your account.
       </p>
 
@@ -40,7 +40,7 @@ export default function TermsOfService() {
 
       <h2 className="text-2xl font-semibold mt-6">5. Limitation of Liability</h2>
       <p className="text-gray-700">
-        TwelveMore is provided "as is" without any warranties. We are not liable for any damages, losses, or
+        12More is provided "as is" without any warranties. We are not liable for any damages, losses, or
         interruptions related to the use of our platform.
       </p>
 

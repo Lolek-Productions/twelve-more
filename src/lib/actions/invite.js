@@ -8,7 +8,7 @@ import {PUBLIC_APP_URL} from "@/lib/constants.js";
 // Send SMS invitation
 export async function sendCommunityInvitation(phoneNumber, community, appUser) {
   const communityLink = `${PUBLIC_APP_URL}/join/${community.id}?phone=${phoneNumber}`;
-  const messageBody = `${appUser.firstName} ${appUser.lastName} invited to join the ${community.name} community at TwelveMore! Click here to join: ${communityLink}`;
+  const messageBody = `${appUser.firstName} ${appUser.lastName} invited to join the ${community.name} community at 12More! Click here to join: ${communityLink}`;
 
   const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);
   if (!smsResult.success) {

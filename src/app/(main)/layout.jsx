@@ -93,7 +93,7 @@ function InnerLayout({ children }) {
               </SheetContent>
             </Sheet>
 
-            <div className="font-semibold text-lg">TwelveMore</div>
+            <div className="font-semibold text-lg">12More</div>
 
             {/* Right Sheet - Context Info - Only show if content component exists */}
             {contentComponent && (

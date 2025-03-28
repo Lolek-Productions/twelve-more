@@ -41,7 +41,7 @@ export default function SignUpPage() {
           <header className="text-center">
             <Image
               src="/logo.png"
-              alt="TwelveMore"
+              alt="12More"
               className="mx-auto"
               width={45}
               height={45}
@@ -137,7 +137,7 @@ export default function SignUpPage() {
                 onCheckedChange={(checked) => setSmsOptIn(checked)}
               />
               <Label htmlFor="smsOptIn" className="text-sm">
-                I agree to receive SMS notifications from TwelveMore. Message & data rates may apply.
+                I agree to receive SMS notifications from 12More. Message & data rates may apply.
                 Reply <strong>STOP</strong> to unsubscribe.
                 See our <Link href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</Link>.
               </Label>
@@ -178,7 +178,7 @@ export default function SignUpPage() {
           <header className="text-center">
             <Image
               src="/logo.png"
-              alt="TwelveMore"
+              alt="12More"
               className={'mx-auto'}
               width={45}
               height={45}

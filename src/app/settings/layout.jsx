@@ -22,7 +22,7 @@ export default function UserSettingsLayout({ children }) {
       <SignedIn>
         <SessionWrapper>
           <SettingsLayout
-            title="TwelveMore Settings"
+            title="12More Settings"
             description="Manage your account settings and set e-mail preferences."
             sidebarNavItems={sidebarNavItems}
             children={children}

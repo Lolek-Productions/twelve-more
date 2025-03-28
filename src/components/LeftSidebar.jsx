@@ -105,12 +105,12 @@ export default function LeftSidebar({ onLinkClick }) {
         <Link href="/home" className="flex items-center gap-2 mb-4" onClick={handleLinkClick}>
           <Image
             src="/logo.png"
-            alt="TwelveMore"
+            alt="12More"
             width={45}
             height={45}
             priority
           />
-          <div className="font-semibold text-xl">TwelveMore</div>
+          <div className="font-semibold text-xl">12More</div>
         </Link>
       </div>
 

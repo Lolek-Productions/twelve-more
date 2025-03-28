@@ -31,7 +31,7 @@ export default function MemberList({ community, members, hideInvite = false }) {
           <Link title="Share this QR code with people so that they can join this group." target="_blank" href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}>
             <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}
-              alt="TwelveMore"
+              alt="12More"
               className={'mx-auto py-2'}
               width={45}
               height={45}

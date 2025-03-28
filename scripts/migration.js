@@ -9,7 +9,7 @@ dotenv.config({ path: '/Users/joshmccarty/Code-2022M1/twelve-more/.env.local' })
 
 console.log('Running migration');
 
-const ORGANIZATION_ID = '67c3776011f461e755fab65a'; //TwelveMore/St. Leo...
+const ORGANIZATION_ID = '67c3776011f461e755fab65a'; //12More/St. Leo...
 
 //Worked
 // async function runMigration() {

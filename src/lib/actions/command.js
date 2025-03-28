@@ -48,7 +48,7 @@ export async function runCommand(commandName) {
       case "Send Test SMS": {
         const result = await twilioService.sendSMS(
           '+12708831110',
-          'This is a test SMS from TwelveMore! Enjoy your day!'
+          'This is a test SMS from 12More! Enjoy your day!'
         );
 
         return {
@@ -60,7 +60,7 @@ export async function runCommand(commandName) {
       case "Send Test Batch SMS": {
         const result = await twilioService.sendBatchSMS(
           ['+12708831110'],
-          'This is a test BATCH SMS from TwelveMore! Enjoy your day!'
+          'This is a test BATCH SMS from 12More! Enjoy your day!'
         );
 
         return {

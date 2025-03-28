@@ -24,7 +24,7 @@ export default function Privacy() {
         We use the collected data for the following purposes:
       </p>
       <ul className="list-disc list-inside text-gray-700">
-        <li>To provide and improve TwelveMore's services, including sending SMS notifications, event reminders, and engagement prompts to keep you connected with your faith community.</li>
+        <li>To provide and improve 12More's services, including sending SMS notifications, event reminders, and engagement prompts to keep you connected with your faith community.</li>
         <li>To personalize user experience and suggest relevant content.</li>
         <li>To enhance security, prevent fraud, and detect unauthorized activity.</li>
         <li>To send notifications, updates, and marketing materials (you may opt out at any time).</li>
@@ -65,7 +65,7 @@ export default function Privacy() {
 
       <h2 className="text-2xl font-semibold mt-6">6. Third-Party Links & Services</h2>
       <p className="text-gray-700">
-        TwelveMore may link to third-party websites. We are not responsible for their privacy policies, and we encourage you to review their terms separately.
+        12More may link to third-party websites. We are not responsible for their privacy policies, and we encourage you to review their terms separately.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6">7. Updates to This Privacy Policy</h2>
@@ -75,13 +75,13 @@ export default function Privacy() {
 
       <h2 className="text-2xl font-semibold mt-6">8. SMS Notifications and Mobile Information Protection</h2>
       <p className="text-gray-700">
-        <strong>SMS Usage:</strong> TwelveMore collects your phone number to send SMS notifications, reminders, and engagement prompts related to your parish or small group (e.g., meeting updates, prayer requests, event RSVPs). <strong>Message and data rates may apply.</strong>
+        <strong>SMS Usage:</strong> 12More collects your phone number to send SMS notifications, reminders, and engagement prompts related to your parish or small group (e.g., meeting updates, prayer requests, event RSVPs). <strong>Message and data rates may apply.</strong>
       </p>
       <p className="text-gray-700">
-        <strong>Consent:</strong> During account registration, you explicitly consent to receive SMS notifications by agreeing to the statement: “I agree to receive SMS notifications from TwelveMore. Message & data rates may apply. Reply STOP to unsubscribe.” This is a mandatory step in onboarding.
+        <strong>Consent:</strong> During account registration, you explicitly consent to receive SMS notifications by agreeing to the statement: “I agree to receive SMS notifications from 12More. Message & data rates may apply. Reply STOP to unsubscribe.” This is a mandatory step in onboarding.
       </p>
       <p className="text-gray-700">
-        <strong>Non-Sharing:</strong> TwelveMore does not share, sell, or disclose your phone number or mobile information to third parties or affiliates for marketing or promotional purposes. Mobile data is used strictly for essential app functionality, security, and user experience enhancements.
+        <strong>Non-Sharing:</strong> 12More does not share, sell, or disclose your phone number or mobile information to third parties or affiliates for marketing or promotional purposes. Mobile data is used strictly for essential app functionality, security, and user experience enhancements.
       </p>
       <p className="text-gray-700">
         <strong>Opt-Out:</strong> Reply “STOP” to any message to unsubscribe. For assistance, reply “HELP” or contact <Link href={`mailto:${supportEmailAddress}`} className="text-blue-500">{supportEmailAddress}</Link>.

@@ -20,14 +20,14 @@ export default function SignInPage() {
           <header className="text-center">
             <Image
               src="/logo.png" // Use the path from the public folder
-              alt="TwelveMore"
+              alt="12More"
               className={'mx-auto'}
               width={45}
               height={45}
               priority
             />
             <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950">
-              Sign In to TwelveMore
+              Sign In to 12More
             </h1>
           </header>
 
@@ -88,7 +88,7 @@ export default function SignInPage() {
           <header className="text-center">
             <Image
               src="/logo.png" // Use the path from the public folder
-              alt="TwelveMore"
+              alt="12More"
               className={'mx-auto'}
               width={45}
               height={45}

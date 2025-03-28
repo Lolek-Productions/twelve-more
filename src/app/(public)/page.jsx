@@ -28,7 +28,7 @@ export default function Landing() {
       <div className="text-center">
         <Image
           src="/logo.png"
-          alt="TwelveMore"
+          alt="12More"
           className={'mx-auto'}
           width={80}
           height={80}
@@ -36,7 +36,7 @@ export default function Landing() {
         />
       </div>
       <h1 className="mt-3 text-[50px] font-bold text-gray-800 leading-normal">
-        TwelveMore
+        12More
       </h1>
       <p className=" text-2xl text-gray-600">
         Sign in and find your community

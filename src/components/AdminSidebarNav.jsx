@@ -18,12 +18,12 @@ export function AdminSidebarNav({ className, items, onLinkClick, ...props }) {
       <Link href="/home" onClick={handleLinkClick} className="flex items-center gap-2 mb-4">
         <Image
           src="/logo.png"
-          alt="TwelveMore"
+          alt="12More"
           width={45}
           height={45}
           priority
         />
-        <div className="font-semibold text-xl">TwelveMore</div>
+        <div className="font-semibold text-xl">12More</div>
       </Link>
 
       <nav

@@ -43,7 +43,7 @@ export default function DeveloperLayout({ children }) {
   return (
     <>
       <SettingsLayout
-        title="TwelveMore Developer"
+        title="12More Developer"
         description="Manage your account settings and set e-mail preferences."
         sidebarNavItems={sidebarNavItems}
         children={children}

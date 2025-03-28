@@ -192,13 +192,13 @@ export default function OnboardingComponent() {
           <CardHeader>
             <Image
               src="/logo.png"
-              alt="TwelveMore"
+              alt="12More"
               className={'mx-auto'}
               width={45}
               height={45}
               priority
             />
-            <CardTitle className="text-center text-2xl">Welcome to TwelveMore{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+            <CardTitle className="text-center text-2xl">Welcome to 12More {user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -266,13 +266,13 @@ export default function OnboardingComponent() {
         <CardHeader>
           <Image
             src="/logo.png"
-            alt="TwelveMore"
+            alt="12More"
             className={'mx-auto'}
             width={45}
             height={45}
             priority
           />
-          <CardTitle className="text-center text-2xl">Welcome to TwelveMore{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+          <CardTitle className="text-center text-2xl">Welcome to 12More {user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
         </CardHeader>
 
         <CardContent>

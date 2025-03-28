@@ -95,7 +95,7 @@ export default function AdminOrganizationsPage() {
       <div className="flex flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Organizations</h3>
-          <p className="text-sm text-muted-foreground">Globally manage the TwelveMore organizations.</p>
+          <p className="text-sm text-muted-foreground">Globally manage the 12More organizations.</p>
         </div>
         {/*<Button onClick={() => setModalOpen(true)}>New Organization</Button>*/}
       </div>

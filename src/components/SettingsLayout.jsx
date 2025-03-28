@@ -15,7 +15,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function SettingsLayout({
-                                         title = "TwelveMore",
+                                         title = "12More",
                                          description = "",
                                          sidebarNavItems = [],
                                          children,
