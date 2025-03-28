@@ -42,6 +42,7 @@ const SafeMicrolink = ({ url }) => {
       contrast="false" // Use string instead of boolean
       media={['image', 'logo']}
       autoPlay="false" // Use string instead of boolean
+      lazy={true}
       className="rounded-lg overflow-hidden border border-gray-200"
     />
   );

@@ -3,14 +3,15 @@
 import * as Clerk from '@clerk/elements/common'
 import * as SignUp from '@clerk/elements/sign-up'
 import Image from "next/image";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
 import Link from "next/link";
 import * as React from "react";
+import {useSearchParams} from "next/navigation";
 
 export default function SignUpPage() {
+  const searchParams = useSearchParams();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [formattedPhoneNumber, setFormattedPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -18,7 +19,17 @@ export default function SignUpPage() {
   const [submissionState, setSubmissionState] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
+
+  useEffect(() => {
+    const phoneParam = searchParams.get('phone');
+    if (phoneParam) {
+      const cleanPhone = phoneParam.replace(/\D/g, "");
+      if (cleanPhone.length === 10) {
+        setPhoneNumber(cleanPhone);
+        setFormattedPhoneNumber("+1" + cleanPhone);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen grid w-full flex-grow items-center bg-zinc-100 px-4 sm:justify-center">

@@ -43,8 +43,8 @@ const profileFormSchema = z.object({
   phoneNumber: z
     .string()
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
-    .min(10, { message: "Phone Number must be at least 10 digits." })
-    .max(15, { message: "Phone Number must not exceed 15 characters." }),
+    .min(10, { message: "Phone Number must be 10 digits." })
+    .max(15, { message: "Phone Number must not exceed 10 digits." }),
   smsOptIn: z
     .boolean()
     .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
@@ -256,7 +256,26 @@ export default function Invite() {
                       <FormItem>
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 2025550123" {...field} />
+                          <Input
+                            placeholder="e.g., 2025550123"
+                            {...field}
+                            maxLength={10}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                return; // Allow Enter key
+                              }
+                              const isNumber = /^[0-9]$/.test(e.key);
+                              if (!isNumber) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              e.preventDefault();
+                              const pastedText = e.clipboardData.getData('text');
+                              const numericText = pastedText.replace(/[^0-9]/g, '');
+                              field.onChange(numericText);
+                            }}
+                          />
                         </FormControl>
                         <FormDescription>
                           Enter your 10-digit US phone number (no +1 needed).
