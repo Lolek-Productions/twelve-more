@@ -8,7 +8,6 @@ import {
   HiChat,
 } from 'react-icons/hi';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { modalState, postIdState } from '@/modalState/modalStateDefinition';
 import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
@@ -24,7 +23,6 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
   const [prayers, setPrayers] = useState(post.prayers || []);
   const [open, setOpen] = useAtom(modalState);
   const [postId, setPostId] = useAtom(postIdState);
-  const router = useRouter();
   const { appUser } = useAppUser();
   const { showResponseToast, showErrorToast } = useApiToast();
 
@@ -184,7 +182,7 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
         )}
       </div>
 
-      {appUser && appUser.id === post.user.id && (
+      {appUser && appUser.id === post.user?.id && (
         <HiOutlineTrash
           onClick={deletePost}
           className='h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'

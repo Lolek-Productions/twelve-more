@@ -1,6 +1,9 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
 import Link from 'next/link';
+import {toast, useToast} from "@/hooks/use-toast";
+import {NextResponse} from "next/server";
+import {SafeMicrolink} from "@/lib/clientUtils.js";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -8,22 +11,7 @@ export function cn(...inputs) {
 
 export const supportEmailAddress = 'fr.josh@lolekproductions.org';
 
-// lib/utils.js
-import {toast, useToast} from "@/hooks/use-toast";
-import {NextResponse} from "next/server";
-
-/**
- * Handles API response with try-catch, toast notifications, and optional callbacks.
- * @param {Promise} apiCall - The API call promise to execute
- * @param {Object} options - Configuration options
- * @param {string} [options.successTitle="Success"] - Title for success toast
- * @param {string} options.successDescription - Description for success toast
- * @param {string} [options.errorTitle="Error"] - Title for error toast
- * @param {string} options.errorDescription - Default error description if no specific error
- * @param {Function} [options.onSuccess] - Optional callback on success
- * @param {Function} [options.onError] - Optional callback on error
- * @returns {Promise} - Resolves with the API response or throws an error
- */
+//TODO: remove
 export const handleApiResponse = async ({
                                           apiCall,
                                           successTitle = "Success",
@@ -94,33 +82,6 @@ export const normalizePhoneNumber = (phoneNumber) => {
   throw new Error('Invalid phone number format. Please provide a 10-digit US number (e.g., 2708831110)');
 };
 
-export const handleClerkError = (error) => {
-  console.error(
-    'Error:',
-    JSON.stringify(
-      {
-        status: error.status,
-        message: error.message,
-        errors: error.errors,
-        clerkTraceId: error.clerkTraceId,
-      },
-      null,
-      2
-    )
-  );
-
-  const errorDetails = error.errors?.map((err) => ({
-    code: err.code,
-    message: err.message,
-    longMessage: err.longMessage || err.message,
-  })) || [{ message: error.message || 'Unknown error' }];
-
-  return NextResponse.json(
-    { error: 'Failed to process request', details: errorDetails },
-    { status: error.status || 500 }
-  );
-};
-
 export function linkifyText(text) {
   if(!text) return;
 
@@ -170,13 +131,6 @@ export const useApiToast = () => {
   return { showResponseToast, showErrorToast };
 };
 
-/**
- * Truncates a string if it exceeds the specified maximum length
- * @param {string} text - The text to truncate
- * @param {number} maxLength - Maximum allowed length before truncation
- * @param {string} suffix - String to append after truncation (default: "...")
- * @return {string} The truncated string or original if shorter than maxLength
- */
 export function truncateText(text, maxLength = 50, suffix = "...") {
   // Handle empty, null or undefined text
   if (!text) return "";
@@ -187,3 +141,101 @@ export function truncateText(text, maxLength = 50, suffix = "...") {
   // Otherwise truncate and add suffix
   return `${text.substring(0, maxLength)}${suffix}`;
 }
+
+export const extractUrls = (text) => {
+  if (!text) return [];
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const matches = text.match(urlRegex) || [];
+
+  // Filter out invalid URLs
+  return matches.filter(url => {
+    try {
+      // Check if URL is valid by attempting to create a URL object
+      // and checking that it has both protocol and hostname
+      const parsedUrl = new URL(url);
+      return parsedUrl.protocol && parsedUrl.hostname &&
+        // Ensure the hostname has at least one dot and doesn't end with a dot
+        parsedUrl.hostname.includes('.') &&
+        !parsedUrl.hostname.endsWith('.');
+    } catch (e) {
+      return false;
+    }
+  });
+};
+
+export const renderPostText = ({post, clickableText}) => {
+  // If not clickable text, just use the linkifyText utility
+  if (!clickableText) {
+    return (
+      <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
+         style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>
+        {linkifyText(post?.text) || 'No text available'}
+      </p>
+    );
+  }
+
+  // If no text, or no links detected, render as normal clickable text
+  if (!post?.text || !post.text.includes('http')) {
+    return (
+      <Link href={`/posts/${post?.id}`} className="block w-full">
+        <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
+           style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+          {post?.text || 'No text available'}
+        </p>
+      </Link>
+    );
+  }
+
+  // Extract URLs using a regex
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = post.text.split(urlRegex);
+  const urls = extractUrls(post.text);
+
+  return (
+    <div>
+      <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
+         style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+        {parts.map((part, index) => {
+          // Check if this part is a URL
+          if (part.match(urlRegex)) {
+            // This is a URL - make it a clickable link that stops propagation
+            return (
+              <a
+                key={index}
+                href={part}
+                className="text-blue-600 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {part}
+              </a>
+            );
+          } else {
+            // This is regular text - make it clickable to the post
+            return (
+              <Link
+                key={index}
+                href={`/posts/${post?.id}`}
+                className="inline"
+              >
+                {part}
+              </Link>
+            );
+          }
+        })}
+      </p>
+
+      {/* Render Microlink components for each URL found in the text */}
+      {urls.length > 0 && urls.map((url, index) => (
+        <div
+          key={`microlink-${index}`}
+          onClick={(e) => e.stopPropagation()}
+          className="mt-2 mb-3"
+        >
+          <SafeMicrolink url={url} />
+        </div>
+      ))}
+    </div>
+  );
+};
