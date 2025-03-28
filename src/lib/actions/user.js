@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import Community from '../models/community.model';
 import Post from "@/lib/models/post.model";
 import twilioService from "@/lib/services/twilioService.js";
+import {PUBLIC_APP_URL} from "@/lib/constants.js";
 
 export const createOrUpdateUser = async (
   id,
@@ -525,8 +526,9 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
       userId,
       { $addToSet: { communities: { community: communityId, role: role } } },
       { new: true }
-    ).lean();
-    // console.log('updated user', updatedUser);
+    )
+    .populate('communities.community')
+    .lean();
 
     //Notify the leaders of this organization that someone has joined
     const leadersResponse = await getPrivateLeadersByCommunityId(communityId);
@@ -537,7 +539,13 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
         .filter(phoneNumber => phoneNumber && typeof phoneNumber === 'string' && phoneNumber.trim() !== '');
 
       if (leadersPhoneNumbers.length > 0) {
-        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community!`;
+        // Find the community that was just added
+        const addedCommunity = updatedUser.communities.find(
+          comm => comm.community._id.toString() === communityId
+        );
+        const addedCommunityName = addedCommunity ? addedCommunity.community.name : null;
+
+        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}  ${PUBLIC_APP_URL}/communities/${communityId}`;
         const smsResponse = await twilioService.sendBatchSMS(leadersPhoneNumbers, message);
         // console.log('SMS notification to leaders:', smsResponse);
       }
