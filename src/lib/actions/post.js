@@ -235,30 +235,33 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
   try {
     await connect();
     const posts = await Post.find(
-      { community: communityId, parentId: null }, // Only get top-level posts
+      {
+        community: communityId,
+        parentId: null
+      }, // Only get top-level posts
     )
-      .populate({
-        path: 'community',
-        select: 'name',
-      })
-      .populate({
-        path: 'organization',
-        select: 'name',
-      })
-      .populate({
-        path: 'user',
-        select: 'firstName lastName',
-      })
-      .populate({
-        path: 'likes',
-      })
-      .populate({
-        path: 'prayers.user',
-      })
-      .sort({ createdAt: -1 })
-      .limit(limit + 1)
-      .skip(offset)
-      .lean();
+    .populate({
+      path: 'community',
+      select: 'name',
+    })
+    .populate({
+      path: 'organization',
+      select: 'name',
+    })
+    .populate({
+      path: 'user',
+      select: 'firstName lastName',
+    })
+    .populate({
+      path: 'likes',
+    })
+    .populate({
+      path: 'prayers.user',
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit + 1)
+    .skip(offset)
+    .lean();
 
     // Determine if there are more posts
     const hasMore = posts.length > limit;
