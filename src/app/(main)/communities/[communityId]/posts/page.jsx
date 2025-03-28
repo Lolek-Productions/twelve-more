@@ -8,7 +8,7 @@ import { getCommunityById } from "@/lib/actions/community.js";
 import { useContextContent } from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 
-export default function CommunitiesHome({ params }) {
+export default function CommunityPosts({ params }) {
   const resolvedParams = use(params);
   const { communityId } = resolvedParams;
 

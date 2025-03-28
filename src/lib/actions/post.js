@@ -315,6 +315,91 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
   }
 }
 
+export async function getPostsForOrganizationFeed(limit = 10, appUser, organizationId, offset = 0) {
+  try {
+    await connect();
+    const posts = await Post.find(
+      {
+        organization: organizationId,
+        community: null,
+        parentId: null
+      }, // Only get top-level posts
+    )
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+      })
+      .populate({
+        path: 'prayers.user',
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit + 1)
+      .skip(offset)
+      .lean();
+
+    // Determine if there are more posts
+    const hasMore = posts.length > limit;
+    // Trim the extra post if it exists, returning only the requested limit
+    const limitedPosts = posts.slice(0, limit);
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { posts: [], hasMore: false }; // No posts found
+    }
+
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      limitedPosts.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
+    const mappedPosts = postsWithCommentCounts.map((post) => ({
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
+      },
+      profileImg: post.profileImg,
+      commentCount: post.commentCount || 0, // Add comment count
+      likes: post.likes?.map((like) => ({
+        userId: like._id.toString(), //this is the id of the user
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    }));
+
+    return { posts: mappedPosts, hasMore }
+  } catch (error) {
+    console.error("Error fetching posts by organization ID:", error);
+    return [];
+  }
+}
+
 export async function getAllPosts({limit = 10}) {
   try {
     await connect();
