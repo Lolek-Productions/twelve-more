@@ -66,7 +66,7 @@ export default function Post({ post, clickableText = true, showComments = false 
             <div className="flex items-center gap-2 -mt-1">
               <div className="flex items-center mt-0.5">
                 <h4 className="font-bold text-xs truncate max-w-[200px]">
-                  <Link href={`/organizations/${post?.organization?.id}`} className="block truncate">
+                  <Link href={`/organizations/${post?.organization?.id}/posts`} className="block truncate">
                     {post?.organization?.name}
                   </Link>
                 </h4>

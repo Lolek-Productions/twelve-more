@@ -690,13 +690,16 @@ export async function getPostsByUserId(userId, limit, appUser) {
       parentId: null, // Only get top-level posts
       $or: [
         {
-          organization: appUser.selectedOrganization.id,
+          organization: { $in: appUser.organizations.map(c => c.id) },
           community: null,
           user: userId
         },
         {
           community: { $in: appUser.communities.map(c => c.id) },
-          organization: appUser.selectedOrganization.id,
+          organization: {
+            $in: appUser.organizations.map(c => c.id),
+            visibility: "public"
+          },
           user: userId,
         }
       ]
@@ -779,7 +782,6 @@ export async function getPostsByUserId(userId, limit, appUser) {
   }
 }
 
-// Add new function to get comments for a post
 export async function getCommentsForPost(postId, limit = 20, page = 1) {
   try {
     await connect();
@@ -877,3 +879,102 @@ export async function notifyOnNewComment(post, commentData) {
     throw error;
   }
 }
+
+export async function searchPosts(searchTerm, appUser, limit = 20) {
+  const decodedSearchTerm = decodeURIComponent(searchTerm);
+
+  try {
+    await connect();
+
+    const posts = await Post.find({
+      $or: [
+        {
+          organization: { $in: appUser.organizations.map(c => c.id) },
+          community: null,
+          text: { $regex: decodedSearchTerm, $options: 'i' }
+        },
+        {
+          community: { $in: appUser.communities.map(c => c.id) },
+          organization: { $in: appUser.organizations.map(c => c.id) },
+          text: { $regex: decodedSearchTerm, $options: 'i' }
+        }
+      ]
+    })
+      .populate({
+        path: 'community',
+        select: 'name',
+      })
+      .populate({
+        path: 'organization',
+        select: 'name',
+      })
+      .populate({
+        path: 'user',
+        select: 'firstName lastName',
+      })
+      .populate({
+        path: 'likes',
+      })
+      .populate({
+        path: 'prayers.user',
+      })
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!posts) {
+      throw new Error("Posts not found");
+    }
+
+    // For each post, get the comment count
+    const postsWithCommentCounts = await Promise.all(
+      posts.map(async (post) => {
+        const commentCount = await Post.countDocuments({ parentId: post._id });
+        return { ...post, commentCount };
+      })
+    );
+
+    // Determine if there are more posts
+    const hasMore = posts.length > limit;
+    // Trim the extra post if it exists, returning only the requested limit
+    const limitedPosts = postsWithCommentCounts.slice(0, limit);
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { posts: [], hasMore: false }; // No posts found
+    }
+
+    const mappedPosts = limitedPosts.map((post) => ({
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: {
+        id: post.user?._id.toString(),
+        firstName: post.user?.firstName,
+        lastName: post.user?.lastName,
+      },
+      community: {
+        id: post.community?._id.toString(),
+        name: post.community?.name,
+      },
+      organization: {
+        id: post.organization?._id.toString(),
+        name: post.organization?.name,
+      },
+      profileImg: post.profileImg,
+      commentCount: post.commentCount || 0, // Add comment count
+      likes: post.likes?.map((like) => ({
+        userId: like._id?.toString(),
+      })) || [],
+      prayers: post.prayers?.map((prayer) => ({
+        userId: prayer._id.toString(),
+      })) || [],
+      createdAt: post.createdAt,
+    }));
+
+
+    return {success: true, posts: mappedPosts};
+  } catch (err) {
+    console.log(err);
+    return {success: false, message: `Error searching posts: ${err.message}` };
+  }
+};

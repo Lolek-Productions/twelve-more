@@ -1,21 +1,42 @@
+'use client'
+
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
+import {useParams, useRouter} from "next/navigation";
+import {useAppUser} from "@/hooks/useAppUser.js";
+import {useEffect, useState} from "react";
+import {searchPosts} from "@/lib/actions/post.js";
 
-export default async function SearchPage({ params }) {
-  let data = null;
-  try {
-    const result = await fetch('/api/post/search', {
-      method: 'POST',
-      body: JSON.stringify({ searchTerm: params.searchTerm }),
-      cache: 'no-store',
-    });
+export default function SearchPage() {
+  const params = useParams();
+  const { searchTerm } = params;
+  // console.log('sesarch term from front', searchTerm);
 
-    data = await result.json();
-    console.log(data);
-  } catch (error) {
-    console.error('Failed to fetch search results', error);
-  }
+  const {appUser} = useAppUser();
+  const [isLoading, setIsLoading] = useState(false);
+  const [posts, setPosts] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!searchTerm || !appUser) {
+      return;
+    }
+    const fetchPost = async () => {
+      setIsLoading(true);
+      try {
+        const postData = await searchPosts(searchTerm, appUser);
+        console.log(postData);
+        setPosts(postData.posts);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [searchTerm, appUser]);
 
   return (
       <>
@@ -27,13 +48,13 @@ export default async function SearchPage({ params }) {
         </div>
         <div className='border-b p-6'>
           <h1 className='text-center text-lg'>
-            Search results for &quot;{decodeURIComponent(params.searchTerm)}&quot;
+            Search results for &quot;{decodeURIComponent(searchTerm)}&quot;
           </h1>
         </div>
-        {data && data.length === 0 && (
+        {posts && posts.length === 0 && (
           <h1 className='text-center pt-6 text-2xl'>No results found</h1>
         )}
-        {data && data.map((post) => <Post key={post.id} post={post}></Post>)}
+        {posts && posts.map((post) => <Post key={post.id} post={post}></Post>)}
       </>
   );
 }
