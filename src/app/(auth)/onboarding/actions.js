@@ -1,7 +1,6 @@
 'use server'
 
 import { currentUser } from '@clerk/nextjs/server';
-import { setSelectedOrganizationOnUser } from "@/lib/actions/user.js";
 import { createOrganizationWithWelcomingCommunity } from "@/lib/actions/organization.js";
 
 export const completeOnboarding = async (formData) => {
@@ -28,8 +27,6 @@ export const completeOnboarding = async (formData) => {
     if (!organizationResult?.success) {
       return { success: false, message: 'Failed to create organization' }
     }
-
-    await setSelectedOrganizationOnUser(organizationResult?.organization.id, userId);
 
     return {
       success: true,
