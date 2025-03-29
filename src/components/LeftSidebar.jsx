@@ -3,34 +3,25 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine } from "react-icons/hi2";
-import {HiHome, HiOutlinePlus, HiUserGroup, HiBriefcase, HiChevronDown, HiChevronRight} from 'react-icons/hi';
+import {HiHome, HiOutlinePlus, HiBriefcase, HiChevronDown, HiChevronRight} from 'react-icons/hi';
+import { HiMegaphone } from "react-icons/hi2";
 import MiniProfile from './MiniProfile';
-import {usePathname, useRouter} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
-import {useState} from "react";
-// No longer need the setSelectedOrganizationOnUser action
-import { useApiToast } from "@/lib/utils";
+import React, {useState} from "react";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
   const {appUser, isLoaded} = useAppUser();
   const [organizationsOpen, setOrganizationsOpen] = useState(false);
   const [expandedOrgs, setExpandedOrgs] = useState({});
-  const { showResponseToast, showErrorToast } = useApiToast();
-  const router = useRouter();
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
     if (onLinkClick) onLinkClick(); // Only call if provided (mobile case)
-  };
-
-  // No longer need to track selected organization
-  const handleOrganizationClick = (organizationId) => {
-    // Expand/collapse communities for this organization
-    toggleOrgExpansion(organizationId, { stopPropagation: () => {} });
   };
 
   const toggleOrgExpansion = (orgId, event) => {
@@ -40,22 +31,6 @@ export default function LeftSidebar({ onLinkClick }) {
       [orgId]: !prev[orgId]
     }));
   };
-
-  const sidebarNavItems = [
-    // { title: 'Communities', href: '/communities', icon: <HiUserGroup className="w-6 h-6" /> },
-    // { title: 'Tasks', href: '/tasks', icon: <HiCheckCircle className="w-6 h-6" /> },
-    // { title: 'Settings', href: '/settings', icon: <HiCog className="w-6 h-6" /> },
-    // { title: 'Admin', href: '/admin', icon: <HiOutlineServer className="w-6 h-6" />, isVisible: user?.phoneNumbers?.some(phone => DEV_PHONE_NUMBERS.includes(phone.phoneNumber)) },
-    {
-      title: 'Developer',
-      href: '/developer',
-      icon: <HiCommandLine className="w-6 h-6" />,
-      isVisible: appUser?.id && DEV_IDS.includes(appUser.id),
-    },
-  ];
-
-  const visibleNavItems = sidebarNavItems.filter(item =>
-    item.isVisible === undefined || item.isVisible === true);
 
   if (isLoaded || !appUser) {
     return <div className="p-3">Loading...</div>;
@@ -92,7 +67,6 @@ export default function LeftSidebar({ onLinkClick }) {
     });
   };
 
-  // Sample organizations data - replace with actual data from appUser
   const organizations = appUser?.organizations || [];
   const fallbackOrg = { id: 'create-org', name: 'Create an Organization', href: '/organizations/create' };
 
@@ -117,6 +91,8 @@ export default function LeftSidebar({ onLinkClick }) {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto p-3 pt-0">
         <div className="flex flex-col gap-3">
+
+          {/*Home*/}
           <Link
             href='/home'
             className={cn(
@@ -129,13 +105,23 @@ export default function LeftSidebar({ onLinkClick }) {
             <span className="font-bold">Home</span>
           </Link>
 
-          {/* Optional: Keep the original Communities section or remove it */}
+          {/*Purpose*/}
+          <Link
+            href='/purpose'
+            className={cn(
+              pathname === '/purpose' ? 'bg-muted' : 'hover:bg-muted/50',
+              'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+            )}
+            onClick={handleLinkClick}
+          >
+            <HiMegaphone className="w-6 h-6" />
+            <span className="font-bold">Purpose</span>
+          </Link>
+
+          {/*My 12s*/}
           <div className="p-3 bg-gray-100 rounded-md">
             <div className="flex items-center">
               <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My 12s</div>
-              {/*<Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>*/}
-              {/*  <HiOutlinePlus className='h-5 w-5'/>*/}
-              {/*</Link>*/}
             </div>
             <div>
               {appUser?.communities?.length > 0 ? (
@@ -160,20 +146,36 @@ export default function LeftSidebar({ onLinkClick }) {
                   <span>{fallbackLink.name}</span>
                 </Link>
               )}
+
+              <div className="flex justify-center">
+                <Button asChild size="small">
+                  <Link
+                    onClick={handleLinkClick}
+                    className={'py-1 px-2'}
+                    href={`/communities/`}
+                  >
+                    Find a 12
+                  </Link>
+                </Button>
+              </div>
+
             </div>
           </div>
 
           {/* Organizations dropdown */}
           <div className="mt-2">
             <div className="flex items-center  justify-between">
-              <Link href="/organizations/" className="p-2 flex-1 flex items-center hover:bg-gray-100 rounded-md">
+              <Link
+                href="/organizations/"
+                onClick={handleLinkClick}
+                className="p-2 flex-1 flex items-center hover:bg-gray-100 rounded-md"
+              >
                 <HiBriefcase className="w-6 h-6 mr-2" />
                 <span className="font-bold">Organizations</span>
               </Link>
 
               <button
                 onClick={() => setOrganizationsOpen(!organizationsOpen)}
-
                 className="p-1 hover:bg-gray-100 rounded-md"
               >
                 {organizationsOpen ? (
@@ -192,6 +194,7 @@ export default function LeftSidebar({ onLinkClick }) {
                       <Link
                         variant={'ghost'}
                         href={`/organizations/${org.id}`}
+                        onClick={handleLinkClick}
                         className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
                       >
                         <span className="text-sm">{org.name}</span>
