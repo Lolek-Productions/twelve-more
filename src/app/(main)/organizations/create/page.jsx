@@ -27,7 +27,6 @@ import { useAppUser } from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
 import { useState } from "react";
-import {setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
 
 const organizationFormSchema = z.object({
   name: z
@@ -79,28 +78,7 @@ export default function NewOrganizationPage() {
         const newOrgId = response.organization?.id;
 
         if (newOrgId) {
-          // Ask for confirmation before switching to the new organization
-          const confirmed = window.confirm(
-            "Your organization has been created successfully. Would you like to switch to this organization now?"
-          );
-
-          if (confirmed) {
-            // User agreed to switch - update the selected organization
-            const updateResponse = await setSelectedOrganizationOnUser(newOrgId, appUser.id);
-
-            if (updateResponse.success) {
-              // Redirect to communities page within the new organization context
-              router.push('/home');
-              location.reload();
-            } else {
-              showResponseToast(updateResponse);
-              // Just refresh to update the sidebar
-              // router.refresh();
-              location.reload();
-            }
-          } else {
-            router.refresh();
-          }
+          window.location.href = `/organizations/${newOrgId}`;
         } else {
           showErrorToast(response.message);
         }

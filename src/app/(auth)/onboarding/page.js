@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import React, { useEffect, useState } from "react";
 import {getCommunityById} from "@/lib/actions/community.js";
-import {addCommunityToUser, addOrganizationToUser, setSelectedOrganizationOnUser} from "@/lib/actions/user.js";
+import {addCommunityToUser, addOrganizationToUser} from "@/lib/actions/user.js";
 
 const formSchema = z.object({
   organizationName: z

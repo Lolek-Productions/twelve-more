@@ -8,7 +8,7 @@ import {
   addCommunityToUser,
   addOrganizationToUser, getUserById,
   removeCommunitiesFromAllUsers,
-  removeOrganizationsFromAllUsers, setSelectedOrganizationOnUser
+  removeOrganizationsFromAllUsers
 } from "@/lib/actions/user.js";
 import {
   deleteCommunities,
