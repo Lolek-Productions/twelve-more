@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { getUserById } from "@/lib/actions/user";
+import {getUserByIdByAppUser} from "@/lib/actions/user";
 import Link from "next/link"
 import Post from "@/components/Post.jsx";
-import {getPostsByUserId} from "@/lib/actions/post.js";
+import {getPostsByUserForAppUser, getPostsByUserId} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 
 export default function UserPage() {
@@ -21,14 +21,13 @@ export default function UserPage() {
 
 
   useEffect(() => {
-    if (!userId) {
-      setError("User ID not provided");
-      setLoading(false);
+    if (!userId || !appUser) {
       return;
     }
     async function fetchUserData() {
       try {
-        const userData = await getUserById(userId);
+        const userData = await getUserByIdByAppUser(userId, appUser);
+        // console.log(userData);
 
         if (!userData.success) {
           setError("User not found");
@@ -43,22 +42,21 @@ export default function UserPage() {
     }
     fetchUserData();
 
-  }, [userId]);
+  }, [userId, appUser]);
 
   useEffect(() => {
-    if (!userId) {
+    if (!userId, !appUser) {
       return;
     }
 
     async function fetchUserPosts() {
+      console.log('fetching posts');
       try {
-        const postData = await getPostsByUserId(userId, postNum, appUser);
-        // console.log(postData);
+        const postData = await getPostsByUserForAppUser(user, postNum, appUser);
 
         if (postData.success) {
           setPosts(postData.posts);
-          setHasMore(postData.hasMore);
-          // console.log(postData.posts);
+          console.log(postData.posts);
         } else {
           // setError("Posts not found");
         }
@@ -67,7 +65,7 @@ export default function UserPage() {
       }
     }
     fetchUserPosts();
-  }, [userId, appUser]);
+  }, [user, appUser]);
 
 
   if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
@@ -97,28 +95,34 @@ export default function UserPage() {
           <div className="mt-2 space-y-2">
             {user.communities.map((community) => (
               <div key={community.id} className="px-2 rounded-md flex justify-start items-center">
-                <Link href={`/communities/${community?.id}/posts`}>
-                  <p className="text-sm">{`${community?.name}` || "Unknown"}</p>
+                <Link className="flex gap-3" href={`/communities/${community?.id}/posts`}>
+                  <div className="text-sm">{`${community?.name}` || "Unknown"} ({`${community?.organizationName}`})</div>
+
+                  <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
+                      {community?.visibility
+                        ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
+                        : 'Unknown'}
+                  </span>
                 </Link>
               </div>
             ))}
           </div>
         )}
 
-        <h3 className="text-lg font-semibold pt-3">Organizations ({user.organizations.length})</h3>
-        {user.organizations.length === 0 ? (
-          <p className="text-gray-500">No organizations yet.</p>
-        ) : (
-          <div className="mt-2 space-y-2">
-            {user.organizations.map((organization) => (
-              <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">
-                <Link href={`/communities/${organization?.id}/posts`}>
-                  <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+        {/*<h3 className="text-lg font-semibold pt-3">Organizations ({user.organizations.length})</h3>*/}
+        {/*{user.organizations.length === 0 ? (*/}
+        {/*  <p className="text-gray-500">No organizations yet.</p>*/}
+        {/*) : (*/}
+        {/*  <div className="mt-2 space-y-2">*/}
+        {/*    {user.organizations.map((organization) => (*/}
+        {/*      <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">*/}
+        {/*        <Link href={`/communities/${organization?.id}/posts`}>*/}
+        {/*          <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>*/}
+        {/*        </Link>*/}
+        {/*      </div>*/}
+        {/*    ))}*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
 
       <div className="p-3">

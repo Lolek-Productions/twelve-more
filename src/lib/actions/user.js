@@ -64,12 +64,6 @@ export async function getUserById(userId) {
           select: '_id name'
         }
       })
-      .populate({
-        path: 'selectedOrganization',
-        populate: {
-          path: 'welcomingCommunity'
-        }
-      })
       .lean();
 
     return {
@@ -90,22 +84,94 @@ export async function getUserById(userId) {
             membershipId: org._id.toString(),
           }))
           : [],
-        selectedOrganization: {
-          id: user.selectedOrganization?._id.toString(),
-          name: user.selectedOrganization?.name,
-          description: user.selectedOrganization?.description,
-          role: user.selectedOrganization?.role,
-          welcomingCommunity: { id: user.selectedOrganization?.welcomingCommunity?._id.toString()},
-        },
         communities: user.communities
           ? user.communities.map((com) => ({
             id: com.community?._id.toString(),       // Populated _id
             name: com.community?.name || "Empty Community", // Populated name
             role: com.role || "",
+            visibility: com.visibility,
             membershipId: com._id.toString(),
             organizationId: com.community?.organization?._id.toString() || null,
             organizationName: com.community?.organization?.name || null,
           }))
+          : [],
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching user from MongoDB:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    return { success: false, message:`Failed to fetch users: ${error.message}` }
+  }
+}
+
+export async function getUserByIdByAppUser(userId, appUser) {
+  try {
+    await connect();
+
+    const user = await User.findById(userId)
+      .populate('organizations.organization')
+      .populate({
+        path: 'communities.community',
+        populate: {
+          path: 'organization',
+          select: '_id name visibility'
+        }
+      })
+      .lean();
+
+    const appUserCommunityIds = [];
+    if (appUser && appUser.communities) {
+      // Use map to extract the community IDs from appUser
+      appUser.communities.forEach(comm => {
+        appUserCommunityIds.push(comm.id);
+      });
+    }
+
+    return {
+      success: true,
+      user: {
+        id: user._id?.toString() || "",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        clerkId: user.clerkId,
+        organizations: user.organizations
+          ? user.organizations.map((org) => ({
+            id: org.organization?._id.toString(),
+            name: org.organization?.name || "Empty Organization",
+            role: org.role || "",
+            membershipId: org._id.toString(),
+          }))
+          : [],
+        communities: user.communities
+          ? user.communities
+            .filter(com => {
+              // Only include a community if:
+              // 1. It's public
+              // 2. OR the appUser is a member of it
+              // 3. OR the user looking at the profile is the profile owner (userId === appUser._id)
+              const communityId = com.community?._id.toString();
+
+              return (
+                (com.community?.visibility === 'public') ||
+                (appUserCommunityIds.includes(communityId)) ||
+                (appUser && appUser.id === userId)
+              );
+            })
+            .map((com) => ({
+              id: com.community?._id.toString(),
+              name: com.community?.name || "Empty Community",
+              role: com.role || "",
+              visibility: com.community?.visibility,
+              membershipId: com._id.toString(),
+              organizationId: com.community?.organization?._id.toString() || null,
+              organizationName: com.community?.organization?.name || null,
+            }))
           : [],
       }
     };
@@ -129,10 +195,9 @@ export async function getPrivateUserById(userId) {
         path: 'communities.community',
         populate: {
           path: 'organization',
-          select: '_id name'
+          select: '_id name visibility'
         }
       })
-      .populate('selectedOrganization')
       .lean();
 
     return {
@@ -154,18 +219,13 @@ export async function getPrivateUserById(userId) {
             membershipId: org._id.toString(),
           }))
           : [],
-        selectedOrganization: {
-          id: user.selectedOrganization?._id.toString(),
-          name: user.selectedOrganization?.name,
-          description: user.selectedOrganization?.description,
-          role: user.selectedOrganization?.role,
-        },
         communities: user.communities
           ? user.communities.map((com) => ({
             id: com.community?._id.toString(),       // Populated _id
             name: com.community?.name || "Empty Community", // Populated name
             role: com.role || "",
             membershipId: com._id.toString(),
+            visibility: com.visibility,
             organizationId: com.community?.organization?._id.toString() || null,
             organizationName: com.community?.organization?.name || null,
           }))
@@ -697,34 +757,6 @@ export async function getCommunityMembers(communityId) {
       success: false,
       message:"Failed to fetch community members",
     };
-  }
-}
-
-export async function setSelectedOrganizationOnUser(organizationId, userId) {
-  try {
-    await connect();
-
-    if (!mongoose.Types.ObjectId.isValid(organizationId)) {
-      return { success: false, message:"Invalid organization ID" };
-    }
-    if (!userId || typeof userId !== "string") {
-      return { success: false, message:"Invalid user ID" };
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $set: { selectedOrganization: organizationId } },
-      { new: true }
-    ).lean();
-
-    if (!user) {
-      return { success: false, message:"User not found" };
-    }
-
-    return { success: true, message: "Selected organization updated" };
-  } catch (error) {
-    console.error("Error setting selected organization:", error.message);
-    return { success: false, message:"Failed to set selected organization" };
   }
 }
 

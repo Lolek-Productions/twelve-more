@@ -678,29 +678,36 @@ export async function setUserLikesAction(post, user) {
   }
 }
 
-export async function getPostsByUserId(userId, limit, appUser) {
+export async function getPostsByUserForAppUser(user, limit, appUser) {
   try {
     await connect();
 
-    if (!userId) {
-      throw new Error("User ID is required");
+    if (!user || !appUser) {
+      throw new Error("User and AppUser required");
     }
+
+    const appUserCommunityIds = appUser.communities
+      .map(c => c.id);
+
+    const userPublicOrMemberCommunityIds = user.communities.filter(c => {
+      if(c.visibility === 'public') return true;
+      return appUserCommunityIds.includes(c.id);
+    }).map(c =>
+      c.id
+    );
 
     const posts = await Post.find({
       parentId: null, // Only get top-level posts
+      user: user.id,   // Posts by the specified user
       $or: [
+        // Case 1: Posts with no community, but in user's organizations
         {
           organization: { $in: appUser.organizations.map(c => c.id) },
-          community: null,
-          user: userId
+          community: null
         },
+        // Case 2: Posts in communities the user has access to
         {
-          community: { $in: appUser.communities.map(c => c.id) },
-          organization: {
-            $in: appUser.organizations.map(c => c.id),
-            visibility: "public"
-          },
-          user: userId,
+          community: { $in: userPublicOrMemberCommunityIds }
         }
       ]
     })
