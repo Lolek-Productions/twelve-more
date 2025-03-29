@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useAppUser } from '@/hooks/useAppUser';
 import OrganizationCommunityList from "@/components/OrganizationCommunityList.jsx";
+import React from "react";
 
 export default function OrganizationList() {
   const { appUser } = useAppUser();
@@ -21,9 +22,19 @@ export default function OrganizationList() {
           {appUser?.organizations.map((organization) => {
             return (
               <div key={organization.id} className={'pb-4 pt-1'}>
-                <Link href={`/organizations/${organization.id}`}>
-                  <div className="text-lg font-semibold">{organization.name}</div>
-                </Link>
+                <div className="flex justify-between items-center py-2">
+                  <Link href={`/organizations/${organization.id}`}>
+                    <div className="text-lg font-semibold">{organization.name}</div>
+                  </Link>
+                  <Button asChild size="small">
+                    <Link
+                      className={'py-1 px-2'}
+                      href={`/organizations/${organization.id}/community/create`}
+                    >
+                      New Community
+                    </Link>
+                  </Button>
+                </div>
                 <OrganizationCommunityList key={organization.id} organization={organization} />
               </div>
             );
