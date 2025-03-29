@@ -132,7 +132,7 @@ export default function LeftSidebar({ onLinkClick }) {
           {/* Optional: Keep the original Communities section or remove it */}
           <div className="p-3 bg-gray-100 rounded-md">
             <div className="flex items-center">
-              <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My Communities</div>
+              <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My 12s</div>
               {/*<Link href='/communities/create' className='hover:bg-gray-200 rounded-full ml-2 mb-1 p-2'>*/}
               {/*  <HiOutlinePlus className='h-5 w-5'/>*/}
               {/*</Link>*/}
