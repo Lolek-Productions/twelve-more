@@ -198,7 +198,7 @@ export default function OnboardingComponent() {
               height={45}
               priority
             />
-            <CardTitle className="text-center text-2xl">Welcome to 12More {user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+            <CardTitle className="text-center text-2xl">Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -272,7 +272,7 @@ export default function OnboardingComponent() {
             height={45}
             priority
           />
-          <CardTitle className="text-center text-2xl">Welcome to 12More {user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+          <CardTitle className="text-center text-2xl">Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
         </CardHeader>
 
         <CardContent>
