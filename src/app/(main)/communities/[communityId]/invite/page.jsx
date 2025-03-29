@@ -45,14 +45,14 @@ const profileFormSchema = z.object({
     .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
     .min(10, { message: "Phone Number must be 10 digits." })
     .max(15, { message: "Phone Number must not exceed 10 digits." }),
-  smsOptIn: z
-    .boolean()
-    .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
+  // smsOptIn: z
+  //   .boolean()
+  //   .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
 });
 
 const defaultValues = {
   phoneNumber: "",
-  smsOptIn: false,
+  // smsOptIn: false,
 };
 
 export default function Invite() {
@@ -285,34 +285,34 @@ export default function Invite() {
                     )}
                   />
 
-                  <FormField
-                    control={inviteForm.control}
-                    name="smsOptIn"
-                    render={({field}) => (
-                      <FormItem className="flex items-start space-x-4">
-                        <FormControl>
-                          <Checkbox
-                            id="smsOptIn"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="mt-5"
-                          />
-                        </FormControl>
-                        <div>
-                          <FormLabel htmlFor="smsOptIn" className="text-sm">
-                            I agree to receive SMS notifications from 12More.
-                          </FormLabel>
-                          <FormDescription className="text-sm">
-                            Message & data rates may apply. Reply <strong>STOP</strong> to unsubscribe. See our{" "}
-                            <Link target="_blank" href="/privacy" className="text-blue-500 hover:underline">
-                              Privacy Policy
-                            </Link>.
-                          </FormDescription>
-                          <FormMessage/>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  {/*<FormField*/}
+                  {/*  control={inviteForm.control}*/}
+                  {/*  name="smsOptIn"*/}
+                  {/*  render={({field}) => (*/}
+                  {/*    <FormItem className="flex items-start space-x-4">*/}
+                  {/*      <FormControl>*/}
+                  {/*        <Checkbox*/}
+                  {/*          id="smsOptIn"*/}
+                  {/*          checked={field.value}*/}
+                  {/*          onCheckedChange={field.onChange}*/}
+                  {/*          className="mt-5"*/}
+                  {/*        />*/}
+                  {/*      </FormControl>*/}
+                  {/*      <div>*/}
+                  {/*        <FormLabel htmlFor="smsOptIn" className="text-sm">*/}
+                  {/*          I agree to receive SMS notifications from 12More.*/}
+                  {/*        </FormLabel>*/}
+                  {/*        <FormDescription className="text-sm">*/}
+                  {/*          Message & data rates may apply. Reply <strong>STOP</strong> to unsubscribe. See our{" "}*/}
+                  {/*          <Link target="_blank" href="/privacy" className="text-blue-500 hover:underline">*/}
+                  {/*            Privacy Policy*/}
+                  {/*          </Link>.*/}
+                  {/*        </FormDescription>*/}
+                  {/*        <FormMessage/>*/}
+                  {/*      </div>*/}
+                  {/*    </FormItem>*/}
+                  {/*  )}*/}
+                  {/*/>*/}
 
                   <div className="flex justify-end space-x-3 pt-2">
                     <Button type="submit" disabled={isSubmitting}>
