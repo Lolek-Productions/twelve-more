@@ -6,7 +6,7 @@ import Icons from './Icons';
 import {linkifyText, renderPostText, SafeMicrolink} from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
-import CommentsSection from './CommentsSection'; // Import the new CommentsSection component
+import CommentsSection from './CommentsSection';
 
 export default function Post({ post, clickableText = true, showComments = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -83,7 +83,7 @@ export default function Post({ post, clickableText = true, showComments = false 
             </div>
           </div>
 
-          {renderPostText({post: post, clickableText: false})}
+          {renderPostText({post: post, clickableText: clickableText})}
 
           {post?.image && (
             <div className="relative w-full overflow-hidden rounded-lg sm:rounded-2xl cursor-pointer" onClick={handleImageClick}>
