@@ -53,8 +53,10 @@ export default function UserPage() {
   return (
     <>
       <div className="py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">
-        <h2 className="text-lg sm:text-xl font-bold">Organization: {organization.name}</h2>
-        <div>{organization.description}</div>
+        <Link href={`/organizations/${organization?.id}/posts`}>
+          <h2 className="text-lg sm:text-xl font-bold">Organization: {organization.name}</h2>
+          <div>{organization.description}</div>
+        </Link>
       </div>
       <div className={'p-6'}>
         {communities?.length === 0 ? (

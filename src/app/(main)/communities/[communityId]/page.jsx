@@ -47,10 +47,11 @@ export default function CommunityPage() {
   return (
     <>
       <div className="py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">
-        <h2 className="text-lg sm:text-xl font-bold">Community: {community?.name}</h2>
-        <h2 className="">Purpose: {community?.purpose}</h2>
+        <Link href={`/communities/${community.id}/posts`}>
+          <h2 className="text-lg sm:text-xl font-bold">Community: {community?.name}</h2>
+          <h2 className="">Purpose: {community?.purpose}</h2>
+        </Link>
       </div>
-
       <div className='mt-3 p-5'>
         <Button asChild >
           <Link href={`/communities/${community.id}/posts`}>Posts</Link>
