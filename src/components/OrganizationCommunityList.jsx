@@ -106,7 +106,7 @@ export default function OrganizationCommunityList({organization}) {
 
   return (
     <div className="">
-      {communities.length === 0 ? (
+      {communities?.length === 0 ? (
         <p>No communities exist in this organization yet.</p>
       ) : (
         <ul className="space-y-4">
