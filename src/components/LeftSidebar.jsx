@@ -152,7 +152,7 @@ export default function LeftSidebar({ onLinkClick }) {
                   <Link
                     onClick={handleLinkClick}
                     className={'py-1 px-2'}
-                    href={`/communities/`}
+                    href={`/organizations/`}
                   >
                     Find a 12
                   </Link>
