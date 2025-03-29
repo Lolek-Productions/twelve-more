@@ -142,7 +142,7 @@ export default function LeftSidebar({ onLinkClick }) {
                 appUser.communities.map((community) => (
                   <Link
                     key={community.id}
-                    href={community.href || `/communities/${community.id}`}
+                    href={community.href || `/communities/${community.id}/posts`}
                     className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
                     onClick={handleLinkClick}
                   >
