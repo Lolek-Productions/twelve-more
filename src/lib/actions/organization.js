@@ -58,6 +58,38 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       console.warn(`Failed to add community to user: ${comAddResult.error}`);
     }
 
+    await Community.create({
+      name: `Lectors`,
+      purpose: `To boldly proclaim the word of God!`,
+      visibility: "public",
+      createdBy: userId,
+      organization: organization.id,
+    });
+
+    await Community.create({
+      name: `Ushers`,
+      purpose: `To communicate the love of God to all those who join us at Mass!`,
+      visibility: "public",
+      createdBy: userId,
+      organization: organization.id,
+    });
+
+    await Community.create({
+      name: `Religious Education Teachers`,
+      purpose: `To teach our children how to Love God!`,
+      visibility: "public",
+      createdBy: userId,
+      organization: organization.id,
+    });
+
+    await Community.create({
+      name: `Ministers of Holy Communion`,
+      purpose: `To assist the priest in the distribution of the Holy Sacrament!`,
+      visibility: "public",
+      createdBy: userId,
+      organization: organization.id,
+    });
+
     return { success: true, message: "Organization created", organization: organization };
   } catch (error) {
     return { success: false, message:error.message };
