@@ -678,13 +678,17 @@ export async function setUserLikesAction(post, user) {
   }
 }
 
-export async function getPostsByUserForAppUser(user, limit, appUser) {
+export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset = 0) {
   try {
     await connect();
 
     if (!user || !appUser) {
       throw new Error("User and AppUser required");
     }
+
+    // Ensure limit and offset are numbers
+    limit = parseInt(limit);
+    offset = parseInt(offset || 0);
 
     const appUserCommunityIds = appUser.communities
       .map(c => c.id);
@@ -696,7 +700,8 @@ export async function getPostsByUserForAppUser(user, limit, appUser) {
       c.id
     );
 
-    const posts = await Post.find({
+    // First query to get the requested posts
+    const query = {
       parentId: null, // Only get top-level posts
       user: user.id,   // Posts by the specified user
       $or: [
@@ -710,7 +715,10 @@ export async function getPostsByUserForAppUser(user, limit, appUser) {
           community: { $in: userPublicOrMemberCommunityIds }
         }
       ]
-    })
+    };
+
+    // Get posts for the current page
+    const posts = await Post.find(query)
       .populate({
         path: 'community',
         select: 'name',
@@ -729,32 +737,30 @@ export async function getPostsByUserForAppUser(user, limit, appUser) {
       .populate({
         path: 'prayers.user',
       })
-      .limit(limit)
+      .skip(offset)
+      .limit(limit + 1) // Get one extra to check if there are more
       .sort({ createdAt: -1 })
       .lean();
 
-    if (!posts) {
-      throw new Error("Posts not found");
+    // Determine if there are more posts (if we got the extra one)
+    const hasMore = posts.length > limit;
+
+    // Remove the extra post if it exists
+    const limitedPosts = hasMore ? posts.slice(0, limit) : posts;
+
+    if (!limitedPosts || limitedPosts.length === 0) {
+      return { success: true, posts: [], hasMore: false }; // No posts found
     }
 
     // For each post, get the comment count
     const postsWithCommentCounts = await Promise.all(
-      posts.map(async (post) => {
+      limitedPosts.map(async (post) => {
         const commentCount = await Post.countDocuments({ parentId: post._id });
         return { ...post, commentCount };
       })
     );
 
-    // Determine if there are more posts
-    const hasMore = posts.length > limit;
-    // Trim the extra post if it exists, returning only the requested limit
-    const limitedPosts = postsWithCommentCounts.slice(0, limit);
-
-    if (!limitedPosts || limitedPosts.length === 0) {
-      return { posts: [], hasMore: false }; // No posts found
-    }
-
-    const mappedPosts = limitedPosts.map((post) => ({
+    const mappedPosts = postsWithCommentCounts.map((post) => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
@@ -782,10 +788,15 @@ export async function getPostsByUserForAppUser(user, limit, appUser) {
       createdAt: post.createdAt,
     }));
 
-    return {success: true, posts: mappedPosts, hasMore};
+    // Return success with posts and hasMore flag
+    return {
+      success: true,
+      posts: mappedPosts,
+      hasMore: hasMore
+    };
   } catch (error) {
     console.error("Error fetching post:", error.message);
-    return null;
+    return { success: false, message: error.message, posts: [], hasMore: false };
   }
 }
 

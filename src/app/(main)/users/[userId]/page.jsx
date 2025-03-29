@@ -1,75 +1,99 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import {getUserByIdByAppUser} from "@/lib/actions/user";
-import Link from "next/link"
+import { getUserByIdByAppUser } from "@/lib/actions/user";
+import Link from "next/link";
 import Post from "@/components/Post.jsx";
-import {getPostsByUserForAppUser, getPostsByUserId} from "@/lib/actions/post.js";
-import {useAppUser} from "@/hooks/useAppUser.js";
+import { getPostsByUserForAppUser } from "@/lib/actions/post.js";
+import { useAppUser } from "@/hooks/useAppUser.js";
+import {
+  useQuery,
+  useInfiniteQuery
+} from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UserPage() {
   const params = useParams();
   const { userId } = params;
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [postNum, setPostNum] = useState(10);
-  const [hasMore, setHasMore] = useState(false);
   const { appUser } = useAppUser();
+  const observerRef = useRef(null);
 
+  // User data query
+  const {
+    data: userData,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ['user', userId, appUser?.id],
+    queryFn: () => getUserByIdByAppUser(userId, appUser),
+    enabled: !!userId && !!appUser,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  useEffect(() => {
-    if (!userId || !appUser) {
-      return;
-    }
-    async function fetchUserData() {
-      try {
-        const userData = await getUserByIdByAppUser(userId, appUser);
-        // console.log(userData);
+  // Fetch posts with pagination
+  const fetchPosts = async ({ pageParam = 0 }) => {
+    const limit = 5; //look
+    const result = await getPostsByUserForAppUser(userData?.user, limit, appUser, pageParam * limit);
+    return {
+      posts: result.posts,
+      nextPage: result.hasMore ? pageParam + 1 : undefined,
+      hasMore: result.hasMore
+    };
+  };
 
-        if (!userData.success) {
-          setError("User not found");
-        } else {
-          setUser(userData.user);
+  // Posts infinite query
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: postsLoading,
+    isError: postsError,
+    error: postsErrorDetails
+  } = useInfiniteQuery({
+    queryKey: ['userPosts', userId, appUser?.id],
+    queryFn: fetchPosts,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    enabled: !!userData?.user && !!appUser,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+
+  // Flatten post data from all pages
+  const posts = data?.pages.flatMap(page => page.posts) || [];
+
+  // Set up intersection observer for infinite scrolling
+  const lastPostRef = useCallback(
+    (node) => {
+      if (postsLoading || isFetchingNextPage) return;
+
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
         }
-      } catch (err) {
-        setError("Failed to fetch user data");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUserData();
+      });
 
-  }, [userId, appUser]);
+      if (node) observerRef.current.observe(node);
+    },
+    [postsLoading, isFetchingNextPage, fetchNextPage, hasNextPage]
+  );
 
-  useEffect(() => {
-    if (!userId, !appUser) {
-      return;
-    }
+  const LoadingSkeleton = () => (
+    <div className="space-y-4 p-5 md:w-[30rem]">
+      {[...Array(2)].map((_, index) => (
+        <Skeleton key={index} className="h-24 w-full" />
+      ))}
+    </div>
+  );
 
-    async function fetchUserPosts() {
-      console.log('fetching posts');
-      try {
-        const postData = await getPostsByUserForAppUser(user, postNum, appUser);
+  // Loading states
+  if (userLoading) return <div className="p-4 md:w-[30rem]">Loading profile...</div>;
+  if (userError) return <div className="p-4 text-red-500 w-[30rem]">Error loading profile: {userError.message}</div>;
+  if (!userData?.success) return <div className="p-4 text-red-500 w-[30rem]">User not found</div>;
 
-        if (postData.success) {
-          setPosts(postData.posts);
-          console.log(postData.posts);
-        } else {
-          // setError("Posts not found");
-        }
-      } catch (err) {
-        // setError("Failed to fetch user posts");
-      }
-    }
-    fetchUserPosts();
-  }, [user, appUser]);
-
-
-  if (loading) return <div className="p-4 md:w-[30rem]">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500 w-[30rem]">{error}</div>;
+  const user = userData.user;
 
   return (
     <>
@@ -99,49 +123,43 @@ export default function UserPage() {
                   <div className="text-sm">{`${community?.name}` || "Unknown"} ({`${community?.organizationName}`})</div>
 
                   <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
-                      {community?.visibility
-                        ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
-                        : 'Unknown'}
+                    {community?.visibility
+                      ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
+                      : 'Unknown'}
                   </span>
                 </Link>
               </div>
             ))}
           </div>
         )}
-
-        {/*<h3 className="text-lg font-semibold pt-3">Organizations ({user.organizations.length})</h3>*/}
-        {/*{user.organizations.length === 0 ? (*/}
-        {/*  <p className="text-gray-500">No organizations yet.</p>*/}
-        {/*) : (*/}
-        {/*  <div className="mt-2 space-y-2">*/}
-        {/*    {user.organizations.map((organization) => (*/}
-        {/*      <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">*/}
-        {/*        <Link href={`/communities/${organization?.id}/posts`}>*/}
-        {/*          <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>*/}
-        {/*        </Link>*/}
-        {/*      </div>*/}
-        {/*    ))}*/}
-        {/*  </div>*/}
-        {/*)}*/}
       </div>
 
       <div className="p-3">
         <h3 className="text-lg font-semibold">Posts</h3>
       </div>
 
-      {posts &&
-        posts.map((post) => {
-          return <Post key={post.id} post={post}/>;
+      {postsLoading ? (
+        <LoadingSkeleton />
+      ) : postsError ? (
+        <div className="p-4 text-red-500">Error loading posts: {postsErrorDetails.message}</div>
+      ) : posts.length > 0 ? (
+        posts.map((post, index) => {
+          // Apply ref to last post for infinite scrolling
+          if (index === posts.length - 1) {
+            return post && post.id ? (
+              <div key={post.id} ref={lastPostRef}>
+                <Post post={post} />
+              </div>
+            ) : null;
+          }
+          return post && post.id ? <Post key={post.id} post={post} /> : null;
         })
-      }
-      {posts.length > 0 && !loading && hasMore && (
-        <button
-          onClick={() => setPostNum(postNum + 10)}
-          className='text-blue-500 pl-4 pb-6 pt-3 hover:text-blue-700 text-sm'
-        >
-          Load more
-        </button>
+      ) : (
+        <div className="p-4 text-gray-500">No posts found.</div>
       )}
+
+      {/* Loading indicator for next page */}
+      {isFetchingNextPage && <LoadingSkeleton />}
     </>
   );
 }
