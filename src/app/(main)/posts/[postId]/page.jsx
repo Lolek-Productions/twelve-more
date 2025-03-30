@@ -27,7 +27,7 @@ export default function PostPage() {
     setIsLoading(true);
     try {
       const postData = await getPostByIdWithCommentsAndMetrics(postId);
-      console.log(postData);
+      // console.log(postData);
       setPost(postData.post);
     } catch (error) {
       console.error('Error fetching post:', error);
