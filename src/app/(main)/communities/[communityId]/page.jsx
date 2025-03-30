@@ -54,41 +54,9 @@ export default function CommunityPage() {
       </div>
       <div className='mt-3 p-5'>
         <Button asChild >
-          <Link href={`/communities/${community.id}/posts`}>Posts</Link>
+          <Link href={`/communities/${community.id}/posts`}>Go to Posts</Link>
         </Button>
       </div>
-
-      {/*<div className="p-3">*/}
-      {/*  <h3 className="text-lg font-semibold">Members ({user.communities.length})</h3>*/}
-      {/*  {user.communities.length === 0 ? (*/}
-      {/*    <p className="text-gray-500">No communities yet.</p>*/}
-      {/*  ) : (*/}
-      {/*    <div className="mt-2 space-y-2">*/}
-      {/*      {user.communities.map((community) => (*/}
-      {/*        <div key={community.id} className="px-2 rounded-md flex justify-start items-center">*/}
-      {/*          <Link href={`/communities/${community?.id}/posts`}>*/}
-      {/*            <p className="text-sm">{`${community?.name}` || "Unknown"}</p>*/}
-      {/*          </Link>*/}
-      {/*        </div>*/}
-      {/*      ))}*/}
-      {/*    </div>*/}
-      {/*  )}*/}
-
-      {/*  <h3 className="text-lg font-semibold pt-3">Organizations ({user.organizations.length})</h3>*/}
-      {/*  {user.organizations.length === 0 ? (*/}
-      {/*    <p className="text-gray-500">No organizations yet.</p>*/}
-      {/*  ) : (*/}
-      {/*    <div className="mt-2 space-y-2">*/}
-      {/*      {user.organizations.map((organization) => (*/}
-      {/*        <div key={organization.id} className="px-2 rounded-md flex justify-start items-center">*/}
-      {/*          <Link href={`/communities/${organization?.id}/posts`}>*/}
-      {/*            <p className="text-sm">{`${organization?.name}` || "Unknown"}</p>*/}
-      {/*          </Link>*/}
-      {/*        </div>*/}
-      {/*      ))}*/}
-      {/*    </div>*/}
-      {/*  )}*/}
-      {/*</div>*/}
     </>
   );
 }

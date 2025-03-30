@@ -547,6 +547,184 @@ export async function getPostByIdWithComments(postId) {
   }
 }
 
+export async function getPostForPostPage(postId) {
+  try {
+    await connect();
+
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+
+    // Convert postId to ObjectId if it's a string
+    const postObjectId = typeof postId === 'string'
+      ? new mongoose.Types.ObjectId(postId)
+      : postId;
+
+    // Get the main post with all needed data in a single aggregation
+    const postResults = await Post.aggregate([
+      // Match the specific post by ID
+      {
+        $match: {
+          _id: postObjectId
+        }
+      },
+      // Lookup to get user details
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      // Lookup to get community details
+      {
+        $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'communityDetails'
+        }
+      },
+      // Lookup to get organization details
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organization',
+          foreignField: '_id',
+          as: 'organizationDetails'
+        }
+      },
+      // Lookup to get comments for this post
+      {
+        $lookup: {
+          from: 'posts',
+          let: { postId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$parentId', '$$postId'] }
+              }
+            },
+            { $sort: { createdAt: 1 } },
+            // Lookup comment authors
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'userDetails'
+              }
+            },
+            // Format comments to match expected output
+            {
+              $project: {
+                _id: 1,
+                text: 1,
+                profileImg: 1,
+                createdAt: 1,
+                user: {
+                  $cond: {
+                    if: { $gt: [{ $size: '$userDetails' }, 0] },
+                    then: {
+                      id: { $toString: { $arrayElemAt: ['$userDetails._id', 0] } },
+                      firstName: { $arrayElemAt: ['$userDetails.firstName', 0] },
+                      lastName: { $arrayElemAt: ['$userDetails.lastName', 0] }
+                    },
+                    else: null
+                  }
+                }
+              }
+            }
+          ],
+          as: 'comments'
+        }
+      },
+      // Format the output
+      {
+        $project: {
+          _id: 1,
+          text: 1,
+          image: 1,
+          profileImg: 1,
+          createdAt: 1,
+          likes: 1,
+          prayers: 1,
+          comments: 1,
+          user: {
+            $cond: {
+              if: { $gt: [{ $size: '$userDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$userDetails._id', 0] } },
+                firstName: { $arrayElemAt: ['$userDetails.firstName', 0] },
+                lastName: { $arrayElemAt: ['$userDetails.lastName', 0] }
+              },
+              else: null
+            }
+          },
+          community: {
+            $cond: {
+              if: { $gt: [{ $size: '$communityDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$communityDetails._id', 0] } },
+                name: { $arrayElemAt: ['$communityDetails.name', 0] }
+              },
+              else: null
+            }
+          },
+          organization: {
+            $cond: {
+              if: { $gt: [{ $size: '$organizationDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$organizationDetails._id', 0] } },
+                name: { $arrayElemAt: ['$organizationDetails.name', 0] }
+              },
+              else: null
+            }
+          }
+        }
+      }
+    ]);
+
+    // Handle case where post is not found
+    if (!postResults || postResults.length === 0) {
+      throw new Error("Post not found");
+    }
+
+    const post = postResults[0];
+
+    // Format the post data to match the expected output
+    const postData = {
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: post.user,
+      community: post.community,
+      organization: post.organization,
+      profileImg: post.profileImg,
+      comments: post.comments.map(comment => ({
+        id: comment._id.toString(),
+        text: comment.text,
+        profileImg: comment.profileImg,
+        createdAt: comment.createdAt,
+        user: comment.user
+      })),
+      likes: post.likes?.map(like => ({
+        userId: like._id?.toString()
+      })) || [],
+      prayers: post.prayers?.map(prayer => ({
+        userId: prayer._id.toString()
+      })) || [],
+      createdAt: post.createdAt
+    };
+
+    return { success: true, post: postData };
+  } catch (error) {
+    console.error("Error fetching post:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function sayPrayerAction(post, appUser) {
   try {
     await connect();

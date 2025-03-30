@@ -5,7 +5,7 @@ import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
 import {useEffect, useState} from "react";
-import {getPostByIdWithComments} from "@/lib/actions/post.js";
+import {getPostForPostPage} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from "next/navigation";
 
@@ -17,6 +17,7 @@ export default function PostPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [post, setPost] = useState(null);
   const router = useRouter();
+  const [canGoBack, setCanGoBack] = useState(false);
 
   useEffect(() => {
     if (!postId) {
@@ -26,7 +27,7 @@ export default function PostPage() {
       setIsLoading(true);
       // console.log(postId);
       try {
-        const postData = await getPostByIdWithComments(postId);
+        const postData = await getPostForPostPage(postId);
         // console.log(postData);
         setPost(postData.post);
       } catch (error) {
@@ -39,11 +40,24 @@ export default function PostPage() {
     fetchPost();
   }, [postId]);
 
+  useEffect(() => {
+    setCanGoBack(window.history.length > 1);
+  }, []);
+
+  const handleBack = () => {
+    if (canGoBack) {
+      router.back();
+    } else {
+      // Fallback destination if there's no history
+      router.push(`/communities/${post.community.id}/posts`);
+    }
+  };
+
   return (
     <>
       <div className='flex items-center space-x-2 py-2 px-3 top-0 z-50 bg-white border-b border-gray-200'>
         <button
-          onClick={() => router.back()}
+          onClick={handleBack}
           className='hover:bg-gray-100 rounded-full p-2'
         >
           <HiArrowLeft className='h-5 w-5'/>
