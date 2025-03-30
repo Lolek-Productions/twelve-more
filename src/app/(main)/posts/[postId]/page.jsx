@@ -4,11 +4,12 @@ import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import AncestorPosts from '@/components/AncestorPosts';
 import { HiArrowLeft } from 'react-icons/hi';
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {getPostByIdWithCommentsAndMetrics, getPostForPostPage} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from "next/navigation";
 import PostInput from "@/components/PostInput.jsx";
+import CommentInput from "@/components/CommentInput.jsx";
 
 
 export default function PostPage() {
@@ -20,28 +21,31 @@ export default function PostPage() {
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
 
-  useEffect(() => {
-    if (!postId) {
-      return;
+  // Define fetchPost outside of useEffect so it can be reused
+  const fetchPost = useCallback(async () => {
+    if (!postId) return;
+
+    setIsLoading(true);
+    try {
+      const postData = await getPostByIdWithCommentsAndMetrics(postId);
+      console.log(postData);
+      setPost(postData.post);
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    } finally {
+      setIsLoading(false);
     }
-    const fetchPost = async () => {
-      setIsLoading(true);
-      // console.log(postId);
-      try {
-        const postData = await getPostByIdWithCommentsAndMetrics(postId);
-
-
-        console.log(postData);
-        setPost(postData.post);
-      } catch (error) {
-        console.error('Error fetching post:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPost();
   }, [postId]);
+
+  // Initial post fetch
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
+
+  // Use the same fetchPost function after comment creation
+  const afterCommentCreated = async () => {
+    await fetchPost();
+  };
 
   useEffect(() => {
     setCanGoBack(window.history.length > 1);
@@ -52,7 +56,7 @@ export default function PostPage() {
       router.back();
     } else {
       // Fallback destination if there's no history
-      router.push(`/communities/${post.community.id}/posts`);
+      router.push(`/communities/${post?.community?.id}/posts`);
     }
   };
 
@@ -70,12 +74,9 @@ export default function PostPage() {
 
       {!post && isLoading && <h2 className='text-center mt-5 text-lg'>Post Loading...</h2>}
 
-
       {post && <AncestorPosts posts={post.ancestors} clickableText={false} />}
-
-
       {post && <Post post={post} clickableText={false} />}
-      {post && <PostInput communityId={post.community.id} placeholder="Respond to the Post" parentId={post.id}/>}
+      {post && <CommentInput post={post} onCommentCreated={afterCommentCreated} />}
       {post && <Comments comments={post.comments} />}
     </>
   );
