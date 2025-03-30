@@ -146,6 +146,177 @@ export async function createPost(postData) {
   }
 }
 
+export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
+  try {
+    await connect();
+
+    // Make sure limit and offset are numbers
+    limit = parseInt(limit);
+    offset = parseInt(offset || 0);
+
+    // Get the user's organization and community IDs
+    const userOrgIds = appUser.organizations.map(c => c.id);
+    const userCommunityIds = appUser.communities.map(c => c.id);
+
+    // Convert string IDs to ObjectId if needed
+    const orgObjectIds = userOrgIds.map(id =>
+      typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id
+    );
+    const communityObjectIds = userCommunityIds.map(id =>
+      typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id
+    );
+
+    // Use aggregation to get posts and comment counts in a single query
+    const aggregatedPosts = await Post.aggregate([
+      // Match stage - filter posts
+      {
+        $match: {
+          parentId: null, // Only get top-level posts
+          $or: [
+            { organization: { $in: orgObjectIds }, community: null },
+            { community: { $in: communityObjectIds } }
+          ]
+        }
+      },
+      // Sort by creation date
+      { $sort: { createdAt: -1 } },
+      // Skip for pagination
+      { $skip: offset },
+      // Limit results (get one extra to check if there are more)
+      { $limit: limit + 1 },
+      // Lookup to get comment counts
+      {
+        $lookup: {
+          from: 'posts',
+          let: { postId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$parentId', '$$postId'] }
+              }
+            },
+            { $count: 'count' }
+          ],
+          as: 'commentData'
+        }
+      },
+      // Add comment count field
+      {
+        $addFields: {
+          commentCount: {
+            $cond: {
+              if: { $gt: [{ $size: '$commentData' }, 0] },
+              then: { $arrayElemAt: ['$commentData.count', 0] },
+              else: 0
+            }
+          }
+        }
+      },
+      // Lookup to get user details
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      // Lookup to get community details
+      {
+        $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'communityDetails'
+        }
+      },
+      // Lookup to get organization details
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organization',
+          foreignField: '_id',
+          as: 'organizationDetails'
+        }
+      },
+      // Format the output
+      {
+        $project: {
+          _id: 1,
+          text: 1,
+          image: 1,
+          commentCount: 1,
+          createdAt: 1,
+          profileImg: 1,
+          likes: 1,
+          prayers: 1,
+          user: {
+            $cond: {
+              if: { $gt: [{ $size: '$userDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$userDetails._id', 0] } },
+                firstName: { $arrayElemAt: ['$userDetails.firstName', 0] },
+                lastName: { $arrayElemAt: ['$userDetails.lastName', 0] }
+              },
+              else: null
+            }
+          },
+          community: {
+            $cond: {
+              if: { $gt: [{ $size: '$communityDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$communityDetails._id', 0] } },
+                name: { $arrayElemAt: ['$communityDetails.name', 0] }
+              },
+              else: null
+            }
+          },
+          organization: {
+            $cond: {
+              if: { $gt: [{ $size: '$organizationDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$organizationDetails._id', 0] } },
+                name: { $arrayElemAt: ['$organizationDetails.name', 0] }
+              },
+              else: null
+            }
+          }
+        }
+      }
+    ]);
+
+    // Check if we got more posts than the limit
+    const hasMore = aggregatedPosts.length > limit;
+
+    // Only return the requested number of posts
+    const postsToReturn = hasMore ? aggregatedPosts.slice(0, limit) : aggregatedPosts;
+
+    // Format the response
+    const mappedPosts = postsToReturn.map(post => ({
+      id: post._id.toString(),
+      text: post.text,
+      image: post.image,
+      user: post.user,
+      community: post.community,
+      organization: post.organization,
+      profileImg: post.profileImg,
+      commentCount: post.commentCount,
+      likes: post.likes?.map(like => ({
+        userId: like._id.toString(),
+      })) || [],
+      prayers: post.prayers?.map(prayer => ({
+        userId: prayer._id.toString(),
+      })) || [],
+      createdAt: post.createdAt
+    }));
+
+    return { posts: mappedPosts, hasMore };
+  } catch (error) {
+    console.error("Error fetching posts for home feed:", error);
+    return { posts: [], hasMore: false };
+  }
+}
+
 export async function getPostsForCommunityFeed(limit = 10, appUser, communityId, offset = 0) {
   try {
     await connect();
