@@ -213,7 +213,7 @@ export default function OnboardingComponent() {
                     <span className="font-semibold">
                     {communityData?.name || 'a community'}
                   </span>
-                    {communityData?.organizationName && ` in ${communityData.organizationName}`}
+                    {communityData?.organization.name && ` in ${communityData.organization.name}`}
                   </p>
 
                   {communityData?.description && (
