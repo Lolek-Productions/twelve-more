@@ -10,6 +10,7 @@ import {sendSMS} from "@/lib/actions/sms.js";
 import {currentUser} from "@clerk/nextjs/server";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {PUBLIC_APP_URL} from "@/lib/constants.js";
+import mongoose from "mongoose";
 
 export async function createPost(postData) {
   const user = await currentUser();
@@ -145,173 +146,165 @@ export async function createPost(postData) {
   }
 }
 
-export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
+export async function getPostsForCommunityFeed(limit = 10, appUser, communityId, offset = 0) {
   try {
     await connect();
 
-    // Only fetch top-level posts (not comments)
-    const posts = await Post.find(
+    // Make sure limit and offset are numbers
+    limit = parseInt(limit);
+    offset = parseInt(offset || 0);
+
+    // Convert communityId to ObjectId if it's a string
+    const communityObjectId = typeof communityId === 'string'
+      ? new mongoose.Types.ObjectId(communityId)
+      : communityId;
+
+    // Use aggregation to get posts and comment counts in a single query
+    const aggregatedPosts = await Post.aggregate([
+      // Match stage - filter posts for this community
       {
-        parentId: null, // Only get top-level posts
-        $or: [
-          { organization: { $in: appUser.organizations.map(c => c.id) }, community: null },
-          { community: { $in: appUser.communities.map(c => c.id) } }
-        ]
+        $match: {
+          community: communityObjectId,
+          parentId: null // Only get top-level posts
+        }
+      },
+      // Sort by creation date
+      { $sort: { createdAt: -1 } },
+      // Skip for pagination
+      { $skip: offset },
+      // Limit results (get one extra to check if there are more)
+      { $limit: limit + 1 },
+      // Lookup to get comment counts
+      {
+        $lookup: {
+          from: 'posts',
+          let: { postId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$parentId', '$$postId'] }
+              }
+            },
+            { $count: 'count' }
+          ],
+          as: 'commentData'
+        }
+      },
+      // Add comment count field
+      {
+        $addFields: {
+          commentCount: {
+            $cond: {
+              if: { $gt: [{ $size: '$commentData' }, 0] },
+              then: { $arrayElemAt: ['$commentData.count', 0] },
+              else: 0
+            }
+          }
+        }
+      },
+      // Lookup to get user details
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      // Lookup to get community details
+      {
+        $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'communityDetails'
+        }
+      },
+      // Lookup to get organization details
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organization',
+          foreignField: '_id',
+          as: 'organizationDetails'
+        }
+      },
+      // Format the output
+      {
+        $project: {
+          _id: 1,
+          text: 1,
+          image: 1,
+          commentCount: 1,
+          createdAt: 1,
+          profileImg: 1,
+          likes: 1,
+          prayers: 1,
+          user: {
+            $cond: {
+              if: { $gt: [{ $size: '$userDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$userDetails._id', 0] } },
+                firstName: { $arrayElemAt: ['$userDetails.firstName', 0] },
+                lastName: { $arrayElemAt: ['$userDetails.lastName', 0] }
+              },
+              else: null
+            }
+          },
+          community: {
+            $cond: {
+              if: { $gt: [{ $size: '$communityDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$communityDetails._id', 0] } },
+                name: { $arrayElemAt: ['$communityDetails.name', 0] }
+              },
+              else: null
+            }
+          },
+          organization: {
+            $cond: {
+              if: { $gt: [{ $size: '$organizationDetails' }, 0] },
+              then: {
+                id: { $toString: { $arrayElemAt: ['$organizationDetails._id', 0] } },
+                name: { $arrayElemAt: ['$organizationDetails.name', 0] }
+              },
+              else: null
+            }
+          }
+        }
       }
-    )
-      .populate({
-        path: 'community',
-        select: 'name',
-      })
-      .populate({
-        path: 'organization',
-        select: 'name',
-      })
-      .populate({
-        path: 'user',
-        select: 'firstName lastName',
-      })
-      .populate({
-        path: 'likes',
-      })
-      .populate({
-        path: 'prayers.user',
-      })
-      .sort({ createdAt: -1 })
-      .limit(limit + 1) // Request one extra post to determine if there are more
-      .skip(offset)
-      .lean();
+    ]);
 
     // Check if we got more posts than the limit
-    const hasMore = posts.length > limit;
+    const hasMore = aggregatedPosts.length > limit;
 
     // Only return the requested number of posts
-    const postsToReturn = hasMore ? posts.slice(0, limit) : posts;
+    const postsToReturn = hasMore ? aggregatedPosts.slice(0, limit) : aggregatedPosts;
 
-    // For each post, get the comment count
-    const postsWithCommentCounts = await Promise.all(
-      postsToReturn.map(async (post) => {
-        const commentCount = await Post.countDocuments({ parentId: post._id });
-        return { ...post, commentCount };
-      })
-    );
-
-    const mappedPosts = postsWithCommentCounts.map((post) => ({
+    // Format the likes and prayers arrays
+    const mappedPosts = postsToReturn.map(post => ({
       id: post._id.toString(),
       text: post.text,
       image: post.image,
-      user: {
-        id: post.user?._id.toString(),
-        firstName: post.user?.firstName,
-        lastName: post.user?.lastName,
-      },
-      community: {
-        id: post.community?._id.toString(),
-        name: post.community?.name,
-      },
-      organization: {
-        id: post.organization?._id.toString(),
-        name: post.organization?.name,
-      },
+      user: post.user,
+      community: post.community,
+      organization: post.organization,
       profileImg: post.profileImg,
-      commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        userId: like._id.toString(),
+      commentCount: post.commentCount,
+      likes: post.likes?.map(like => ({
+        userId: like._id.toString(), // this is the id of the user
       })) || [],
-      prayers: post.prayers?.map((prayer) => ({
+      prayers: post.prayers?.map(prayer => ({
         userId: prayer._id.toString(),
       })) || [],
-      createdAt: post.createdAt,
+      createdAt: post.createdAt
     }));
 
     return { posts: mappedPosts, hasMore };
   } catch (error) {
     console.error("Error fetching posts by community ID:", error);
-    return { posts: [], hasMore: false };
-  }
-}
-
-export async function getPostsForCommunityFeed(limit = 10, appUser, communityId, offset = 0) {
-  try {
-    await connect();
-    const posts = await Post.find(
-      {
-        community: communityId,
-        parentId: null
-      }, // Only get top-level posts
-    )
-    .populate({
-      path: 'community',
-      select: 'name',
-    })
-    .populate({
-      path: 'organization',
-      select: 'name',
-    })
-    .populate({
-      path: 'user',
-      select: 'firstName lastName',
-    })
-    .populate({
-      path: 'likes',
-    })
-    .populate({
-      path: 'prayers.user',
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit + 1)
-    .skip(offset)
-    .lean();
-
-    // Determine if there are more posts
-    const hasMore = posts.length > limit;
-    // Trim the extra post if it exists, returning only the requested limit
-    const limitedPosts = posts.slice(0, limit);
-
-    if (!limitedPosts || limitedPosts.length === 0) {
-      return { posts: [], hasMore: false }; // No posts found
-    }
-
-    // For each post, get the comment count
-    const postsWithCommentCounts = await Promise.all(
-      limitedPosts.map(async (post) => {
-        const commentCount = await Post.countDocuments({ parentId: post._id });
-        return { ...post, commentCount };
-      })
-    );
-
-    const mappedPosts = postsWithCommentCounts.map((post) => ({
-      id: post._id.toString(),
-      text: post.text,
-      image: post.image,
-      user: {
-        id: post.user?._id.toString(),
-        firstName: post.user?.firstName,
-        lastName: post.user?.lastName,
-      },
-      community: {
-        id: post.community?._id.toString(),
-        name: post.community?.name,
-      },
-      organization: {
-        id: post.organization?._id.toString(),
-        name: post.organization?.name,
-      },
-      profileImg: post.profileImg,
-      commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        userId: like._id.toString(), //this is the id of the user
-      })) || [],
-      prayers: post.prayers?.map((prayer) => ({
-        userId: prayer._id.toString(),
-      })) || [],
-      createdAt: post.createdAt,
-    }));
-
-    return { posts: mappedPosts, hasMore }
-  } catch (error) {
-    console.error("Error fetching posts by community ID:", error);
-    return [];
+    // Return structured error response to match success format
+    return { posts: [], hasMore: false, error: error.message };
   }
 }
 
