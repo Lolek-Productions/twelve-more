@@ -35,7 +35,7 @@ export default function Post({ post, clickableText = true, showComments = false,
       <div className={`flex p-2 sm:p-3 border-b border-gray-200 w-full hover:bg-gray-50 ${isAncestor ? 'relative' : ''}`}>
         {/* Ancestor vertical line */}
         {isAncestor && (
-          <div className="absolute left-5 top-14 bottom-0 w-0.5 bg-gray-300" aria-hidden="true"></div>
+          <div className="absolute left-6 sm:left-8 top-14 sm:top-16 bottom-0 w-0.5 bg-gray-300" aria-hidden="true"></div>
         )}
 
         <div className="flex-shrink-0 mr-2 flex flex-col">
