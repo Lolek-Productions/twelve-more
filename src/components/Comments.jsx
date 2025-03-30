@@ -1,4 +1,4 @@
-import Comment from './Comment';
+import Post from "./Post.jsx";
 
 export default function Comments({ comments = [] }) {
   const sortedComments = comments.sort(
@@ -8,7 +8,7 @@ export default function Comments({ comments = [] }) {
   return (
     <>
       {sortedComments.map((comment) => (
-        <Comment key={comment.id} comment={comment} />
+        <Post post={comment} key={comment.id} clickableText={true} />
       ))}
     </>
   );

@@ -3,12 +3,11 @@
 import Link from 'next/link';
 import moment from 'moment';
 import Icons from './Icons';
-import {linkifyText, renderPostText, SafeMicrolink} from "@/lib/utils";
+import {renderPostText, SafeMicrolink} from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
-import CommentsSection from './CommentsSection';
 
-export default function Post({ post, clickableText = true, showComments = false }) {
+export default function Post({ post, clickableText = true, showComments = false, isAncestor = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isCommentsOpen, setIsCommentsOpen] = useState(showComments);
 
@@ -33,7 +32,13 @@ export default function Post({ post, clickableText = true, showComments = false 
 
   return (
     <>
-      <div className="flex p-2 sm:p-3 border-b border-gray-200 w-full hover:bg-gray-50">
+      <div className={`flex p-2 sm:p-3 border-b border-gray-200 w-full hover:bg-gray-50 ${isAncestor ? 'relative' : ''}`}>
+
+        {/* Ancestor vertical line */}
+        {isAncestor && (
+          <div className="absolute left-6 sm:left-8 top-14 sm:top-16 bottom-0 w-0.5 bg-gray-300" aria-hidden="true"></div>
+        )}
+
         <div className="flex-shrink-0 mr-2 flex flex-col">
           <Link href={`/users/${post?.user?.id}`} className="block">
             <img
@@ -100,16 +105,9 @@ export default function Post({ post, clickableText = true, showComments = false 
           <Icons
             post={post}
             id={post?.id}
-            commentCount={post?.comments?.length || 0}
+            commentCount={post.commentsCount}
             onCommentClick={toggleComments}
           />
-
-          {/* Conditionally render the comments section */}
-          {isCommentsOpen && (
-            <div className="mt-2 border-t pt-3">
-              <CommentsSection postId={post.id} />
-            </div>
-          )}
         </div>
       </div>
 

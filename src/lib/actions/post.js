@@ -718,6 +718,318 @@ export async function getPostByIdWithComments(postId) {
   }
 }
 
+//Good one!
+export async function getPostByIdWithCommentsAndMetrics(postId) {
+  try {
+    await connect();
+
+    if (!postId) {
+      throw new Error("Post ID is required");
+    }
+
+    // Convert string ID to ObjectId if needed
+    const objectId = typeof postId === 'string' ? new mongoose.Types.ObjectId(postId) : postId;
+
+    // Get the main post with aggregation to count likes, prayers, and comments
+    const mainPostPipeline = [
+      { $match: { _id: objectId } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'communityDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organization',
+          foreignField: '_id',
+          as: 'organizationDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'parentId',
+          as: 'directComments'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'likes',
+          foreignField: '_id',
+          as: 'likesDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'prayers.user',
+          foreignField: '_id',
+          as: 'prayersUserDetails'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          text: 1,
+          image: 1,
+          profileImg: 1,
+          createdAt: 1,
+          parentId: 1,
+          user: {
+            $arrayElemAt: ['$userDetails', 0]
+          },
+          community: {
+            $arrayElemAt: ['$communityDetails', 0]
+          },
+          organization: {
+            $arrayElemAt: ['$organizationDetails', 0]
+          },
+          likes: '$likesDetails',
+          prayers: '$prayers',
+          prayersUserDetails: '$prayersUserDetails',
+          commentsCount: { $size: '$directComments' },
+          likesCount: { $size: '$likesDetails' },
+          prayersCount: { $size: '$prayers' }
+        }
+      }
+    ];
+
+    const [mainPostResult] = await Post.aggregate(mainPostPipeline);
+
+    if (!mainPostResult) {
+      throw new Error("Post not found");
+    }
+
+    // Get ancestor posts using aggregation
+    const ancestorPosts = [];
+    let currentParentId = mainPostResult.parentId;
+
+    while (currentParentId) {
+      const ancestorPipeline = [
+        { $match: { _id: currentParentId } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'userDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'posts',
+            localField: '_id',
+            foreignField: 'parentId',
+            as: 'comments'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'likes',
+            foreignField: '_id',
+            as: 'likesDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'prayers.user',
+            foreignField: '_id',
+            as: 'prayersUserDetails'
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            text: 1,
+            parentId: 1,
+            createdAt: 1,
+            profileImg: 1,
+            user: {
+              $arrayElemAt: ['$userDetails', 0]
+            },
+            commentsCount: { $size: '$comments' },
+            likesCount: { $size: '$likesDetails' },
+            prayersCount: { $size: '$prayers' }
+          }
+        }
+      ];
+
+      const [ancestor] = await Post.aggregate(ancestorPipeline);
+
+      if (!ancestor) break;
+
+      ancestorPosts.push({
+        id: ancestor._id.toString(),
+        text: ancestor.text,
+        profileImg: ancestor.profileImg,
+        user: {
+          id: ancestor.user?._id.toString(),
+          firstName: ancestor.user?.firstName,
+          lastName: ancestor.user?.lastName,
+        },
+        commentsCount: ancestor.commentsCount,
+        likesCount: ancestor.likesCount,
+        prayersCount: ancestor.prayersCount,
+        createdAt: ancestor.createdAt
+      });
+
+      currentParentId = ancestor.parentId;
+    }
+
+    // Get comments (direct descendants) with their metrics
+    const commentsPipeline = [
+      { $match: { parentId: objectId } },
+      { $sort: { createdAt: 1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'parentId',
+          as: 'childComments'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'likes',
+          foreignField: '_id',
+          as: 'likesDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'prayers.user',
+          foreignField: '_id',
+          as: 'prayersUserDetails'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          text: 1,
+          profileImg: 1,
+          createdAt: 1,
+          user: {
+            $arrayElemAt: ['$userDetails', 0]
+          },
+          likes: '$likesDetails',
+          prayers: '$prayers',
+          prayersUserDetails: '$prayersUserDetails',
+          commentsCount: { $size: '$childComments' },
+          likesCount: { $size: '$likesDetails' },
+          prayersCount: { $size: '$prayers' }
+        }
+      }
+    ];
+
+    const commentsResults = await Post.aggregate(commentsPipeline);
+
+    // Format the main post response
+    const postData = {
+      id: mainPostResult._id.toString(),
+      text: mainPostResult.text,
+      image: mainPostResult.image,
+      user: mainPostResult.user ? {
+        id: mainPostResult.user._id.toString(),
+        firstName: mainPostResult.user.firstName,
+        lastName: mainPostResult.user.lastName,
+      } : null,
+      community: mainPostResult.community ? {
+        id: mainPostResult.community._id.toString(),
+        name: mainPostResult.community.name,
+      } : null,
+      organization: mainPostResult.organization ? {
+        id: mainPostResult.organization._id.toString(),
+        name: mainPostResult.organization.name,
+      } : null,
+      profileImg: mainPostResult.profileImg,
+      createdAt: mainPostResult.createdAt,
+
+      // Add metrics
+      commentsCount: mainPostResult.commentsCount,
+      likesCount: mainPostResult.likesCount,
+      prayersCount: mainPostResult.prayersCount,
+
+      // Format comments
+      comments: commentsResults.map(comment => ({
+        id: comment._id.toString(),
+        text: comment.text,
+        profileImg: comment.profileImg,
+        createdAt: comment.createdAt,
+        user: comment.user ? {
+          id: comment.user._id.toString(),
+          firstName: comment.user.firstName,
+          lastName: comment.user.lastName,
+        } : null,
+        commentsCount: comment.commentsCount,
+        likesCount: comment.likesCount,
+        prayersCount: comment.prayersCount,
+        likes: comment.likes.map(like => ({
+          userId: like._id.toString()
+        })) || [],
+        prayers: comment.prayers.map((prayer, index) => {
+          const userDetails = comment.prayersUserDetails.find(u =>
+            u._id.toString() === prayer.user.toString()
+          );
+          return {
+            userId: prayer.user.toString(),
+            name: userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : ''
+          };
+        }) || []
+      })),
+
+      // Format likes
+      likes: mainPostResult.likes.map(like => ({
+        userId: like._id.toString()
+      })) || [],
+
+      // Format prayers
+      prayers: mainPostResult.prayers.map((prayer, index) => {
+        const userDetails = mainPostResult.prayersUserDetails.find(u =>
+          u._id.toString() === prayer.user.toString()
+        );
+        return {
+          userId: prayer.user.toString(),
+          name: userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : ''
+        };
+      }) || [],
+
+      // Add ancestors
+      ancestors: ancestorPosts
+    };
+
+    return { success: true, post: postData };
+  } catch (error) {
+    console.error("Error fetching post:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getPostForPostPage(postId) {
   try {
     await connect();
