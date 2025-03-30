@@ -9,7 +9,6 @@ import {getPostByIdWithCommentsAndMetrics, getPostForPostPage} from "@/lib/actio
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from "next/navigation";
 import PostInput from "@/components/PostInput.jsx";
-import CommentInput from "@/components/CommentInput.jsx";
 
 
 export default function PostPage() {
@@ -43,7 +42,8 @@ export default function PostPage() {
   }, [fetchPost]);
 
   // Use the same fetchPost function after comment creation
-  const afterCommentCreated = async () => {
+  const afterPostCreated = async () => {
+    // console.log('fetching Post')
     await fetchPost();
   };
 
@@ -76,7 +76,10 @@ export default function PostPage() {
 
       {post && <AncestorPosts posts={post.ancestors} clickableText={false} />}
       {post && <Post post={post} clickableText={false} />}
-      {post && <CommentInput post={post} onCommentCreated={afterCommentCreated} />}
+
+      {/*Comments*/}
+      {post && <PostInput communityId={post.community.id} placeholder="Write your comment here" parentId={post.id} onPostCreated={afterPostCreated} />}
+
       {post && <Comments comments={post.comments} />}
     </>
   );

@@ -12,7 +12,8 @@ import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {useQueryClient} from "@tanstack/react-query";
 
-export default function PostInput({communityId, placeholder, parentId = null, onPostCreated = null}) {
+export default function PostInput({communityId, placeholder, parentId, onPostCreated = null}) {
+  // console.log('parentId', parentId);
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,14 +27,6 @@ export default function PostInput({communityId, placeholder, parentId = null, on
   const [imageFileUplaoding, setImageFileUploading] = useState(false);
   const [text, setText] = useState('');
   const imagePickRef = useRef(null);
-
-  //Audio
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordedURL, setRecordedURL] = useState('')
-  const [audioFileUplaoding, setAudioFileUploading] = useState(false);
-  const mediaStream = useRef(null)
-  const mediaRecorder = useRef(null)
-  const chunks = useRef([])
 
   //Image
   const addImageToPost = (e) => {
@@ -99,74 +92,6 @@ export default function PostInput({communityId, placeholder, parentId = null, on
     );
   };
 
-  const startRecording = async () => {
-    console.log('startRecording')
-    setIsRecording(true)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      mediaStream.current = stream
-      mediaRecorder.current = new MediaRecorder(stream)
-      mediaRecorder.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.current.push(e.data)
-        }
-      }
-
-      mediaRecorder.current.onstop = async () => {
-        console.log('onStop')
-        const recordedBlob = new Blob(chunks.current, { type: 'audio/mp3' })
-
-        await uploadAudioFileToStorage(recordedBlob);
-
-        const url = URL.createObjectURL(recordedBlob)
-        setRecordedURL(url)
-
-        chunks.current = []
-      }
-
-      mediaRecorder.current.start()
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const uploadAudioFileToStorage = async (recordedBlob) => {
-    setAudioFileUploading(true);
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + '.mp3';
-    const storageRef = ref(storage, fileName);
-
-    const uploadTask = uploadBytesResumable(storageRef, recordedBlob);
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
-      },
-      (error) => {
-        console.log(error);
-        setAudioFileUploading(false);
-        setRecordedURL('');
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log('File available at', downloadURL);
-        setRecordedURL(downloadURL);
-        setAudioFileUploading(false);
-      }
-    );
-  };
-
-  const stopRecording = () => {
-    console.log('stopRecording')
-    setIsRecording(false)
-    if (mediaRecorder.current) {
-      mediaRecorder.current.stop()
-      mediaStream.current.getTracks().forEach(track => track.stop())
-    }
-  }
-
   const handleSubmit = async () => {
     if (!community.organization.id) {
       showErrorToast({message: 'Organization ID is required'});
@@ -178,10 +103,10 @@ export default function PostInput({communityId, placeholder, parentId = null, on
     const response = await createPost({
       userId: appUser.id,
       communityId: communityId,
+      parentId: parentId,
       text,
       profileImg: appUser.avatar,
       image: imageFileUrl,
-      audio: recordedURL,
       organizationId: community.organization.id,
     })
 
@@ -195,23 +120,10 @@ export default function PostInput({communityId, placeholder, parentId = null, on
     setText('');
     setSelectedFile(null);
     setImageFileUrl(null);
-    setRecordedURL(null);
 
     // Call the callback if provided (useful for comment handling)
     if (onPostCreated && typeof onPostCreated === 'function') {
       onPostCreated(response.data);
-    }
-
-    // Invalidate relevant queries
-    if (parentId) {
-      // If this is a comment, invalidate the comments query
-      queryClient.invalidateQueries(['comments', parentId]);
-    } else if (communityId) {
-      // If this is a post in a community
-      queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
-    } else {
-      // If this is a general post
-      queryClient.invalidateQueries(['infiniteHomeFeed']);
     }
   };
 
@@ -249,11 +161,6 @@ export default function PostInput({communityId, placeholder, parentId = null, on
             }`}
           />
         )}
-        {recordedURL &&
-          <div className="w-full py-5">
-            <audio controls src={recordedURL} className="w-full" />
-          </div>
-        }
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
