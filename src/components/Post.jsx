@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import moment from 'moment';
 import Icons from './Icons';
-import {renderPostText, SafeMicrolink} from "@/lib/utils";
+import {linkifyText, renderPostText, SafeMicrolink} from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
 
@@ -33,10 +33,9 @@ export default function Post({ post, clickableText = true, showComments = false,
   return (
     <>
       <div className={`flex p-2 sm:p-3 border-b border-gray-200 w-full hover:bg-gray-50 ${isAncestor ? 'relative' : ''}`}>
-
         {/* Ancestor vertical line */}
         {isAncestor && (
-          <div className="absolute left-6 sm:left-8 top-14 sm:top-16 bottom-0 w-0.5 bg-gray-300" aria-hidden="true"></div>
+          <div className="absolute left-5 top-14 bottom-0 w-0.5 bg-gray-300" aria-hidden="true"></div>
         )}
 
         <div className="flex-shrink-0 mr-2 flex flex-col">
@@ -117,7 +116,7 @@ export default function Post({ post, clickableText = true, showComments = false,
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
           onClick={closeModal}
         >
-          <div className="relative max-w-screen-lg mx-auto p-4 w-full">
+          <div className="relative max-w-screen-lg mx-auto p-4 w-full flex items-center justify-center">
             <button
               className="absolute top-6 right-6 p-2 rounded-full bg-black bg-opacity-60 text-white hover:bg-opacity-80 transition-colors duration-200 z-10"
               onClick={closeModal}
@@ -125,13 +124,12 @@ export default function Post({ post, clickableText = true, showComments = false,
               <HiX className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center justify-center h-full" onClick={(e) => e.stopPropagation()}>
-              <img
-                src={post?.image}
-                alt="Enlarged post image"
-                className="max-h-[90vh] max-w-full object-contain rounded-2xl "
-              />
-            </div>
+            <img
+              src={post?.image}
+              alt="Enlarged post image"
+              className="max-h-[90vh] max-w-full object-contain rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}
