@@ -195,7 +195,7 @@ export default function LeftSidebar({ onLinkClick }) {
                     <div className="flex items-center">
                       <Link
                         variant={'ghost'}
-                        href={`/organizations/${org.id}`}
+                        href={`/organizations/${org.id}/posts`}
                         onClick={handleLinkClick}
                         className="flex-1 flex items-center p-1.5 rounded-md transition-all duration-200 gap-2 justify-start hover:bg-gray-100"
                       >
