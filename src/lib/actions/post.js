@@ -896,20 +896,20 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
       if (!ancestor) break;
 
       ancestorPosts.push({
-        id: ancestor._id.toString(),
+        id: ancestor._id?.toString(),
         text: ancestor.text,
         profileImg: ancestor.profileImg,
-        user: {
-          id: ancestor.user?._id.toString(),
-          firstName: ancestor.user?.firstName,
-          lastName: ancestor.user?.lastName,
-        },
+        user: ancestor.user ? {
+          id: ancestor.user._id?.toString(),
+          firstName: ancestor.user.firstName,
+          lastName: ancestor.user.lastName,
+        } : null,
         organization: ancestor.organization ? {
-          id: ancestor.organization._id.toString(),
+          id: ancestor.organization._id?.toString(),
           name: ancestor.organization.name,
         } : null,
         community: ancestor.community ? {
-          id: ancestor.community._id.toString(),
+          id: ancestor.community._id?.toString(),
           name: ancestor.community.name,
         } : null,
         commentsCount: ancestor.commentsCount,
@@ -1002,20 +1002,20 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
 
     // Format the main post response
     const postData = {
-      id: mainPostResult._id.toString(),
+      id: mainPostResult._id?.toString(),
       text: mainPostResult.text,
       image: mainPostResult.image,
       user: mainPostResult.user ? {
-        id: mainPostResult.user._id.toString(),
+        id: mainPostResult.user._id?.toString(),
         firstName: mainPostResult.user.firstName,
         lastName: mainPostResult.user.lastName,
       } : null,
       community: mainPostResult.community ? {
-        id: mainPostResult.community._id.toString(),
+        id: mainPostResult.community._id?.toString(),
         name: mainPostResult.community.name,
       } : null,
       organization: mainPostResult.organization ? {
-        id: mainPostResult.organization._id.toString(),
+        id: mainPostResult.organization._id?.toString(),
         name: mainPostResult.organization.name,
       } : null,
       profileImg: mainPostResult.profileImg,
@@ -1028,55 +1028,63 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
 
       // Format comments
       comments: commentsResults.map(comment => ({
-        id: comment._id.toString(),
+        id: comment._id?.toString(),
         text: comment.text,
         profileImg: comment.profileImg,
         createdAt: comment.createdAt,
         user: comment.user ? {
-          id: comment.user._id.toString(),
+          id: comment.user._id?.toString(),
           firstName: comment.user.firstName,
           lastName: comment.user.lastName,
         } : null,
-        community: mainPostResult.community ? {
-          id: mainPostResult.community._id.toString(),
-          name: mainPostResult.community.name,
+        community: comment.community ? {
+          id: comment.community._id?.toString(),
+          name: comment.community.name,
         } : null,
-        organization: mainPostResult.organization ? {
-          id: mainPostResult.organization._id.toString(),
-          name: mainPostResult.organization.name,
+        organization: comment.organization ? {
+          id: comment.organization._id?.toString(),
+          name: comment.organization.name,
         } : null,
         commentsCount: comment.commentsCount,
         likesCount: comment.likesCount,
         prayersCount: comment.prayersCount,
-        likes: comment.likes.map(like => ({
-          userId: like._id.toString()
-        })) || [],
-        prayers: comment.prayers.map((prayer, index) => {
+        likes: (comment.likes || []).map(like => ({
+          userId: like._id?.toString()
+        })),
+        prayers: (comment.prayers || []).map((prayer) => {
+          if (!prayer || !prayer.user) return { userId: '', name: '' };
+
           const userDetails = comment.prayersUserDetails.find(u =>
+            u && u._id && prayer.user &&
             u._id.toString() === prayer.user.toString()
           );
+
           return {
             userId: prayer.user.toString(),
-            name: userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : ''
+            name: userDetails ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}` : ''
           };
-        }) || []
+        })
       })),
 
       // Format likes
-      likes: mainPostResult.likes.map(like => ({
-        userId: like._id.toString()
-      })) || [],
+      likes: (mainPostResult.likes || []).map(like => ({
+        userId: like._id?.toString()
+      })),
 
       // Format prayers
-      prayers: mainPostResult.prayers.map((prayer, index) => {
+      prayers: (mainPostResult.prayers || []).map((prayer) => {
+        if (!prayer || !prayer.user) return { userId: '', name: '' };
+
         const userDetails = mainPostResult.prayersUserDetails.find(u =>
+          u && u._id && prayer.user &&
           u._id.toString() === prayer.user.toString()
         );
+
         return {
           userId: prayer.user.toString(),
-          name: userDetails ? `${userDetails.firstName} ${userDetails.lastName}` : ''
+          name: userDetails ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}` : ''
         };
-      }) || [],
+      }),
 
       // Add ancestors
       ancestors: ancestorPosts
@@ -1088,7 +1096,6 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
     return { success: false, error: error.message };
   }
 }
-
 export async function getPostForPostPage(postId) {
   try {
     await connect();

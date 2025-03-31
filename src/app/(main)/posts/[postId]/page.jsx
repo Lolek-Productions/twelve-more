@@ -23,11 +23,12 @@ export default function PostPage() {
   // Define fetchPost outside of useEffect so it can be reused
   const fetchPost = useCallback(async () => {
     if (!postId) return;
+    //console.log(postId);
 
     setIsLoading(true);
     try {
       const postData = await getPostByIdWithAncestorsAndDescendents(postId);
-      console.log(postData);
+      //console.log(postData.post);
       setPost(postData.post);
     } catch (error) {
       console.error('Error fetching post:', error);

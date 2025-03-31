@@ -29,7 +29,7 @@ export default function PostPage() {
         if (!postData) {
           setError("Post not found");
         } else {
-          setPost(postData);
+          setPost(postData.post);
         }
       } catch (err) {
         setError("Failed to fetch post data");
@@ -76,16 +76,16 @@ export default function PostPage() {
         </div>
 
         <div className="mb-4">
-          <h3 className="text-lg font-semibold">Likes ({post.likes.length})</h3>
+          <h3 className="text-lg font-semibold">Likes ({post?.likes?.length})</h3>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold">Comments ({post.comments.length})</h3>
-          {post.comments.length === 0 ? (
+          <h3 className="text-lg font-semibold">Comments ({post?.comments?.length})</h3>
+          {post?.comments?.length === 0 ? (
             <p className="text-gray-500">No comments yet.</p>
           ) : (
             <div className="mt-2 space-y-2">
-              {post.comments.map((comment) => (
+              {post?.comments?.map((comment) => (
                 <div key={comment.id} className="border p-2 rounded-md flex justify-start items-center">
                   <div>
                     {comment.profileImg ?

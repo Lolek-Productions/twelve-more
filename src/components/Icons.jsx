@@ -156,9 +156,9 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
             className='h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'
           />
         )}
-        {likes.length > 0 && (
+        {likes?.length > 0 && (
           <span className={`text-xs ${isLiked && 'text-red-600'}`}>
-            {likes.length}
+            {likes?.length}
           </span>
         )}
       </div>
