@@ -2,8 +2,7 @@ import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
 import Link from 'next/link';
 import {toast, useToast} from "@/hooks/use-toast";
-import {NextResponse} from "next/server";
-import {SafeMicrolink} from "@/lib/clientUtils.js";
+import SafeMicrolink from "@/components/SafeMicroLink"
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -161,81 +160,4 @@ export const extractUrls = (text) => {
       return false;
     }
   });
-};
-
-export const renderPostText = ({post, clickableText}) => {
-  // If not clickable text, just use the linkifyText utility
-  if (!clickableText) {
-    return (
-      <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
-         style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>
-        {linkifyText(post?.text) || 'No text available'}
-      </p>
-    );
-  }
-
-  // If no text, or no links detected, render as normal clickable text
-  if (!post?.text || !post.text.includes('http')) {
-    return (
-      <Link href={`/posts/${post?.id}`} className="block w-full">
-        <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
-           style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-          {post?.text || 'No text available'}
-        </p>
-      </Link>
-    );
-  }
-
-  // Extract URLs using a regex
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = post.text.split(urlRegex);
-  const urls = extractUrls(post.text);
-
-  return (
-    <div>
-      <p className="text-gray-800 text-sm mt-1.5 mb-2 whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
-         style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-        {parts.map((part, index) => {
-          // Check if this part is a URL
-          if (part.match(urlRegex)) {
-            // This is a URL - make it a clickable link that stops propagation
-            return (
-              <a
-                key={index}
-                href={part}
-                className="text-blue-600 hover:underline"
-                onClick={(e) => e.stopPropagation()}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {part}
-              </a>
-            );
-          } else {
-            // This is regular text - make it clickable to the post
-            return (
-              <Link
-                key={index}
-                href={`/posts/${post?.id}`}
-                className="inline"
-              >
-                {part}
-              </Link>
-            );
-          }
-        })}
-      </p>
-
-      {/* Render Microlink components for each URL found in the text */}
-      {urls.length > 0 && urls.map((url, index) => (
-        <div
-          key={`microlink-${index}`}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-2 mb-3"
-        >
-          <SafeMicrolink url={url} />
-        </div>
-      ))}
-    </div>
-  );
 };

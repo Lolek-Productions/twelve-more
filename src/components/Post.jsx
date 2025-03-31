@@ -6,6 +6,7 @@ import Icons from './Icons';
 import {linkifyText, renderPostText, SafeMicrolink} from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
+import PostText from "@/components/PostText.jsx";
 
 export default function Post({ post, clickableText = true, showComments = false, isAncestor = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -87,7 +88,7 @@ export default function Post({ post, clickableText = true, showComments = false,
             </div>
           </div>
 
-          {renderPostText({post: post, clickableText: clickableText})}
+          <PostText post={post} clickableText={clickableText} />
 
           {post?.image && (
             <div className="relative w-full overflow-hidden rounded-lg sm:rounded-2xl cursor-pointer" onClick={handleImageClick}>
