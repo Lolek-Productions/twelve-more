@@ -123,7 +123,7 @@ export default function LeftSidebar({ onLinkClick }) {
           {/*My 12s*/}
           <div className="p-3 bg-gray-100 rounded-md">
             <div className="flex items-center">
-              <div className="ml-2 text-xl font-semibold mb-1 whitespace-nowrap">My 12s</div>
+              <div className="ml-2 text-lg font-semibold mb-1 whitespace-nowrap">My 12s</div>
             </div>
             <div>
               {appUser?.communities?.length > 0 ? (
@@ -135,7 +135,7 @@ export default function LeftSidebar({ onLinkClick }) {
                     onClick={handleLinkClick}
                   >
                     <span className="text-xl mr-2">·</span>
-                    <span>{community.name}</span>
+                    <span className="text-sm">{community.organizationName}-{community.name}</span>
                   </Link>
                 ))
               ) : (
@@ -149,7 +149,7 @@ export default function LeftSidebar({ onLinkClick }) {
                 </Link>
               )}
 
-              <div className="flex justify-center">
+              <div className="flex justify-center py-1">
                 <Button asChild size="small">
                   <Link
                     onClick={handleLinkClick}
