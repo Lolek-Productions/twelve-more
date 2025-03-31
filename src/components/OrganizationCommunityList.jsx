@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
@@ -9,6 +9,7 @@ import {
 } from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
+import VisibilityLabel from "@/components/VisibilityLabel.jsx";
 
 export default function OrganizationCommunityList({organization}) {
   const [loading, setLoading] = useState(true);
@@ -118,9 +119,7 @@ export default function OrganizationCommunityList({organization}) {
                 <Link href={`/communities/${community.id}`}>
                   <h4 className="text-lg font-medium">
                     {community.name}{" "}
-                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
-                      {community?.visibility?.charAt(0).toUpperCase() + community?.visibility?.slice(1)}
-                    </span>
+                    <VisibilityLabel visibility={community?.visibility} />
                   </h4>
                 </Link>
                 <div className="flex items-center gap-2 mt-2">

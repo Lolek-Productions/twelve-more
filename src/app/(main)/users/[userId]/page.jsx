@@ -12,6 +12,7 @@ import {
   useInfiniteQuery
 } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import VisibilityLabel from "@/components/VisibilityLabel.jsx";
 
 export default function UserPage() {
   const params = useParams();
@@ -122,11 +123,8 @@ export default function UserPage() {
                 <Link className="flex gap-3" href={`/communities/${community?.id}/posts`}>
                   <div className="text-sm">{`${community?.name}` || "Unknown"} ({`${community?.organizationName}`})</div>
 
-                  <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full align-middle">
-                    {community?.visibility
-                      ? community.visibility.charAt(0).toUpperCase() + community.visibility.slice(1)
-                      : 'Unknown'}
-                  </span>
+                  <VisibilityLabel visibility={community?.visibility} />
+
                 </Link>
               </div>
             ))}
