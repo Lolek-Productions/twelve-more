@@ -2,7 +2,6 @@ import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
 import Link from 'next/link';
 import {toast, useToast} from "@/hooks/use-toast";
-import SafeMicrolink from "@/components/SafeMicroLink"
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import moment from 'moment';
 import Icons from './Icons';
-import {linkifyText, renderPostText, SafeMicrolink} from "@/lib/utils";
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
 import PostText from "@/components/PostText.jsx";
