@@ -54,12 +54,7 @@ export async function createCommunity(data) {
   }
 }
 
-
-/**
- * Deletes one or more communities and removes their references from all users
- * @param {string|string[]} ids - Single community ID or array of community IDs to delete
- * @returns {Object} Result object with success status and message
- */
+//Takes a string or an array
 export const deleteCommunities = async (ids) => {
   try {
     await connect();
@@ -220,9 +215,6 @@ export const getCommunitiesByUser = async function (appUser) {
   }
 };
 
-/**
- * Gets a community by ID
- */
 export const getCommunityById = async function (communityId) {
   try {
     if (!communityId) {
@@ -258,9 +250,6 @@ export const getCommunityById = async function (communityId) {
   }
 };
 
-/**
- * Adds a user to a community
- */
 export async function addUserToCommunity(communityId, userId, role = "member") {
   try {
     await connect();
@@ -294,9 +283,6 @@ export async function addUserToCommunity(communityId, userId, role = "member") {
   }
 }
 
-/**
- * Searches for communities by name
- */
 export async function searchCommunities(query) {
   try {
     // Input validation
@@ -343,9 +329,6 @@ export async function searchCommunities(query) {
   }
 }
 
-/**
- * Gets all communities
- */
 export const getAllCommunities = async function () {
   try {
     await connect();
@@ -370,9 +353,6 @@ export const getAllCommunities = async function () {
   }
 };
 
-/**
- * Updates a community
- */
 export async function updateCommunity(formData) {
   if (!formData.id) return { success: false, message: "Community ID is required." };
 

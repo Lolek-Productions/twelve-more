@@ -11,7 +11,7 @@ find . -type f -exec sh -c 'echo "--- File: {} ---"; cat "{}"; echo ""' \; | pbc
 # Git Summary
 git log --since="7 days ago" --pretty=tformat: --numstat | awk '{ add += $1; rem += $2 } END { print "Lines added: " add "\nLines removed: " rem "\nTotal changes: " (add + rem) }'
 
-# Starter Video:
+# Starter Video that I used:
 https://www.youtube.com/watch?v=gsysxSuTohA
 
 # Throwing an error:
@@ -26,7 +26,7 @@ throw new Error("This is a test error message");
 # toast:
 const { showResponseToast, showErrorToast } = useApiToast();
 
-# Example from public meta data in Clerk:
+# Example from public metadata in Clerk:
 smsOptIn:true
 userMongoId:"67c4d7308e1ad29f8673701b"
 onboardingComplete:true
