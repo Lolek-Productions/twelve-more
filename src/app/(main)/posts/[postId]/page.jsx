@@ -5,7 +5,7 @@ import Post from '@/components/Post';
 import AncestorPosts from '@/components/AncestorPosts';
 import { HiArrowLeft } from 'react-icons/hi';
 import {useEffect, useState, useCallback} from "react";
-import {getPostByIdWithCommentsAndMetrics, getPostForPostPage} from "@/lib/actions/post.js";
+import {getPostByIdWithAncestorsAndDescendents} from "@/lib/actions/post.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useParams, useRouter} from "next/navigation";
 import PostInput from "@/components/PostInput.jsx";
@@ -26,8 +26,8 @@ export default function PostPage() {
 
     setIsLoading(true);
     try {
-      const postData = await getPostByIdWithCommentsAndMetrics(postId);
-      // console.log(postData);
+      const postData = await getPostByIdWithAncestorsAndDescendents(postId);
+      console.log(postData);
       setPost(postData.post);
     } catch (error) {
       console.error('Error fetching post:', error);

@@ -718,8 +718,7 @@ export async function getPostByIdWithComments(postId) {
   }
 }
 
-//Good one!
-export async function getPostByIdWithCommentsAndMetrics(postId) {
+export async function getPostByIdWithAncestorsAndDescendents(postId) {
   try {
     await connect();
 
@@ -839,6 +838,22 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
         },
         {
           $lookup: {
+            from: 'communities',
+            localField: 'community',
+            foreignField: '_id',
+            as: 'communityDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'organizations',
+            localField: 'organization',
+            foreignField: '_id',
+            as: 'organizationDetails'
+          }
+        },
+        {
+          $lookup: {
             from: 'users',
             localField: 'likes',
             foreignField: '_id',
@@ -863,6 +878,12 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
             user: {
               $arrayElemAt: ['$userDetails', 0]
             },
+            community: {
+              $arrayElemAt: ['$communityDetails', 0]
+            },
+            organization: {
+              $arrayElemAt: ['$organizationDetails', 0]
+            },
             commentsCount: { $size: '$comments' },
             likesCount: { $size: '$likesDetails' },
             prayersCount: { $size: '$prayers' }
@@ -883,6 +904,14 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
           firstName: ancestor.user?.firstName,
           lastName: ancestor.user?.lastName,
         },
+        organization: ancestor.organization ? {
+          id: ancestor.organization._id.toString(),
+          name: ancestor.organization.name,
+        } : null,
+        community: ancestor.community ? {
+          id: ancestor.community._id.toString(),
+          name: ancestor.community.name,
+        } : null,
         commentsCount: ancestor.commentsCount,
         likesCount: ancestor.likesCount,
         prayersCount: ancestor.prayersCount,
@@ -922,6 +951,22 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
       },
       {
         $lookup: {
+          from: 'communities',
+          localField: 'community',
+          foreignField: '_id',
+          as: 'communityDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'organizations',
+          localField: 'organization',
+          foreignField: '_id',
+          as: 'organizationDetails'
+        }
+      },
+      {
+        $lookup: {
           from: 'users',
           localField: 'prayers.user',
           foreignField: '_id',
@@ -936,6 +981,12 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
           createdAt: 1,
           user: {
             $arrayElemAt: ['$userDetails', 0]
+          },
+          community: {
+            $arrayElemAt: ['$communityDetails', 0]
+          },
+          organization: {
+            $arrayElemAt: ['$organizationDetails', 0]
           },
           likes: '$likesDetails',
           prayers: '$prayers',
@@ -985,6 +1036,14 @@ export async function getPostByIdWithCommentsAndMetrics(postId) {
           id: comment.user._id.toString(),
           firstName: comment.user.firstName,
           lastName: comment.user.lastName,
+        } : null,
+        community: mainPostResult.community ? {
+          id: mainPostResult.community._id.toString(),
+          name: mainPostResult.community.name,
+        } : null,
+        organization: mainPostResult.organization ? {
+          id: mainPostResult.organization._id.toString(),
+          name: mainPostResult.organization.name,
         } : null,
         commentsCount: comment.commentsCount,
         likesCount: comment.likesCount,
