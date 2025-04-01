@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
 import {
-  deleteCommunities, getCommunitiesByOrganization,
+  deleteCommunities, getCommunitiesByOrganizationForUser,
 } from '@/lib/actions/community';
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
@@ -22,7 +22,7 @@ export default function OrganizationCommunityList({organization}) {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
-      const orgData = await getCommunitiesByOrganization(organization.id);
+      const orgData = await getCommunitiesByOrganizationForUser(organization.id, appUser);
       setCommunities(orgData.communities);
     } catch (err) {
       setError(err.message);
