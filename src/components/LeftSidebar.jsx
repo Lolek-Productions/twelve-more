@@ -138,7 +138,7 @@ export default function LeftSidebar({ onLinkClick }) {
               onClick={handleLinkClick}
             >
               <HiMegaphone className="w-6 h-6" />
-              <span className="font-bold">Purpose</span>
+              <span className="font-bold">Why 12More?</span>
             </Link>
           </div>
 
