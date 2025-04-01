@@ -40,6 +40,17 @@ export function CommunityTable({ data, deleteEntity }) {
       },
     },
     {
+      accessorKey: "organization",
+      header: (<div>Organization</div>),
+      cell: ({ row }) => {
+        return (
+          <div>
+            {row.original.organization.name}
+          </div>
+        )
+      },
+    },
+    {
       accessorKey: "visibility",
       header: ({ column }) => (
         <div>Visibility</div>

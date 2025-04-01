@@ -397,3 +397,70 @@ export async function updateCommunity(formData) {
     return { success: false, message: "Failed to update community." };
   }
 }
+
+export async function changeOrganizationOfCommunity(organizationId, communityId) {
+  try {
+    // Start a session for transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    // 1. Update the community's organization
+    const updatedCommunity = await Community.findOneAndUpdate(
+      { _id: communityId },
+      { $set: { organization: organizationId } },
+      { new: true, session }
+    );
+
+    if (!updatedCommunity) {
+      await session.abortTransaction();
+      await session.endSession();
+      return {
+        success: false,
+        message: "Could not find or update this community"
+      };
+    }
+
+    // 2. Use updateMany to add the organization to all users who:
+    // - Are members of this community
+    // - Don't already have this organization
+    const userUpdateResult = await User.updateMany(
+      {
+        "communities.community": communityId,
+        "organizations.organization": { $ne: organizationId } // Users who don't have this org
+      },
+      {
+        $push: {
+          organizations: {
+            organization: organizationId,
+            role: "member"
+          }
+        }
+      },
+      { session }
+    );
+
+    // Commit the transaction
+    await session.commitTransaction();
+    await session.endSession();
+
+    return {
+      success: true,
+      message: `Community updated and ${userUpdateResult.modifiedCount} users given access to the organization`
+    };
+  } catch (error) {
+    console.error("Error changing organization of this community:", error);
+
+    // Ensure transaction is aborted on error
+    try {
+      await session.abortTransaction();
+      await session.endSession();
+    } catch (cleanupError) {
+      console.error("Error cleaning up transaction:", cleanupError);
+    }
+
+    return {
+      success: false,
+      message: error.message || "Failed to change organization"
+    };
+  }
+}

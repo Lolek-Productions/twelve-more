@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {useApiToast} from "@/lib/utils.js";
-import {changeRoleOnUserInOrganization} from "@/lib/actions/organization.js";
+import {changeRoleOnUserInOrganization} from "@/lib/actions/user.js";
 
 export function OrganizationsTable({ userId, data, onOrganizationRemoved, onRoleUpdated }) {
   const [sorting, setSorting] = useState([]);

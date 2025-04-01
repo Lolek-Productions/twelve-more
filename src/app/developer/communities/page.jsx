@@ -32,8 +32,8 @@ export default function DeveloperCommunitiesPage() {
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex flex-row items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">Organizations</h3>
-          <p className="text-sm text-muted-foreground">Globally manage the 12More organizations.</p>
+          <h3 className="text-lg font-medium">Communities</h3>
+          <p className="text-sm text-muted-foreground">Globally manage the 12More communities.</p>
         </div>
         {/*<Button onClick={() => setModalOpen(true)}>New Organization</Button>*/}
       </div>

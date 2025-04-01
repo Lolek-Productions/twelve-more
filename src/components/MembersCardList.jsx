@@ -11,9 +11,7 @@ import {
 import {
   addCommunityToUser, changeRoleOnUserInCommunity,
   getCommunityMembers,
-  getUsersByCommunityId,
   removeCommunityFromUser,
-  updateUserRole
 } from '@/lib/actions/user';
 import { useToast } from "@/hooks/use-toast.js";
 import { useApiToast } from "@/lib/utils.js";
