@@ -122,7 +122,7 @@ export default function CommentModal() {
 
             {/* Comment Input */}
             {atomPost && atomPost.id &&
-              <PostInput parentId={atomPost.id} organizationId={atomPost.organization.id} placeholder={`Respond to this Post`} communityId={atomPost.community?.id} onPostCreated={() => afterPostCreated()} />
+              <PostInput parentId={atomPost.id} organizationId={atomPost.organization.id} placeholder={`Respond to this Post`} communityId={atomPost.community?.id} onPostCreated={() => afterPostCreated()} autoFocus={true} />
             }
 
             {/* Comments Section Title */}

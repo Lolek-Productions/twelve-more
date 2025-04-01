@@ -70,7 +70,7 @@ export default function OrganizationPosts({ params }) {
           <h2 className='text-lg sm:text-xl font-bold'>{organization.name}</h2>
         </Link>
       </div>
-      <PostInput organizationId={organizationId} placeholder={`Post to the ${organization.name} organization`} onPostCreated={afterPostCreated} />
+      <PostInput organizationId={organizationId} placeholder={`Post to the ${organization.name} organization`} onPostCreated={afterPostCreated} autoFocus={true} />
       <OrganizationFeed organizationId={organizationId} />
     </>
   );

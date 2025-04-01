@@ -73,7 +73,7 @@ export default function CommunityPosts({ params }) {
           <h2 className='text-lg sm:text-xl font-bold'>Community: {community.name}</h2>
         </Link>
       </div>
-      <PostInput communityId={communityId} organizationId={community.organization.id} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} />
+      <PostInput communityId={communityId} organizationId={community.organization.id} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} autoFocus={true} />
       <CommunityFeed communityId={communityId} />
     </>
   );

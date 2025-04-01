@@ -96,6 +96,7 @@ export default function PostPage() {
           placeholder="Write your comment here"
           parentId={postData.id}
           onPostCreated={afterPostCreated}
+          autoFocus={true}
         />
       )}
 

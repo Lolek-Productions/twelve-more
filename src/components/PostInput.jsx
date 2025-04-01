@@ -11,7 +11,15 @@ import {createPost} from "@/lib/actions/post.js";
 import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
 
-export default function PostInput({communityId, organizationId, placeholder, parentId, onPostCreated = null}) {
+export default function PostInput({
+                                    communityId,
+                                    organizationId,
+                                    placeholder,
+                                    parentId,
+                                    onPostCreated = null,
+                                    refreshMainPage = null,
+                                    autoFocus = false  // Added autoFocus prop with default value
+                                  }) {
   // console.log('parentId', parentId);
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
@@ -26,6 +34,18 @@ export default function PostInput({communityId, organizationId, placeholder, par
   const [text, setText] = useState('');
   const imagePickRef = useRef(null);
   const textareaRef = useRef(null);
+
+  // Auto-focus the textarea when the component mounts if autoFocus is true
+  useEffect(() => {
+    if (autoFocus && textareaRef.current) {
+      // Short timeout to ensure DOM is ready and any animations have completed
+      const timer = setTimeout(() => {
+        textareaRef.current.focus();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus]);
 
   //Image
   const addImageToPost = (e) => {
@@ -126,9 +146,21 @@ export default function PostInput({communityId, organizationId, placeholder, par
     setSelectedFile(null);
     setImageFileUrl(null);
 
+    // Call the refreshMainPage function if provided
+    if (refreshMainPage && typeof refreshMainPage === 'function') {
+      refreshMainPage();
+    }
+
     // Call the callback if provided (useful for comment handling)
     if (onPostCreated && typeof onPostCreated === 'function') {
       onPostCreated();
+    }
+
+    // Focus the textarea again after posting
+    if (autoFocus && textareaRef.current) {
+      setTimeout(() => {
+        textareaRef.current.focus();
+      }, 100);
     }
   };
 
