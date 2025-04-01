@@ -7,8 +7,8 @@ import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import OrganizationFeed from "@/components/OrganizationFeed.jsx";
 import {getOrganizationById} from "@/lib/actions/organization.js";
 import PostInput from "@/components/PostInput.jsx";
-import {getCommunityById} from "@/lib/actions/community.js";
 import {useQueryClient} from "@tanstack/react-query";
+import Link from 'next/link';
 
 export default function OrganizationPosts({ params }) {
   const resolvedParams = use(params);
@@ -66,7 +66,9 @@ export default function OrganizationPosts({ params }) {
   return (
     <>
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-        <h2 className='text-lg sm:text-xl font-bold'>{organization.name}</h2>
+        <Link href={`/organizations/${organization.id}/`}>
+          <h2 className='text-lg sm:text-xl font-bold'>{organization.name}</h2>
+        </Link>
       </div>
       <PostInput organizationId={organizationId} placeholder={`Post to the ${organization.name} organization`} onPostCreated={afterPostCreated} />
       <OrganizationFeed organizationId={organizationId} />

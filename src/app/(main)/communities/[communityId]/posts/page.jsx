@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { use } from 'react';
 import CommunityFeed from '@/components/CommunityFeed.jsx';
 import PostInput from '@/components/PostInput.jsx';
@@ -8,6 +8,7 @@ import { getCommunityById } from "@/lib/actions/community.js";
 import { useContextContent } from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useQueryClient} from "@tanstack/react-query";
+import Link from "next/link";
 
 export default function CommunityPosts({ params }) {
   const resolvedParams = use(params);
@@ -67,7 +68,9 @@ export default function CommunityPosts({ params }) {
   return (
     <>
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
-        <h2 className='text-lg sm:text-xl font-bold'>Community: {community.name}</h2>
+        <Link href={`/communities/${community.id}/`}>
+          <h2 className='text-lg sm:text-xl font-bold'>Community: {community.name}</h2>
+        </Link>
       </div>
       <PostInput communityId={communityId} organizationId={community.organization.id} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} />
       <CommunityFeed communityId={communityId} />

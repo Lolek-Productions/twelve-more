@@ -61,6 +61,7 @@ export default function HomePage() {
     checkForInvitation();
   }, []);
 
+  // Part of the onboarding process to join a new community
   const handleJoinCommunity = async () => {
     if (!pendingCommunityId || !communityData || !appUser?.id) {
       setError('Missing required information to join community.');
