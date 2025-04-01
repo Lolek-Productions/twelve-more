@@ -27,6 +27,7 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
   const [imageFileUplaoding, setImageFileUploading] = useState(false);
   const [text, setText] = useState('');
   const imagePickRef = useRef(null);
+  const textareaRef = useRef(null);
 
   //Image
   const addImageToPost = (e) => {
@@ -93,7 +94,11 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
   };
 
   const handleSubmit = async () => {
-    if (!community.organization.id) {
+    if (!text.trim() || imageFileUplaoding || isSubmitting) {
+      return;
+    }
+
+    if (!community?.organization?.id) {
       showErrorToast({message: 'Organization ID is required'});
       return;
     }
@@ -127,6 +132,15 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
     }
   };
 
+  // Handle Command+Enter to submit post
+  const handleKeyDown = (e) => {
+    // Check for Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault(); // Prevent default new line behavior
+      handleSubmit();
+    }
+  };
+
   if (!isSignedIn || !isLoaded) {
     return (
       <div className="w-full"></div>
@@ -142,11 +156,13 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
       />
       <div className='w-full divide-y divide-gray-200'>
         <textarea
+          ref={textareaRef}
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700'
           placeholder={placeholder || (parentId ? 'Write a comment...' : 'What\'s on your mind?')}
           rows={parentId ? '2' : '3'}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
         ></textarea>
         {selectedFile && (
           <img
@@ -166,6 +182,7 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
                                  onClick={() => imagePickRef.current.click()}
             />
+            <span className="text-xs text-gray-500 ml-2">Tip: Press ⌘+Enter to post</span>
           </div>
           <input
             type='file'

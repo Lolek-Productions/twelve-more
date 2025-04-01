@@ -7,31 +7,41 @@ import PostInput from '@/components/PostInput.jsx';
 import { getCommunityById } from "@/lib/actions/community.js";
 import { useContextContent } from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
+import {useQueryClient} from "@tanstack/react-query";
 
 export default function CommunityPosts({ params }) {
   const resolvedParams = use(params);
   const { communityId } = resolvedParams;
-
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  // Define fetchCommunityData outside of useEffect so it can be reused
+  const fetchCommunityData = useCallback(async () => {
+    try {
+      if (communityId) {
+        setLoading(true);
+        const communityData = await getCommunityById(communityId);
+        setCommunity(communityData.community);
+      } else {
+        console.error("Community Id not found");
+      }
+    } catch (error) {
+      console.error("Error fetching community:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [communityId]);
 
   useEffect(() => {
-    async function fetchCommunityData() {
-      try {
-        if (communityId) {
-          const communityData = await getCommunityById(communityId);
-          setCommunity(communityData.community);
-        } else {
-          console.error("Community Id not found");
-        }
-      } catch (error) {
-        console.error("Error fetching community:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchCommunityData();
-  }, [communityId]);
+  }, [fetchCommunityData]);
+
+  // Now this function can properly access fetchCommunityData
+  const afterPostCreated = useCallback(async () => {
+    console.log("afterPostCreated");
+    queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
+  }, [fetchCommunityData]);
 
   const { setContextContent } = useContextContent();
   useEffect(() => {
@@ -59,7 +69,7 @@ export default function CommunityPosts({ params }) {
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
         <h2 className='text-lg sm:text-xl font-bold'>Community: {community.name}</h2>
       </div>
-      <PostInput communityId={communityId} placeholder={`Post to the ${community.name} community`} />
+      <PostInput communityId={communityId} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} />
       <CommunityFeed communityId={communityId} />
     </>
   );
