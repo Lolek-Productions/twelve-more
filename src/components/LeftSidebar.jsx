@@ -159,10 +159,10 @@ export default function LeftSidebar({ onLinkClick }) {
                 organizationsWithCommunities.map((org) => (
                   <div key={org.id} className="mb-1">
                     {/* Organization header without toggle - always expanded */}
-                    <div className="flex items-center px-2 py-0.5 rounded-md">
+                    <div>
                       <Link
                         href={`/organizations/${org.id}/posts`}
-                        className="flex-1 flex items-center"
+                        className="flex-1 flex items-center hover:bg-gray-200 rounded-full px-2 py-0.5 "
                         onClick={handleLinkClick}
                       >
                         <span className="font-semibold text-sm">{org.name}</span>
