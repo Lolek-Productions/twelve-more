@@ -53,7 +53,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
     );
 
     // Add community to User (consider a specific function to add as admin)
-    const comAddResult = await addCommunityToUser(community._id.toString(), userId, 'leader');
+    const comAddResult = await addCommunityToUser(community._id.toString(), userId, 'leader', false);
     if (!comAddResult.success) {
       console.warn(`Failed to add community to user: ${comAddResult.error}`);
     }
@@ -65,7 +65,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       createdBy: userId,
       organization: organization.id,
     });
-    await addCommunityToUser(community2._id.toString(), userId, 'leader');
+    await addCommunityToUser(community2._id.toString(), userId, 'leader', false);
 
     const community3 = await Community.create({
       name: `Ushers`,
@@ -74,7 +74,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       createdBy: userId,
       organization: organization.id,
     });
-    await addCommunityToUser(community3._id.toString(), userId, 'leader');
+    await addCommunityToUser(community3._id.toString(), userId, 'leader', false);
 
     const community4 = await Community.create({
       name: `Religious Education Teachers`,
@@ -83,7 +83,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       createdBy: userId,
       organization: organization.id,
     });
-    await addCommunityToUser(community4._id.toString(), userId, 'leader');
+    await addCommunityToUser(community4._id.toString(), userId, 'leader', false);
 
     const community5 = await Community.create({
       name: `Ministers of Holy Communion`,
@@ -92,7 +92,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       createdBy: userId,
       organization: organization.id,
     });
-    await addCommunityToUser(community5._id.toString(), userId, 'leader');
+    await addCommunityToUser(community5._id.toString(), userId, 'leader', false);
 
     return { success: true, message: "Organization created", organization: organization };
   } catch (error) {

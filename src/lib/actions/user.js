@@ -554,7 +554,7 @@ export async function searchUsersInUserOrganizations(appUser, query) {
   }
 }
 
-export async function addCommunityToUser(communityId, userId, role = 'member') {
+export async function addCommunityToUser(communityId, userId, role = 'member', attemptToNotify = true) {
   try {
     await connect();
 
@@ -593,7 +593,7 @@ export async function addCommunityToUser(communityId, userId, role = 'member') {
     //Notify the leaders of this organization that someone has joined
     const leadersResponse = await getPrivateLeadersByCommunityId(communityId);
 
-    if(leadersResponse.success && leadersResponse.leaders?.length > 0) {
+    if(leadersResponse.success && leadersResponse.leaders?.length > 0 && attemptToNotify) {
       const leadersPhoneNumbers = leadersResponse.leaders
         .map((leader) => leader.phoneNumber)
         .filter(phoneNumber => phoneNumber && typeof phoneNumber === 'string' && phoneNumber.trim() !== '');
