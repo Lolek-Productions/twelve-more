@@ -122,9 +122,7 @@ export default function UserPage() {
               <div key={community.id} className="px-2 rounded-md flex justify-start items-center">
                 <Link className="flex gap-3" href={`/communities/${community?.id}/posts`}>
                   <div className="text-sm">{`${community?.name}` || "Unknown"} ({`${community?.organizationName}`})</div>
-
                   <VisibilityLabel visibility={community?.visibility} />
-
                 </Link>
               </div>
             ))}

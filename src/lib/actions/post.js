@@ -11,6 +11,7 @@ import {currentUser} from "@clerk/nextjs/server";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {PUBLIC_APP_URL} from "@/lib/constants.js";
 import mongoose from "mongoose";
+import Community from "@/lib/models/community.model.js";
 
 export async function createPost(postData) {
   const user = await currentUser();
@@ -1410,29 +1411,25 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
     limit = parseInt(limit);
     offset = parseInt(offset || 0);
 
-    const appUserCommunityIds = appUser.communities
-      .map(c => c.id);
+    const publicCommunityIds = await Community.find({
+      organization: { $in: appUser.organizations.map(org => org.id) },
+      visibility: 'public'
+    }).distinct('_id');
 
-    const userPublicOrMemberCommunityIds = user.communities.filter(c => {
-      if(c.visibility === 'public') return true;
-      return appUserCommunityIds.includes(c.id);
-    }).map(c =>
-      c.id
-    );
 
-    // First query to get the requested posts
     const query = {
       parentId: null, // Only get top-level posts
       user: user.id,   // Posts by the specified user
       $or: [
-        // Case 1: Posts with no community, but in user's organizations
         {
-          organization: { $in: appUser.organizations.map(c => c.id) },
-          community: null
+          community: { $in: publicCommunityIds }
         },
-        // Case 2: Posts in communities the user has access to
         {
-          community: { $in: userPublicOrMemberCommunityIds }
+          organization: { $in: appUser.organizations.map(o => o.id) },
+          community: null,
+        },
+        {
+          community: { $in: appUser.communities.map(c => c.id) }
         }
       ]
     };
