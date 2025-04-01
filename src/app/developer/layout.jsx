@@ -10,6 +10,14 @@ const sidebarNavItems = [
     href: "/developer",
   },
   {
+    title: "Developers",
+    href: "/developer/developers",
+  },
+  {
+    title: "Stats",
+    href: "/developer/stats",
+  },
+  {
     title: "Organizations",
     href: "/developer/organizations",
   },
