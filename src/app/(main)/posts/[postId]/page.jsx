@@ -4,48 +4,43 @@ import Comments from '@/components/Comments';
 import Post from '@/components/Post';
 import AncestorPosts from '@/components/AncestorPosts';
 import { HiArrowLeft } from 'react-icons/hi';
-import {useEffect, useState, useCallback} from "react";
-import {getPostByIdWithAncestorsAndDescendents} from "@/lib/actions/post.js";
-import {useAppUser} from "@/hooks/useAppUser.js";
-import {useParams, useRouter} from "next/navigation";
+import { useEffect, useState } from "react";
+import { getPostByIdWithAncestorsAndDescendents } from "@/lib/actions/post.js";
+import { useAppUser } from "@/hooks/useAppUser.js";
+import { useParams, useRouter } from "next/navigation";
 import PostInput from "@/components/PostInput.jsx";
-
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function PostPage() {
   const params = useParams();
   const { postId } = params;
-  const {appUser} = useAppUser();
-  const [isLoading, setIsLoading] = useState(false);
-  const [post, setPost] = useState(null);
+  const { appUser } = useAppUser();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Define fetchPost outside of useEffect so it can be reused
-  const fetchPost = useCallback(async () => {
-    if (!postId) return;
-    //console.log(postId);
+  // Set up the React Query for fetching post data (using v5 object syntax)
+  const {
+    data: postData,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['post', postId],
+    queryFn: async () => {
+      if (!postId) return null;
+      const response = await getPostByIdWithAncestorsAndDescendents(postId);
+      return response.post;
+    },
+    enabled: !!postId, // Only run query if postId exists
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+  });
 
-    setIsLoading(true);
-    try {
-      const postData = await getPostByIdWithAncestorsAndDescendents(postId);
-      //console.log(postData.post);
-      setPost(postData.post);
-    } catch (error) {
-      console.error('Error fetching post:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [postId]);
-
-  // Initial post fetch
-  useEffect(() => {
-    fetchPost();
-  }, [fetchPost]);
-
-  // Use the same fetchPost function after comment creation
-  const afterPostCreated = async () => {
-    // console.log('fetching Post')
-    await fetchPost();
+  // Function to handle refreshing post data after a new comment is added
+  const afterPostCreated = () => {
+    // Invalidate the current post query to trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['post', postId] });
   };
 
   useEffect(() => {
@@ -57,9 +52,25 @@ export default function PostPage() {
       router.back();
     } else {
       // Fallback destination if there's no history
-      router.push(`/communities/${post?.community?.id}/posts`);
+      router.push(`/communities/${postData?.community?.id}/posts`);
     }
   };
+
+  // Handle error state
+  if (error && !isLoading) {
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl text-red-500">Error loading post</h2>
+        <p className="text-gray-600 mt-2">{error.message}</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -73,15 +84,23 @@ export default function PostPage() {
         <h2 className='sm:text-lg'>Back</h2>
       </div>
 
-      {!post && isLoading && <h2 className='text-center mt-5 text-lg'>Post Loading...</h2>}
+      {isLoading && <h2 className='text-center mt-5 text-lg'>Post Loading...</h2>}
 
-      {post && <AncestorPosts posts={post.ancestors} clickableText={false} />}
-      {post && <Post post={post} clickableText={false} />}
+      {postData && <AncestorPosts posts={postData.ancestors} clickableText={false} />}
+      {postData && <Post post={postData} clickableText={false} />}
+
+      {postData && (
+        <PostInput
+          communityId={postData.community?.id}
+          organizationId={postData.organization.id}
+          placeholder="Write your comment here"
+          parentId={postData.id}
+          onPostCreated={afterPostCreated}
+        />
+      )}
 
       {/*Comments*/}
-      {post && <PostInput communityId={post.community.id} organizationId={post.organization.id} placeholder="Write your comment here" parentId={post.id} onPostCreated={afterPostCreated} />}
-
-      {post && <Comments comments={post.comments} />}
+      {postData && <Comments comments={postData.comments} />}
     </>
   );
 }

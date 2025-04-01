@@ -8,7 +8,7 @@ import {
   HiChat,
 } from 'react-icons/hi';
 import { useState, useEffect } from 'react';
-import { modalState, postIdState } from '@/modalState/modalStateDefinition';
+import {atomPostState, modalState, postIdState} from '@/modalState/modalStateDefinition';
 import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
 import { useAppUser } from "@/hooks/useAppUser";
@@ -23,6 +23,7 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
   const [prayers, setPrayers] = useState(post.prayers || []);
   const [open, setOpen] = useAtom(modalState);
   const [postId, setPostId] = useAtom(postIdState);
+  const [atomPost, setAtomPost] = useAtom(atomPostState);
   const { appUser } = useAppUser();
   const { showResponseToast, showErrorToast } = useApiToast();
 
@@ -124,6 +125,7 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
 
     setOpen(!open);
     setPostId(post.id);
+    setAtomPost(post);
   };
 
   return (
