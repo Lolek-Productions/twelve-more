@@ -37,6 +37,12 @@ export function OrganizationsTable({ userId, data, onOrganizationRemoved }) {
       ),
     },
     {
+      accessorKey: "role",
+      header: ({ column }) => (
+        <div>Role</div>
+      ),
+    },
+    {
       accessorKey: "id",
       header: ({ column }) => (
         <div>ID</div>

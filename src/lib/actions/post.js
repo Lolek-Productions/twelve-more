@@ -1416,7 +1416,6 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
       visibility: 'public'
     }).distinct('_id');
 
-
     const query = {
       parentId: null, // Only get top-level posts
       user: user.id,   // Posts by the specified user

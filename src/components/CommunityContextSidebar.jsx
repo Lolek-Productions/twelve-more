@@ -83,7 +83,7 @@ export default function CommunityContextSidebarComponent({ community, communityI
       <div className="flex-1 overflow-auto">
         <MemberList community={community} members={members} />
 
-        <div className="flex justify-center w-full pt-3">
+        <div className="flex justify-center w-full pt-2">
           <button onClick={() => onLeave12()} className="text-red-500 hover:text-red-700 font-medium transition-colors duration-200">
             Leave 12
           </button>
