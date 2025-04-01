@@ -33,7 +33,7 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       description: data.description,
     }
 
-    const orgAddResult = await addOrganizationToUser(organization.id, userId);
+    const orgAddResult = await addOrganizationToUser(organization.id, userId, 'leader');
     if (!orgAddResult.success) {
       throw new Error(`Failed to associate organization with user: ${orgAddResult.error}`);
     }
@@ -53,42 +53,46 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
     );
 
     // Add community to User (consider a specific function to add as admin)
-    const comAddResult = await addCommunityToUser(community._id.toString(), userId);
+    const comAddResult = await addCommunityToUser(community._id.toString(), userId, 'leader');
     if (!comAddResult.success) {
       console.warn(`Failed to add community to user: ${comAddResult.error}`);
     }
 
-    await Community.create({
+    const community2 = await Community.create({
       name: `Lectors`,
       purpose: `To boldly proclaim the word of God!`,
       visibility: "public",
       createdBy: userId,
       organization: organization.id,
     });
+    await addCommunityToUser(community2._id.toString(), userId, 'leader');
 
-    await Community.create({
+    const community3 = await Community.create({
       name: `Ushers`,
       purpose: `To communicate the love of God to all those who join us at Mass!`,
       visibility: "public",
       createdBy: userId,
       organization: organization.id,
     });
+    await addCommunityToUser(community3._id.toString(), userId, 'leader');
 
-    await Community.create({
+    const community4 = await Community.create({
       name: `Religious Education Teachers`,
       purpose: `To teach our children how to Love God!`,
       visibility: "public",
       createdBy: userId,
       organization: organization.id,
     });
+    await addCommunityToUser(community4._id.toString(), userId, 'leader');
 
-    await Community.create({
+    const community5 = await Community.create({
       name: `Ministers of Holy Communion`,
       purpose: `To assist the priest in the distribution of the Holy Sacrament!`,
       visibility: "public",
       createdBy: userId,
       organization: organization.id,
     });
+    await addCommunityToUser(community5._id.toString(), userId, 'leader');
 
     return { success: true, message: "Organization created", organization: organization };
   } catch (error) {
