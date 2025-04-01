@@ -18,7 +18,6 @@ export default function LeftSidebar({ onLinkClick }) {
   const {appUser, isLoaded} = useAppUser();
   const [organizationsOpen, setOrganizationsOpen] = useState(false);
   const [expandedOrgs, setExpandedOrgs] = useState({});
-  // No longer using my12sExpanded state since all org sections are always expanded
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
@@ -32,8 +31,6 @@ export default function LeftSidebar({ onLinkClick }) {
       [orgId]: !prev[orgId]
     }));
   };
-
-  // No longer need the toggle function for My 12s since all org sections are always expanded
 
   // Group communities by organization
   const communitiesByOrg = useMemo(() => {
@@ -66,7 +63,6 @@ export default function LeftSidebar({ onLinkClick }) {
     href: '/communities/',
   };
 
-  // No longer using selectedOrganization
   const WELCOMING_COMMITTEE_ID = null; // You might want to implement a different way to find welcoming communities
 
   // Get communities for a specific organization
