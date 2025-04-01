@@ -711,29 +711,53 @@ export async function removeCommunityFromUser(communityId, userId) {
 }
 
 export async function getCommunityMembers(communityId) {
-  // console.log('communityId',communityId);
-
   try {
     // Input validation
     if (!communityId || !mongoose.isValidObjectId(communityId)) {
       return {
         success: false,
-        message:"Invalid or missing community ID",
+        message: "Invalid or missing community ID",
       };
     }
 
     await connect(); // Ensure database connection
 
-    // Find all users where the communities array contains the specified communityId
-    const members = await User.find({
-      "communities.community": communityId,
-    })
-    .select("firstName lastName avatar")
-    .lean();
-    // console.log(members);
+    // Use aggregation to get users and only the relevant community membership
+    const members = await User.aggregate([
+      // Match users who are members of this community
+      {
+        $match: {
+          "communities.community": new mongoose.Types.ObjectId(communityId)
+        }
+      },
+      // Project only the fields we need
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          avatar: 1,
+          // Get only the community membership for the specified communityId
+          communityMembership: {
+            $filter: {
+              input: "$communities",
+              as: "community",
+              cond: { $eq: ["$$community.community", new mongoose.Types.ObjectId(communityId)] }
+            }
+          }
+        }
+      },
+      // Unwind the filtered array which now contains only the relevant membership
+      {
+        $unwind: "$communityMembership"
+      }
+    ]);
+
+    // console.log('members', members);
+
 
     // Check if any members were found
-    if (!members || members.length === 0) {
+    if (!members || members?.length === 0) {
       return {
         success: true,
         message: "No members found in this community",
@@ -749,13 +773,16 @@ export async function getCommunityMembers(communityId) {
         firstName: member.firstName,
         lastName: member.lastName,
         avatar: member.avatar,
+        role: member.communityMembership.role || "member",
+        membershipId: member.communityMembership._id.toString()
       })),
     };
   } catch (error) {
     console.error("Error fetching community members:", error);
     return {
       success: false,
-      message:"Failed to fetch community members",
+      message: "Failed to fetch community members",
+      error: error.message
     };
   }
 }
@@ -902,6 +929,39 @@ export async function getPrivateLeadersByCommunityId(communityId) {
     return {
       success: false,
       message: error.message || "Failed to fetch community leaders"
+    };
+  }
+}
+
+export async function changeRoleOnUserInCommunity(userId, communityId, role) {
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "communities.community": communityId // Find the specific community in the user's communities array
+      },
+      {
+        $set: { "communities.$.role": role } // Update the role for the matched community
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message: "User not found or user is not a member of this community"
+      };
+    }
+
+    return {
+      success: true,
+      message: "User updated"
+    };
+  } catch (error) {
+    console.error("Error changing user role in community:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to change user role"
     };
   }
 }

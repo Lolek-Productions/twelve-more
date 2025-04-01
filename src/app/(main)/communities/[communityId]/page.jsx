@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {getCommunityById} from "@/lib/actions/community.js";
-import Link from "next/link.js";
+import Link from "next/link";
 import {Button} from "@/components/ui/button.jsx";
+import MembersCardList from "@/components/MembersCardList"
 
 export default function CommunityPage() {
   const params = useParams();
@@ -56,6 +57,10 @@ export default function CommunityPage() {
         <Button asChild >
           <Link href={`/communities/${community.id}/posts`}>Go to Posts</Link>
         </Button>
+      </div>
+
+      <div>
+        <MembersCardList community={community} />
       </div>
     </>
   );

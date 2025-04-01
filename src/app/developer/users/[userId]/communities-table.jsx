@@ -17,11 +17,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Input} from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
+import { changeRoleOnUserInCommunity } from "@/lib/actions/user";
+import {useApiToast} from "@/lib/utils.js";
 
-export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
+export function CommunitiesTable({ userId, data, onCommunityRemoved, onRoleUpdated }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+  const { showResponseToast, showErrorToast } = useApiToast();
+  const [updating, setUpdating] = useState(false);
+
+  const handleRoleChange = async (communityId, membershipId, newRole) => {
+    if (updating) return;
+
+    try {
+      setUpdating(true);
+
+      const result = await changeRoleOnUserInCommunity(userId, communityId, newRole);
+
+      if (!result.success) {
+        showErrorToast(result.message);
+        return;
+      }
+
+      showResponseToast(result);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating role:", error);
+      showErrorToast(error);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const columns = [
     {
@@ -31,22 +58,27 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          First Name
+          Community Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
     },
     {
       accessorKey: "role",
-      header: ({ column }) => (
-        <div>Role</div>
-      ),
+      header: "Role",
+      cell: ({ row }) => {
+        const community = row.original;
+        return (
+          <div className="font-medium">{community.role}</div>
+        );
+      },
     },
     {
       accessorKey: "id",
-      header: ({ column }) => (
-        <div>ID</div>
-      ),
+      header: "ID",
+      cell: ({ row }) => {
+        return <div className="font-mono text-xs truncate max-w-[120px]">{row.original.id}</div>;
+      },
     },
     {
       id: "actions",
@@ -62,8 +94,28 @@ export function CommunitiesTable({ userId, data, onCommunityRemoved }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onCommunityRemoved(community.membershipId)}>
-                  Force Delete Membership to Community
+                {/* Role change options */}
+                {community.role === "member" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRoleChange(community.id, community.membershipId, "leader")}
+                    disabled={updating}
+                  >
+                    Make Leader
+                  </DropdownMenuItem>
+                )}
+                {community.role === "leader" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRoleChange(community.id, community.membershipId, "member")}
+                    disabled={updating}
+                  >
+                    Make Member
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => onCommunityRemoved(community.membershipId)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Remove from Community
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

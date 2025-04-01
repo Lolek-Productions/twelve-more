@@ -235,3 +235,36 @@ export async function setWelcomingCommunity(organizationId, communityId) {
     };
   }
 }
+
+export async function changeRoleOnUserInOrganization(userId, organizationId, role) {
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "organizations.organization": organizationId // Find the specific organization in the user's organizations array
+      },
+      {
+        $set: { "organizations.$.role": role } // Update the role for the matched organization
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message: "User not found or user is not a member of this organization"
+      };
+    }
+
+    return {
+      success: true,
+      message: "User updated"
+    };
+  } catch (error) {
+    console.error("Error changing user role in organization:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to change user role"
+    };
+  }
+}

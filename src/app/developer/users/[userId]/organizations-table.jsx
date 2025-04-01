@@ -18,10 +18,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {useApiToast} from "@/lib/utils.js";
+import {changeRoleOnUserInOrganization} from "@/lib/actions/organization.js";
 
-export function OrganizationsTable({ userId, data, onOrganizationRemoved }) {
+export function OrganizationsTable({ userId, data, onOrganizationRemoved, onRoleUpdated }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+  const { showResponseToast, showErrorToast } = useApiToast();
+  const [updating, setUpdating] = useState(false);
+
+  const handleRoleChange = async (organizationId, membershipId, newRole) => {
+    if (updating) return;
+
+    try {
+      setUpdating(true);
+
+      // Assuming you have a similar function for organizations
+      const result = await changeRoleOnUserInOrganization(userId, organizationId, newRole);
+
+      if (!result.success) {
+        showErrorToast(result.message);
+        return;
+      }
+
+      showResponseToast(result);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating role:", error);
+      showErrorToast(error);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const columns = [
     {
@@ -38,15 +66,20 @@ export function OrganizationsTable({ userId, data, onOrganizationRemoved }) {
     },
     {
       accessorKey: "role",
-      header: ({ column }) => (
-        <div>Role</div>
-      ),
+      header: "Role",
+      cell: ({ row }) => {
+        const organization = row.original;
+        return (
+          <div className="font-medium">{organization.role}</div>
+        );
+      },
     },
     {
       accessorKey: "id",
-      header: ({ column }) => (
-        <div>ID</div>
-      ),
+      header: "ID",
+      cell: ({ row }) => {
+        return <div className="font-mono text-xs truncate max-w-[120px]">{row.original.id}</div>;
+      },
     },
     {
       id: "actions",
@@ -62,8 +95,28 @@ export function OrganizationsTable({ userId, data, onOrganizationRemoved }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onOrganizationRemoved(organization.membershipId)}>
-                  Force Delete Membership to Organization
+                {/* Role change options */}
+                {organization.role === "member" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRoleChange(organization.id, organization.membershipId, "leader")}
+                    disabled={updating}
+                  >
+                    Make Leader
+                  </DropdownMenuItem>
+                )}
+                {organization.role === "leader" && (
+                  <DropdownMenuItem
+                    onClick={() => handleRoleChange(organization.id, organization.membershipId, "member")}
+                    disabled={updating}
+                  >
+                    Make Member
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => onOrganizationRemoved(organization.membershipId)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Remove from Organization
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
