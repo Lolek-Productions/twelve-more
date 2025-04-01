@@ -116,7 +116,7 @@ export default function OrganizationCommunityList({organization}) {
             const isMember = isUserInCommunity(community.id);
             return (
               <li key={community.id} className="border p-4 rounded-md">
-                <Link href={`/communities/${community.id}`}>
+                <Link href={`/communities/${community.id}/posts`}>
                   <h4 className="text-lg font-medium">
                     {community.name}{" "}
                     <VisibilityLabel visibility={community?.visibility} />

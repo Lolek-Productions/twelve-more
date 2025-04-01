@@ -19,6 +19,7 @@ export default function CommunityPosts({ params }) {
 
   // Define fetchCommunityData outside of useEffect so it can be reused
   const fetchCommunityData = useCallback(async () => {
+    if(!communityId) return;
     try {
       if (communityId) {
         setLoading(true);
@@ -52,7 +53,7 @@ export default function CommunityPosts({ params }) {
   if (loading) {
     return (
       <div className="flex w-full justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900">Loading...</div>
       </div>
     );
   }
