@@ -11,13 +11,14 @@ import { cn } from '@/lib/utils';
 import {DEV_IDS} from '@/lib/constants';
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
-import React, {useState} from "react";
+import React, {useState, useMemo} from "react";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
   const {appUser, isLoaded} = useAppUser();
   const [organizationsOpen, setOrganizationsOpen] = useState(false);
   const [expandedOrgs, setExpandedOrgs] = useState({});
+  // No longer using my12sExpanded state since all org sections are always expanded
 
   // Wrap Link clicks to close the Sheet
   const handleLinkClick = () => {
@@ -31,6 +32,29 @@ export default function LeftSidebar({ onLinkClick }) {
       [orgId]: !prev[orgId]
     }));
   };
+
+  // No longer need the toggle function for My 12s since all org sections are always expanded
+
+  // Group communities by organization
+  const communitiesByOrg = useMemo(() => {
+    if (!appUser?.communities?.length) return {};
+
+    return appUser.communities.reduce((acc, community) => {
+      // Create an org entry if it doesn't exist
+      if (!acc[community.organizationId]) {
+        acc[community.organizationId] = {
+          id: community.organizationId,
+          name: community.organizationName,
+          communities: []
+        };
+      }
+
+      // Add community to the org's communities array
+      acc[community.organizationId].communities.push(community);
+
+      return acc;
+    }, {});
+  }, [appUser?.communities]);
 
   if (isLoaded || !appUser) {
     return <div className="p-3">Loading...</div>;
@@ -71,6 +95,9 @@ export default function LeftSidebar({ onLinkClick }) {
   const fallbackOrg = { id: 'create-org', name: 'Create an Organization', href: '/organizations/create' };
 
   const orgsToRender = organizations.length > 0 ? organizations : [fallbackOrg];
+
+  // Get organized list of organizations with their communities for My 12s
+  const organizationsWithCommunities = Object.values(communitiesByOrg);
 
   return (
     <div className="flex flex-col h-full">
@@ -120,23 +147,43 @@ export default function LeftSidebar({ onLinkClick }) {
           </div>
 
 
-          {/*My 12s*/}
+          {/*My 12s - UPDATED*/}
           <div className="p-3 bg-gray-100 rounded-md">
-            <div className="flex items-center">
-              <div className="ml-2 text-lg font-semibold mb-1 whitespace-nowrap">My 12s</div>
+            <div className="flex items-center mb-1">
+              <div className="ml-2 text-lg font-bold whitespace-nowrap">My 12s</div>
             </div>
+
+            {/* Communities grouped by organization */}
             <div>
-              {appUser?.communities?.length > 0 ? (
-                appUser.communities.map((community) => (
-                  <Link
-                    key={community.id}
-                    href={community.href || `/communities/${community.id}/posts`}
-                    className="flex items-center px-3 py-1 hover:bg-gray-200 rounded-full transition-all duration-200 gap-2 w-fit"
-                    onClick={handleLinkClick}
-                  >
-                    <span className="text-xl mr-2">·</span>
-                    <span className="text-sm">{community.organizationName}-{community.name}</span>
-                  </Link>
+              {organizationsWithCommunities.length > 0 ? (
+                organizationsWithCommunities.map((org) => (
+                  <div key={org.id} className="mb-1">
+                    {/* Organization header without toggle - always expanded */}
+                    <div className="flex items-center px-2 py-0.5 rounded-md">
+                      <Link
+                        href={`/organizations/${org.id}/posts`}
+                        className="flex-1 flex items-center"
+                        onClick={handleLinkClick}
+                      >
+                        <span className="font-semibold text-sm">{org.name}</span>
+                      </Link>
+                    </div>
+
+                    {/* Communities list - always visible */}
+                    <div className="pl-4 mt-0.5 space-y-0">
+                      {org.communities.map((community) => (
+                        <Link
+                          key={community.id}
+                          href={community.href || `/communities/${community.id}/posts`}
+                          className="flex items-center py-0.5 hover:bg-gray-200 rounded-full transition-all duration-200 gap-1 w-full"
+                          onClick={handleLinkClick}
+                        >
+                          <span className="text-lg mr-0.5">·</span>
+                          <span className="text-sm truncate">{community.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 ))
               ) : (
                 <Link
@@ -160,7 +207,6 @@ export default function LeftSidebar({ onLinkClick }) {
                   </Link>
                 </Button>
               </div>
-
             </div>
           </div>
 
