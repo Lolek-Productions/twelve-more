@@ -35,12 +35,14 @@ export default function PostInput({
   const imagePickRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Auto-focus the textarea when the component mounts if autoFocus is true
   useEffect(() => {
-    if (autoFocus && textareaRef.current) {
+    if (autoFocus) {
       // Short timeout to ensure DOM is ready and any animations have completed
       const timer = setTimeout(() => {
-        textareaRef.current.focus();
+        // Check if textareaRef.current exists inside the callback
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
       }, 100);
 
       return () => clearTimeout(timer);
