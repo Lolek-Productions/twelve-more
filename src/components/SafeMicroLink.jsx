@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Microlink from "@microlink/react";
 
-const SafeMicrolink = ({ url }) => {
+export default function SafeMicrolink({ url }) {
   const [isValidUrl, setIsValidUrl] = useState(true);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -55,17 +55,16 @@ const SafeMicrolink = ({ url }) => {
 
   return (
     <div className="w-full">
-      <Microlink
-        url={cleanedUrl}
-        size="large"
-        contrast="false"
-        media={['image', 'logo']}
-        autoPlay="false"
-        lazy={true}
-        className="rounded-lg overflow-hidden border border-gray-200 w-full"
-      />
+      {url &&
+        <Microlink
+          url={cleanedUrl}
+          size="large"
+          media={['image', 'logo']}
+          autoPlay="false"
+          lazy={true}
+          className="rounded-lg overflow-hidden border border-gray-200 w-full"
+        />
+      }
     </div>
   );
 };
-
-export default SafeMicrolink;

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import SafeMicrolink from './SafeMicrolink';
+import SafeMicrolink from '@/components/SafeMicrolink';
 
 const PostText = ({ post, clickableText }) => {
   // Extract URLs using a regex
