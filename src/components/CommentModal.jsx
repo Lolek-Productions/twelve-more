@@ -107,7 +107,7 @@ export default function CommentModal() {
 
             {/* Comment Input */}
             {post && post.id &&
-              <PostInput parentId={post.id} placeholder={`Respond to this Post`} communityId={post.community.id} onPostCreated={() => afterPostCreated()} />
+              <PostInput parentId={post.id} organizationId={post.organization.id} placeholder={`Respond to this Post`} communityId={post.community.id} onPostCreated={() => afterPostCreated()} />
             }
           </div>
         </div>

@@ -10,16 +10,14 @@ import {useAppUser} from "@/hooks/useAppUser.js";
 import {createPost} from "@/lib/actions/post.js";
 import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
-import {useQueryClient} from "@tanstack/react-query";
 
-export default function PostInput({communityId, placeholder, parentId, onPostCreated = null}) {
+export default function PostInput({communityId, organizationId, placeholder, parentId, onPostCreated = null}) {
   // console.log('parentId', parentId);
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showResponseToast, showErrorToast } = useApiToast();
   const [ community, setCommunity ] = useState(null);
-  const queryClient = useQueryClient();
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -98,8 +96,8 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
       return;
     }
 
-    if (!community?.organization?.id) {
-      showErrorToast({message: 'Organization ID is required'});
+    if (!communityId && !organizationId) {
+      showErrorToast('Organization ID or Community ID is required');
       return;
     }
 
@@ -112,12 +110,14 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
       text,
       profileImg: appUser.avatar,
       image: imageFileUrl,
-      organizationId: community.organization.id,
+      organizationId: organizationId,
     })
+
+    // console.log(response)
 
     if(!response.success) {
       setIsSubmitting(false);
-      return showErrorToast({message: response.message || 'Error creating post'});
+      return showErrorToast(response.message);
     }
 
     showResponseToast(response);
@@ -128,7 +128,7 @@ export default function PostInput({communityId, placeholder, parentId, onPostCre
 
     // Call the callback if provided (useful for comment handling)
     if (onPostCreated && typeof onPostCreated === 'function') {
-      onPostCreated(response.data);
+      onPostCreated();
     }
   };
 

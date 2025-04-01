@@ -69,7 +69,7 @@ export default function CommunityPosts({ params }) {
       <div className='py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200'>
         <h2 className='text-lg sm:text-xl font-bold'>Community: {community.name}</h2>
       </div>
-      <PostInput communityId={communityId} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} />
+      <PostInput communityId={communityId} organizationId={community.organization.id} placeholder={`Post to the ${community.name} community`} onPostCreated={afterPostCreated} />
       <CommunityFeed communityId={communityId} />
     </>
   );

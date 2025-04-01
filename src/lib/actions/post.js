@@ -138,7 +138,7 @@ export async function createPost(postData) {
       }
     } else {
       console.log('No communityId provided, skipping notification');
-      return { success: true, notificationSent: false };
+      return { success: true, message: "No communityId provided, skipping notification", notificationSent: false };
     }
   } catch (error) {
     console.log('Error creating post:', error);

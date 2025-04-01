@@ -79,7 +79,7 @@ export default function PostPage() {
       {post && <Post post={post} clickableText={false} />}
 
       {/*Comments*/}
-      {post && <PostInput communityId={post.community.id} placeholder="Write your comment here" parentId={post.id} onPostCreated={afterPostCreated} />}
+      {post && <PostInput communityId={post.community.id} organizationId={post.organization.id} placeholder="Write your comment here" parentId={post.id} onPostCreated={afterPostCreated} />}
 
       {post && <Comments comments={post.comments} />}
     </>
