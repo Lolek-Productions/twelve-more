@@ -93,7 +93,7 @@ export default function PostPage() {
         <PostInput
           communityId={postData.community?.id}
           organizationId={postData.organization.id}
-          placeholder="Write your comment here"
+          placeholder={`Respond to this Post by ${postData.user.firstName} ${postData.user.lastName}`}
           parentId={postData.id}
           onPostCreated={afterPostCreated}
           autoFocus={true}

@@ -120,9 +120,10 @@ export default function CommentModal() {
               </div>
             </div>
 
+            <div className="border border-b border-gray-200"></div>
             {/* Comment Input */}
             {atomPost && atomPost.id &&
-              <PostInput parentId={atomPost.id} organizationId={atomPost.organization.id} placeholder={`Respond to this Post`} communityId={atomPost.community?.id} onPostCreated={() => afterPostCreated()} autoFocus={true} />
+              <PostInput parentId={atomPost.id} organizationId={atomPost.organization.id} placeholder={`Respond to this Post by ${atomPost.user.firstName} ${atomPost.user.lastName}`} communityId={atomPost.community?.id} onPostCreated={() => afterPostCreated()} autoFocus={true} />
             }
 
             {/* Comments Section Title */}
