@@ -117,8 +117,8 @@ export default function OrganizationCommunityList({organization}) {
             return (
               <li key={community.id} className="border p-4 rounded-md">
                 <Link href={`/communities/${community.id}/posts`}>
-                  <h4 className="text-lg font-medium">
-                    {community.name}{" "}
+                  <h4 className="text-lg font-medium flex gap-2 items-center">
+                    <div>{community.name}</div>
                     <VisibilityLabel visibility={community?.visibility} />
                   </h4>
                 </Link>
