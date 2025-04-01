@@ -128,7 +128,7 @@ export default function MembersCardList({community}) {
           {members.map((member) => {
             return (
               <div key={member.id} className="border px-4 py-2 rounded-md flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <Link href={`/profile/${member.id}`} className="flex items-center gap-2 flex-grow">
+                <Link href={`/users/${member.id}`} className="flex items-center gap-2 flex-grow">
                   {member.avatar && (
                     <img
                       src={member.avatar}
