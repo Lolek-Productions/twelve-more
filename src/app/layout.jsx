@@ -20,6 +20,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   return (
     <ClerkProvider>
       <html lang="en">
@@ -31,7 +33,8 @@ export default function RootLayout({ children }) {
             {children}
           </ClerkLoaded>
 
-          <Analytics/>
+          {/* Only render Analytics in production */}
+          {isProduction && <Analytics />}
         </body>
       </html>
     </ClerkProvider>
