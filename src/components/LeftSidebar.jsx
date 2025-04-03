@@ -155,13 +155,21 @@ export default function LeftSidebar({ onLinkClick }) {
                 organizationsWithCommunities.map((org) => (
                   <div key={org.id} className="mb-1">
                     {/* Organization header without toggle - always expanded */}
-                    <div>
+                    <div className={'flex items-center'}>
                       <Link
                         href={`/organizations/${org.id}/posts`}
                         className="flex-1 flex items-center hover:bg-gray-200 rounded-full px-2 py-0.5 "
                         onClick={handleLinkClick}
                       >
                         <span className="font-semibold text-sm">{org.name}</span>
+                      </Link>
+                      <Link
+                        href={`/organizations/${org.id}/community/create`}
+                        className="flex items-center p-1.5 rounded-md text-xs text-gray-600 hover:bg-gray-200"
+                        onClick={handleLinkClick}
+                        title={`Create New Community for the ${org.name} community`}
+                      >
+                        <HiOutlinePlus className="w-3 h-3" />
                       </Link>
                     </div>
 
@@ -171,7 +179,7 @@ export default function LeftSidebar({ onLinkClick }) {
                         <Link
                           key={community.id}
                           href={community.href || `/communities/${community.id}/posts`}
-                          className="flex items-center py-0.5 hover:bg-gray-200 rounded-full transition-all duration-200 gap-1 w-full"
+                          className="flex items-center pl-2 py-0.5 hover:bg-gray-200 rounded-full transition-all duration-200 gap-1 w-full"
                           onClick={handleLinkClick}
                         >
                           <span className="text-lg mr-0.5">·</span>
@@ -265,7 +273,7 @@ export default function LeftSidebar({ onLinkClick }) {
                             <Link
                               key={community.id}
                               href={community.href || `/communities/${community.id}`}
-                              className="flex items-center p-1 hover:bg-gray-100 rounded-md text-sm"
+                              className="flex items-center py-1 px-2 hover:bg-gray-100 rounded-md text-sm"
                               onClick={handleLinkClick}
                             >
                               <span className="text-xl mr-1">·</span>
@@ -277,19 +285,18 @@ export default function LeftSidebar({ onLinkClick }) {
                             <span>No communities</span>
                           </div>
                         )}
+                        <Link
+                          href={`/organizations/${org.id}/community/create`}
+                          className="flex items-center p-1.5 rounded-md text-xs text-gray-600 hover:bg-gray-100"
+                          onClick={handleLinkClick}
+                        >
+                          <HiOutlinePlus className="w-3 h-3 mr-1" />
+                          <span>New Community</span>
+                        </Link>
                       </div>
                     )}
                   </div>
                 ))}
-
-                <Link
-                  href="/organizations/create"
-                  className="flex items-center p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
-                  onClick={handleLinkClick}
-                >
-                  <HiOutlinePlus className="w-3 h-3 mr-1" />
-                  <span className="text-xs">New Organization</span>
-                </Link>
               </div>
             )}
           </div>
