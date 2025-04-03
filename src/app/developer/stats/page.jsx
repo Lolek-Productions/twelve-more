@@ -21,24 +21,29 @@ const chartConfig = {
 }
 
 export default function StatsPage() {
+
   return (
-    <ChartContainer config={chartConfig} className="h-[400px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
-        <CartesianGrid vertical={false} />
-        <XAxis
-          dataKey="month"
-          tickLine={false}
-          tickMargin={10}
-          axisLine={false}
-          tickFormatter={(value) => value.slice(0, 3)}
-        />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          tickMargin={10}
-        />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-      </BarChart>
-    </ChartContainer>
+    <>
+      Posts created today: {}
+    </>
+
+    // <ChartContainer config={chartConfig} className="h-[400px] w-full">
+    //   <BarChart accessibilityLayer data={chartData}>
+    //     <CartesianGrid vertical={false} />
+    //     <XAxis
+    //       dataKey="month"
+    //       tickLine={false}
+    //       tickMargin={10}
+    //       axisLine={false}
+    //       tickFormatter={(value) => value.slice(0, 3)}
+    //     />
+    //     <YAxis
+    //       tickLine={false}
+    //       axisLine={false}
+    //       tickMargin={10}
+    //     />
+    //     <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
+    //   </BarChart>
+    // </ChartContainer>
   )
 }
