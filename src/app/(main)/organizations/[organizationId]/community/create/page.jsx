@@ -101,7 +101,7 @@ export default function NewCommunityPage() {
       const response = await createCommunity({ ...data, userId: appUser.id, organizationId: organizationId });
       showResponseToast(response);
       if (response.success) {
-        window.location.href = `/organizations/${organizationId}`;
+        window.location.href = `/communities/${response.community.id}/posts`;
       }
     } catch (error) {
       showErrorToast(error);
