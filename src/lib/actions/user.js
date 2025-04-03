@@ -56,15 +56,26 @@ export async function getUserById(userId) {
     await connect();
 
     const user = await User.findById(userId)
-      .populate('organizations.organization')
+      .populate({
+        path: 'organizations.organization',
+        populate: {
+          path: 'welcomingCommunity',
+          select: '_id name'
+        }
+      })
       .populate({
         path: 'communities.community',
         populate: {
           path: 'organization',
-          select: '_id name'
+          select: '_id name',
+          populate: {
+            path: 'welcomingCommunity',
+            select: '_id name'
+          }
         }
       })
       .lean();
+
 
     return {
       success: true,
@@ -82,6 +93,12 @@ export async function getUserById(userId) {
             name: org.organization?.name || "Empty Organization",
             role: org.role || "",
             membershipId: org._id.toString(),
+            welcomingCommunity: org.organization?.welcomingCommunity
+              ? {
+                id: org.organization.welcomingCommunity._id.toString(),
+                name: org.organization.welcomingCommunity.name
+              }
+              : null
           }))
           : [],
         communities: user.communities
@@ -93,6 +110,8 @@ export async function getUserById(userId) {
             membershipId: com._id.toString(),
             organizationId: com.community?.organization?._id.toString() || null,
             organizationName: com.community?.organization?.name || null,
+// return console.log(user.communities[0].community.organization.welcomingCommunity._id);
+            welcomingCommunityId: com.community?.organization?.welcomingCommunity?._id?.toString() || null,
           }))
           : [],
       }
