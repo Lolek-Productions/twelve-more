@@ -16,7 +16,10 @@ export default function MemberList({ community, members, hideInvite = false }) {
       <div className={'items-center flex flex-col px-4'}>
 
         <h4 className="font-bold text-xl text-center">
-          Community Members: {community?.name}{" "}
+          Community Members:{" "}
+          <Link href={`/communities/${community?.id}/posts`}>
+            {community?.name}{" "}
+          </Link>
           <VisibilityLabel visibility={community?.visibility} />
         </h4>
 
