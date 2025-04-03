@@ -63,27 +63,33 @@ export default function LeftSidebar({ onLinkClick }) {
     href: '/communities/',
   };
 
-  const WELCOMING_COMMITTEE_ID = null; // You might want to implement a different way to find welcoming communities
-
-  // Get communities for a specific organization
   const getOrgCommunities = (orgId) => {
-    // This is a placeholder - you'll need to adapt this to match your data structure
-    // It should filter communities that belong to the specific organization
+    // Get all organizations the user belongs to
+    const organizations = appUser?.organizations || [];
+
+    // Find the current organization
+    const currentOrg = organizations.find(org => org.id === orgId);
+
+    // Filter communities for the specific organization
     const orgCommunities = appUser?.communities?.filter(community =>
       community.organizationId === orgId
     ) || [];
 
     return orgCommunities.sort((a, b) => {
-      // Check if community is the welcoming committee by ID
-      const isWelcomingCommitteeA = a.id === WELCOMING_COMMITTEE_ID;
-      const isWelcomingCommitteeB = b.id === WELCOMING_COMMITTEE_ID;
+      // If this organization has a designated welcoming community
+      if (currentOrg?.welcomingCommunity?.id) {
+        // Check if community is the welcoming community for this organization
+        const isWelcomingCommunityA = a.id === currentOrg.welcomingCommunity.id;
+        const isWelcomingCommunityB = b.id === currentOrg.welcomingCommunity.id;
 
-      // If a is welcoming committee, it comes first
-      if (isWelcomingCommitteeA && !isWelcomingCommitteeB) return -1;
-      // If b is welcoming committee, it comes first
-      if (!isWelcomingCommitteeA && isWelcomingCommitteeB) return 1;
-      // Otherwise maintain original order
-      return 0;
+        // If a is welcoming community, it comes first
+        if (isWelcomingCommunityA && !isWelcomingCommunityB) return -1;
+        // If b is welcoming community, it comes first
+        if (!isWelcomingCommunityA && isWelcomingCommunityB) return 1;
+      }
+
+      // Otherwise sort alphabetically by name
+      return a.name.localeCompare(b.name);
     });
   };
 
