@@ -13,6 +13,10 @@ const organizationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Community',
     },
+    leadershipCommunity: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Community',
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
