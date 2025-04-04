@@ -189,7 +189,7 @@ export default function LeftSidebar({ onLinkClick }) {
                           onClick={handleLinkClick}
                         >
                           <span className="text-lg mr-0.5">·</span>
-                          <span className="text-sm truncate">{community.name}</span>
+                          <span className="text-sm truncate" title={community.name}>{community.name}</span>
                         </Link>
                       ))}
                     </div>
