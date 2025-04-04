@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {useParams, useRouter} from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { deleteCommunities, getCommunityById } from "@/lib/actions/community"; // New action to fetch a single community
+import { deleteCommunities, getCommunityById, addAllLeadersToCommunitiy } from "@/lib/actions/community";
 import { MembersTable } from "./members-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function CommunityMembersPage() {
   const params = useParams();
@@ -38,7 +39,9 @@ export default function CommunityMembersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const router = useRouter();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Added for delete confirmation
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addLeadersDialogOpen, setAddLeadersDialogOpen] = useState(false); // New state for add leaders dialog
+  const [isAddingLeaders, setIsAddingLeaders] = useState(false); // Loading state
 
   const { toast } = useToast();
 
@@ -52,8 +55,6 @@ export default function CommunityMembersPage() {
   async function fetchCommunity() {
     try {
       const communityData = await getCommunityById(communityId);
-      // console.log('community data', communityData);
-
       if (communityData.success) {
         setCommunity(communityData.community);
       } else {
@@ -76,8 +77,6 @@ export default function CommunityMembersPage() {
   async function fetchMembers() {
     try {
       const memberData = await getCommunityMembers(communityId);
-      // console.log('member data', memberData);
-
       if (memberData) {
         setMembers(memberData.data || []);
       } else {
@@ -102,7 +101,7 @@ export default function CommunityMembersPage() {
       const response = await deleteCommunities(communityId);
 
       if (response?.success) {
-        router.push(`/developer/organizations/${organizationId}`); // Redirect after deletion
+        router.push(`/developer/organizations/${organizationId}`);
       } else {
         toast({
           variant: "destructive",
@@ -117,6 +116,38 @@ export default function CommunityMembersPage() {
         title: "Error",
         description: "Failed to delete organization",
       });
+    }
+  };
+
+  // New handler for adding all leaders
+  const handleAddAllLeaders = async () => {
+    setIsAddingLeaders(true);
+    try {
+      const response = await addAllLeadersToCommunitiy(organizationId, communityId);
+
+      if (response?.success) {
+        fetchMembers(); // Refresh the members list
+        toast({
+          title: "Success",
+          description: response.message,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response?.message || "Failed to add leaders",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding leaders:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add leaders",
+      });
+    } finally {
+      setIsAddingLeaders(false);
+      setAddLeadersDialogOpen(false);
     }
   };
 
@@ -157,12 +188,7 @@ export default function CommunityMembersPage() {
       return;
     }
     try {
-      // console.log('searching',organizationId, query)
-
-
-      //TODO not going to work
       const results = await searchUsersInUserOrganizations(organizationId, query);
-      // console.log(results);
       setSearchResults(results.users || []);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -230,9 +256,9 @@ export default function CommunityMembersPage() {
               <Button variant="outline">Actions</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {/*<DropdownMenuItem onClick={() => console.log("Edit community")}>*/}
-              {/*  Edit Community*/}
-              {/*</DropdownMenuItem>*/}
+              <DropdownMenuItem onClick={() => setAddLeadersDialogOpen(true)}>
+                Add All Community Leaders
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
                 Delete Community
               </DropdownMenuItem>
@@ -241,6 +267,7 @@ export default function CommunityMembersPage() {
           <Button onClick={() => setDialogOpen(true)}>New Member</Button>
         </div>
 
+        {/* Add Member Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -280,6 +307,28 @@ export default function CommunityMembersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* New Add All Leaders Dialog */}
+        <AlertDialog open={addLeadersDialogOpen} onOpenChange={setAddLeadersDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Add All Community Leaders</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will add all users who are leaders in any community within this organization to this community.
+                Are you sure you want to proceed?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isAddingLeaders}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleAddAllLeaders}
+                disabled={isAddingLeaders}
+              >
+                {isAddingLeaders ? "Adding Leaders..." : "Add All Leaders"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <MembersTable

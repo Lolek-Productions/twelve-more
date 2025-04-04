@@ -5,11 +5,9 @@ import Community from '../models/community.model';
 import User from '../models/user.model';
 import { connect } from '../mongodb/mongoose';
 import { clerkClient } from '@clerk/nextjs/server';
-import {removeCommunitiesFromAllUsers} from "@/lib/actions/user.js";
+import {addCommunityToUser, removeCommunitiesFromAllUsers} from "@/lib/actions/user.js";
+import {getOrganizationById} from "@/lib/actions/organization.js";
 
-/**
- * Creates a new community
- */
 export async function createCommunity(data) {
 
   try {
@@ -37,6 +35,27 @@ export async function createCommunity(data) {
       { _id: userId },
       { $addToSet: { communities: { community: newCommunity._id, role: "leader" } } }
     );
+
+    // Add the new leader to the leadership community on the organization
+    try {
+      const orgData = await getOrganizationById(organizationId);
+
+      if (orgData.organization?.leadershipCommunity) {
+        const leadershipCommunityId = orgData.organization.leadershipCommunity.id;
+
+        if (leadershipCommunityId) {
+          console.log(`Adding user ${userId} to leadership community ${leadershipCommunityId}`);
+          await addCommunityToUser(leadershipCommunityId, userId);
+        } else {
+          console.log("Leadership community ID not found");
+        }
+      } else {
+        console.log("Organization does not have a leadership community");
+      }
+    } catch (error) {
+      // Log the error but don't fail the whole function
+      console.error("Error adding user to leadership community:", error);
+    }
 
     return {
       success: true,
@@ -461,6 +480,70 @@ export async function changeOrganizationOfCommunity(organizationId, communityId)
     return {
       success: false,
       message: error.message || "Failed to change organization"
+    };
+  }
+}
+
+export async function addAllLeadersToCommunitiy(organizationId, targetCommunityId) {
+  try {
+    await connect();
+
+    // Find all communities in this organization
+    const communities = await Community.find({ organization: organizationId });
+
+    if (!communities || communities.length === 0) {
+      return {
+        success: false,
+        message: 'No communities found in this organization',
+      };
+    }
+
+    // Find all users who are leaders in any community of this organization
+    const users = await User.find({
+      'communities.role': 'leader',
+      'organizations.organization': organizationId
+    });
+
+    if (!users || users.length === 0) {
+      return {
+        success: false,
+        message: 'No community leaders found in this organization',
+      };
+    }
+
+    // Set to track unique users who've been added (to prevent duplicates)
+    const addedLeaders = new Set();
+    const communityIds = communities.map(comm => comm._id.toString());
+
+    // Process each user
+    for (const user of users) {
+      // Skip if we've already processed this user
+      if (addedLeaders.has(user._id.toString())) continue;
+
+      // Check if the user is a leader in any community of this organization
+      const isLeaderInOrg = user.communities.some(membership => {
+        return communityIds.includes(membership.community.toString()) &&
+          membership.role === 'leader';
+      });
+
+      if (isLeaderInOrg) {
+        // Add user to the target community as a member
+        const addResult = await addCommunityToUser(targetCommunityId, user._id.toString());
+        if (addResult.success) {
+          addedLeaders.add(user._id.toString());
+        }
+      }
+    }
+
+    return {
+      success: true,
+      message: `Added ${addedLeaders.size} leaders to the community`,
+    };
+  } catch (error) {
+    console.error('Error adding leaders to community:', error);
+    return {
+      success: false,
+      message: error.message || 'Failed to add leaders to community',
     };
   }
 }

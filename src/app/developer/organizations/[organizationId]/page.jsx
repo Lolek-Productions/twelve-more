@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCommunitiesByOrganization, createCommunity } from "@/lib/actions/community";
-import {deleteOrganization, getOrganizationById, setWelcomingCommunity} from "@/lib/actions/organization";
+import {
+  deleteOrganization,
+  getOrganizationById,
+  setWelcomingCommunity,
+  setLeadershipCommunity
+} from "@/lib/actions/organization";
 import { CommunityTable } from "./community-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,22 +20,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {Breadcrumb} from "@/components/ui/breadcrumb";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {useApiToast} from "@/lib/utils.js";
+import { useApiToast } from "@/lib/utils.js";
 
 export default function DeveloperCommunitiesPage() {
   const params = useParams();
   const organizationId = params?.organizationId;
   const router = useRouter();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Added for delete confirmation
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [communities, setCommunities] = useState([]);
-  const [organizationName, setOrganizationName] = useState("");
+  const [organization, setOrganization] = useState(null); // Initialize as null
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newCommunityName, setNewCommunityName] = useState("");
   const { showResponseToast, showErrorToast } = useApiToast();
@@ -44,32 +49,21 @@ export default function DeveloperCommunitiesPage() {
   async function fetchCommunities() {
     try {
       const communitiesData = await getCommunitiesByOrganization(organizationId);
+      setCommunities(communitiesData.communities);
 
-      console.log('communitiesData', communitiesData);
-
-      if (Array.isArray(communitiesData.communities) && communitiesData.communities.length > 0) {
-        setCommunities(communitiesData.communities);
-        setOrganizationName(communitiesData.communities[0].organization?.name || "Unknown Organization");
-      } else {
-        const organizationData = await getOrganizationById(organizationId);
-        setCommunities([]);
-        setOrganizationName(organizationData.organization?.name || "Unknown Organization");
-      }
+      const organizationData = await getOrganizationById(organizationId);
+      console.log("Organization data from API:", organizationData);
+      setOrganization(organizationData.organization);
     } catch (error) {
       console.error("Error fetching communities:", error);
       setCommunities([]);
-      setOrganizationName("Unknown Organization");
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch communities",
-      });
+      showErrorToast(error);
     }
   }
 
   const handleCreateCommunity = async () => {
     if (!newCommunityName.trim()) {
-      showErrorToast("Community name is required")
+      showErrorToast("Community name is required");
       return;
     }
 
@@ -79,19 +73,17 @@ export default function DeveloperCommunitiesPage() {
         organizationId: organizationId,
       });
 
-      console.log(response);
-
       if (response?.success) {
         setNewCommunityName("");
         setDialogOpen(false);
         fetchCommunities(); // Refresh the community list
-        showResponseToast(response)
+        showResponseToast(response);
       } else {
-        showErrorToast(response?.message)
+        showErrorToast(response?.message);
       }
     } catch (error) {
       console.error("Error creating community:", error);
-      showErrorToast(error)
+      showErrorToast(error);
     }
   };
 
@@ -99,11 +91,23 @@ export default function DeveloperCommunitiesPage() {
     try {
       const response = await setWelcomingCommunity(organizationId, communityId);
       showResponseToast(response);
+      fetchCommunities(); // Refresh to show the updated organizational data
     } catch (error) {
       console.error("Error updating organization:", error);
       showErrorToast(error);
     }
-  }
+  };
+
+  const handleSetLeadershipCommunity = async (communityId) => {
+    try {
+      const response = await setLeadershipCommunity(organizationId, communityId);
+      showResponseToast(response);
+      fetchCommunities(); // Refresh to show the updated organizational data
+    } catch (error) {
+      console.error("Error updating leadership community:", error);
+      showErrorToast(error);
+    }
+  };
 
   const handleDeleteOrganization = async () => {
     try {
@@ -135,10 +139,14 @@ export default function DeveloperCommunitiesPage() {
       <Breadcrumb items={breadcrumbItems} />
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-medium">Communities in {organizationName}</h3>
+          <h3 className="text-lg font-medium">Communities in {organization?.name}</h3>
           <p className="text-sm text-muted-foreground">
-            Organization ID: {organizationId}
+            Organization ID: {organization?.id}
           </p>
+
+          <div className={'pt-2'}>Welcoming Community: {organization?.welcomingCommunity?.name || "None"}</div>
+          <div className={'pt-2'}>Leadership Community: {organization?.leadershipCommunity?.name || "None"}</div>
+
         </div>
         <div className="space-x-2 flex justify-between items-center">
           <DropdownMenu>
@@ -146,9 +154,6 @@ export default function DeveloperCommunitiesPage() {
               <Button variant="outline">Actions</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {/*<DropdownMenuItem onClick={() => console.log("Edit organization")}>*/}
-              {/*  Edit Organization*/}
-              {/*</DropdownMenuItem>*/}
               <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
                 Delete Organization
               </DropdownMenuItem>
@@ -163,6 +168,8 @@ export default function DeveloperCommunitiesPage() {
         deleteEntity={(id) => console.log("Delete community", id)}
         onManageMembers={(community) => console.log("Manage members for", community)}
         handleSetWelcomingCommittee={handleSetWelcomingCommittee}
+        handleSetLeadershipCommunity={handleSetLeadershipCommunity}
+        organization={organization} // Pass the organization object
       />
 
       {/*Create a new community*/}
@@ -171,7 +178,7 @@ export default function DeveloperCommunitiesPage() {
           <DialogHeader>
             <DialogTitle>Create a New Community</DialogTitle>
             <DialogDescription>
-              Add a new community to {organizationName}.
+              Add a new community to {organization?.name}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -196,7 +203,7 @@ export default function DeveloperCommunitiesPage() {
           <DialogHeader>
             <DialogTitle>Delete Organization</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {organizationName}? This action cannot be undone.
+              Are you sure you want to delete {organization?.name}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

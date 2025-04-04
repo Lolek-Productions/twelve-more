@@ -15,8 +15,8 @@ import {
   getCommunitiesByOrganization,
 } from "@/lib/actions/community.js";
 import {currentUser} from "@clerk/nextjs/server";
-import {redirect} from "next/navigation.js";
 
+//This is the main function for creating a new organization
 export async function createOrganizationWithWelcomingCommunity(formData, userId) {
   try {
     await connect();
@@ -38,7 +38,8 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
       throw new Error(`Failed to associate organization with user: ${orgAddResult.error}`);
     }
 
-    const community = await Community.create({
+    //Welcoming Community
+    const community1 = await Community.create({
       name: `Welcome to ${data.name}!`,
       purpose: `To warmly invite new members to feel a greater sense of belonging at ${data.name}`,
       visibility: "public",
@@ -49,15 +50,36 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
     // Add the community to the organization as the welcomingCommunity
     await Organization.findByIdAndUpdate(
       organization.id,
-      { welcomingCommunity: community._id }
+      { welcomingCommunity: community1._id }
     );
 
     // Add community to User (consider a specific function to add as admin)
-    const comAddResult = await addCommunityToUser(community._id.toString(), userId, 'leader', false);
+    const comAddResult = await addCommunityToUser(community1._id.toString(), userId, 'leader', false);
     if (!comAddResult.success) {
       console.warn(`Failed to add community to user: ${comAddResult.error}`);
     }
 
+    //Leadership Community
+    const leadershipCommunity = await Community.create({
+      name: `${data.name} Leadership Community`,
+      purpose: `To help develop the leadership of communities at ${data.name}.  Newly leaders of groups will be automatically added to this group.`,
+      visibility: "private",
+      createdBy: userId,
+      organization: organization.id,
+    });
+
+    await Organization.findByIdAndUpdate(
+      organization.id,
+      { leadershipCommunity: leadershipCommunity._id }
+    );
+
+    // Add community to User
+    const leadershipResult = await addCommunityToUser(leadershipCommunity._id.toString(), userId, 'leader', false);
+    if (!leadershipResult.success) {
+      console.warn(`Failed to add community to user: ${leadershipResult.error}`);
+    }
+
+    //Various individual communities
     const community2 = await Community.create({
       name: `Lectors`,
       purpose: `To boldly proclaim the word of God!`,
@@ -146,7 +168,10 @@ export const getOrganizationById = async function (organizationId) {
   try {
     await connect(); // Ensure database connection
 
-    const organization = await Organization.findById(organizationId)
+    const organization = await Organization
+      .findById(organizationId)
+      .populate('welcomingCommunity')
+      .populate('leadershipCommunity')
       .lean();
 
     if (!organization) {
@@ -160,6 +185,14 @@ export const getOrganizationById = async function (organizationId) {
         id: organization._id?.toString() || "",
         name: organization.name,
         description: organization.description,
+        welcomingCommunity: {
+          id: organization.welcomingCommunity?.id,
+          name: organization.welcomingCommunity?.name
+        },
+        leadershipCommunity: {
+          id: organization.leadershipCommunity?.id,
+          name: organization.leadershipCommunity?.name
+        },
       }
     };
   } catch (error) {
@@ -232,6 +265,37 @@ export async function setWelcomingCommunity(organizationId, communityId) {
     return {
       success: false,
       message:"Failed to update Welcoming Community",
+    };
+  }
+}
+
+export async function setLeadershipCommunity(organizationId, communityId) {
+  try {
+    await connect();
+
+    // Update the organization with the leadership community
+    const updatedOrganization = await Organization.findByIdAndUpdate(
+      organizationId,
+      { leadershipCommunity: communityId },
+      { new: true }
+    );
+
+    if (!updatedOrganization) {
+      return {
+        success: false,
+        message: 'Organization not found',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Leadership community updated successfully',
+    };
+  } catch (error) {
+    console.error('Error in setLeadershipCommunity:', error);
+    return {
+      success: false,
+      message: error.message || 'Something went wrong',
     };
   }
 }

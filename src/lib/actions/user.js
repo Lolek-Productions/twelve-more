@@ -1,13 +1,13 @@
 "use server";
 
-import User from '../models/user.model';
-import Organization from '../models/organization.model';
-import { connect } from '../mongodb/mongoose';
+import { connect } from '../mongodb/mongoose.js';
 import mongoose from "mongoose";
-import Community from '../models/community.model';
-import Post from "@/lib/models/post.model";
-import twilioService from "@/lib/services/twilioService.js";
-import {PUBLIC_APP_URL} from "@/lib/constants.js";
+import User from '../models/user.model.js';
+import Organization from '../models/organization.model.js';
+import Community from '../models/community.model.js';
+import Post from "../models/post.model.js";
+import twilioService from "../services/twilioService.js";
+import {PUBLIC_APP_URL} from "../constants.js";
 
 export const createOrUpdateUser = async (
   id,
@@ -625,8 +625,8 @@ export async function addCommunityToUser(communityId, userId, role = 'member', a
         const addedCommunityName = addedCommunity ? addedCommunity.community.name : null;
 
         const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}!  Be sure to welcome them to the 12!  ${PUBLIC_APP_URL}/communities/${communityId}/posts`;
+
         const smsResponse = await twilioService.sendBatchSMS(leadersPhoneNumbers, message);
-        // console.log('SMS notification to leaders:', smsResponse);
       }
     }
 
