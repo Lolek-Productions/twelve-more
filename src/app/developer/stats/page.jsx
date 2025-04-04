@@ -19,7 +19,6 @@ export default function StatsPage() {
   const [communityCount, setCommunityCount] = useState(null)
   const [organizationCount, setOrganizationCount] = useState(null)
 
-  // Initialize with Date objects
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(new Date())
   const [isLoading, setIsLoading] = useState(false)
