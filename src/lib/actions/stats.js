@@ -21,6 +21,8 @@ export async function getNewPostCountForDateRange(startDate, endDate, options = 
     end;
 
   try {
+    await connect();
+
     const count = await Post.countDocuments({
       createdAt: {
         $gte: rangeStart,
@@ -50,6 +52,8 @@ export async function getNewUserCountForDateRange(startDate, endDate, options = 
     end;
 
   try {
+    await connect();
+
     const count = await User.countDocuments({
       createdAt: {
         $gte: rangeStart,
@@ -79,6 +83,8 @@ export async function getNewCommunityCountForDateRange(startDate, endDate, optio
     end;
 
   try {
+    await connect();
+
     const count = await Community.countDocuments({
       createdAt: {
         $gte: rangeStart,
@@ -108,6 +114,8 @@ export async function getNewOrganizationCountForDateRange(startDate, endDate, op
     end;
 
   try {
+    await connect();
+
     const count = await Organization.countDocuments({
       createdAt: {
         $gte: rangeStart,
