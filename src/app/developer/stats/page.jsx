@@ -1,162 +1,193 @@
 "use client"
 
-import { ChartContainer } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import {useEffect, useState} from "react";
-import {checkPhoneExists} from "@/lib/actions/clerk.js";
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
 import {
   getNewCommunityCountForDateRange,
   getNewOrganizationCountForDateRange,
-  getNewPostCountForDateRange, getNewUserCountForDateRange,
-  getPostCountForDateRange
-} from "@/lib/actions/stats.js";
-import moment from "moment";
-
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-]
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "#2563eb",
-  },
-}
+  getNewPostCountForDateRange,
+  getNewUserCountForDateRange
+} from "@/lib/actions/stats.js"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import moment from "moment-timezone"
 
 export default function StatsPage() {
-  const [postCount, setPostCount] = useState(null);
-  const [userCount, setUserCount] = useState(null);
-  const [communityCount, setCommunityCount] = useState(null);
-  const [organizationCount, setOrganizationCount] = useState(null);
+  const [postCount, setPostCount] = useState(null)
+  const [userCount, setUserCount] = useState(null)
+  const [communityCount, setCommunityCount] = useState(null)
+  const [organizationCount, setOrganizationCount] = useState(null)
 
-  useEffect(() => {
-    async function loadGetPostCount() {
-      try {
-        // Call server action to check if user exists
-        const result = await getNewPostCountForDateRange(moment.now(), moment.now());
+  // Initialize with Date objects
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date())
+  const [isLoading, setIsLoading] = useState(false)
 
-        if (result.success) {
-          // console.log(result.count);
-          setPostCount(result.count);
-        } else {
-          console.error('Problem getting count of posts');
-        }
-      } catch (error) {
-        console.error('Error loading post count:', error);
-      }
+  // Convert date to UTC, considering it was in Central Time
+  const convertToUTC = (date) => {
+    // Create a moment object in Central Time
+    const centralTime = moment.tz(date, "America/Chicago")
+
+    // Convert to UTC
+    return centralTime.utc().toDate()
+  }
+
+  // Function to load all stats with a single date range
+  const loadAllStats = async (from, to) => {
+    setIsLoading(true)
+
+    try {
+      // Ensure from and to are Date objects
+      const fromDate = from instanceof Date ? from : new Date(from)
+      const toDate = to instanceof Date ? to : new Date(to)
+
+      // Convert dates from Central Time to UTC
+      const fromUTC = convertToUTC(fromDate)
+      const toUTC = convertToUTC(toDate)
+
+      // For the end date, set it to the end of the day in UTC
+      // This ensures we capture all data for that day
+      toUTC.setUTCHours(23, 59, 59, 999)
+
+      // Format dates as ISO strings for the server actions
+      const startDateISO = fromUTC.toISOString()
+      const endDateISO = toUTC.toISOString()
+
+      // console.log(`Querying from ${startDateISO} to ${endDateISO}`)
+
+      // Load all stats in parallel
+      const [postResult, userResult, communityResult, orgResult] = await Promise.all([
+        getNewPostCountForDateRange(startDateISO, endDateISO),
+        getNewUserCountForDateRange(startDateISO, endDateISO),
+        getNewCommunityCountForDateRange(startDateISO, endDateISO),
+        getNewOrganizationCountForDateRange(startDateISO, endDateISO)
+      ])
+
+      // Update state with results
+      if (postResult.success) setPostCount(postResult.count)
+      if (userResult.success) setUserCount(userResult.count)
+      if (communityResult.success) setCommunityCount(communityResult.count)
+      if (orgResult.success) setOrganizationCount(orgResult.count)
+
+    } catch (error) {
+      console.error('Error loading stats:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    loadGetPostCount();
-  }, []);
+  // Handler for applying the date range
+  const handleApplyDateRange = async () => {
+    await loadAllStats(startDate, endDate)
+  }
 
+  // Handler for start date change
+  const handleStartDateChange = (date) => {
+    setStartDate(date)
+  }
+
+  // Handler for end date change
+  const handleEndDateChange = (date) => {
+    setEndDate(date)
+  }
+
+  // Initial load on component mount
   useEffect(() => {
-    async function loadGetUserCount() {
-      try {
-        const result = await getNewUserCountForDateRange(moment.now(), moment.now());
+    loadAllStats(startDate, endDate)
+  }, [])
 
-        if (result.success) {
-          setUserCount(result.count);
-        } else {
-          console.error('Problem getting count of users');
-        }
-      } catch (error) {
-        console.error('Error loading user count:', error);
-      }
+  // Format the date range string for display
+  const getDateRangeString = () => {
+    try {
+      const start = format(new Date(startDate), "MMMM d, yyyy")
+      const end = format(new Date(endDate), "MMMM d, yyyy")
+      return start === end ? start : `${start} - ${end}`
+    } catch (error) {
+      console.error("Error formatting date range:", error)
+      return "Selected date range"
     }
-
-    loadGetUserCount();
-  }, []);
-
-  useEffect(() => {
-    async function loadGetCommunityCount() {
-      try {
-        const result = await getNewCommunityCountForDateRange(moment.now(), moment.now());
-
-        if (result.success) {
-          setCommunityCount(result.count);
-        } else {
-          console.error('Problem getting count of communities');
-        }
-      } catch (error) {
-        console.error('Error loading community count:', error);
-      }
-    }
-
-    loadGetCommunityCount();
-  }, []);
-
-  useEffect(() => {
-    async function loadGetOrganizationCount() {
-      try {
-        const result = await getNewOrganizationCountForDateRange(moment.now(), moment.now());
-
-        if (result.success) {
-          setOrganizationCount(result.count);
-        } else {
-          console.error('Problem getting count of organizations');
-        }
-      } catch (error) {
-        console.error('Error loading organization count:', error);
-      }
-    }
-
-    loadGetOrganizationCount();
-  }, []);
+  }
 
   return (
-    <>
-      <div className="bg-white shadow-md rounded-lg p-6 max-w-md mx-auto">
-        <div className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
-          Dashboard Statistics for the Day: {moment().format('MMMM D, YYYY')}
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Dashboard Statistics</h1>
+
+      <div className="bg-white shadow-sm rounded-lg p-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Start Date
+            </label>
+            <DatePicker
+              date={startDate}
+              onSelect={handleStartDateChange}
+              label="Select start date"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              End Date
+            </label>
+            <DatePicker
+              date={endDate}
+              onSelect={handleEndDateChange}
+              label="Select end date"
+            />
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-blue-50 p-4 rounded-md">
-            <div className="text-sm text-blue-500 font-medium">New Posts</div>
-            <div className="text-2xl font-bold text-blue-700">{postCount}</div>
-          </div>
-
-          <div className="bg-green-50 p-4 rounded-md">
-            <div className="text-sm text-green-500 font-medium">New Users</div>
-            <div className="text-2xl font-bold text-green-700">{userCount}</div>
-          </div>
-
-          <div className="bg-purple-50 p-4 rounded-md">
-            <div className="text-sm text-purple-500 font-medium">New Communities</div>
-            <div className="text-2xl font-bold text-purple-700">{communityCount}</div>
-          </div>
-
-          <div className="bg-amber-50 p-4 rounded-md">
-            <div className="text-sm text-amber-500 font-medium">New Organizations</div>
-            <div className="text-2xl font-bold text-amber-700">{organizationCount}</div>
-          </div>
-        </div>
+        <Button
+          onClick={handleApplyDateRange}
+          disabled={isLoading}
+          className="w-full sm:w-auto"
+        >
+          {isLoading ? 'Loading...' : 'Update Statistics'}
+        </Button>
       </div>
-    </>
 
-    // <ChartContainer config={chartConfig} className="h-[400px] w-full">
-    //   <BarChart accessibilityLayer data={chartData}>
-    //     <CartesianGrid vertical={false} />
-    //     <XAxis
-    //       dataKey="month"
-    //       tickLine={false}
-    //       tickMargin={10}
-    //       axisLine={false}
-    //       tickFormatter={(value) => value.slice(0, 3)}
-    //     />
-    //     <YAxis
-    //       tickLine={false}
-    //       axisLine={false}
-    //       tickMargin={10}
-    //     />
-    //     <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-    //   </BarChart>
-    // </ChartContainer>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl">
+            {isLoading ? (
+              <span>Loading statistics...</span>
+            ) : (
+              <span>Statistics for: {getDateRangeString()}</span>
+            )}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div className="bg-blue-50 p-4 rounded-md">
+              <div className="text-sm text-blue-500 font-medium">New Posts</div>
+              <div className="text-2xl font-bold text-blue-700">
+                {isLoading ? '...' : postCount}
+              </div>
+            </div>
+
+            <div className="bg-green-50 p-4 rounded-md">
+              <div className="text-sm text-green-500 font-medium">New Users</div>
+              <div className="text-2xl font-bold text-green-700">
+                {isLoading ? '...' : userCount}
+              </div>
+            </div>
+
+            <div className="bg-purple-50 p-4 rounded-md">
+              <div className="text-sm text-purple-500 font-medium">New Communities</div>
+              <div className="text-2xl font-bold text-purple-700">
+                {isLoading ? '...' : communityCount}
+              </div>
+            </div>
+
+            <div className="bg-amber-50 p-4 rounded-md">
+              <div className="text-sm text-amber-500 font-medium">New Organizations</div>
+              <div className="text-2xl font-bold text-amber-700">
+                {isLoading ? '...' : organizationCount}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
