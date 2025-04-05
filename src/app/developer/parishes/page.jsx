@@ -112,7 +112,7 @@ function ParishesPage() {
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold mb-6">Parishes Directory</h1>
+      <h1 className="text-2xl font-bold mb-6">Parishes/Organizations Directory - Total Count: {totalParishes}</h1>
 
       {/* Search Input */}
       <div className="mb-4">
