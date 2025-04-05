@@ -34,6 +34,10 @@ const sidebarNavItems = [
     href: "/developer/commands",
   },
   {
+    title: "Parishes",
+    href: "/developer/parishes",
+  },
+  {
     title: "Phone Lookup",
     href: "/developer/phone-lookup",
   },
