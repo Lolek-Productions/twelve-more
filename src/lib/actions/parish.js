@@ -4,7 +4,7 @@ import Parish from '@/lib/models/parish.model';
 import { connect } from "@/lib/mongodb/mongoose";
 
 export async function getParishes(queryData) {
-
+  console.log('queryData', queryData);
   try {
     const page = queryData ? Number(queryData.page || 1) : 1;
     const limit = queryData ? Number(queryData.limit || 10) : 10;

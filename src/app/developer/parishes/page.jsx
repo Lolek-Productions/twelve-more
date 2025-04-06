@@ -11,32 +11,39 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
-import {getParishes} from "@/lib/actions/parish.js";
+import { getParishes } from "@/lib/actions/parish.js";
 
 function ParishesPage() {
   const [parishes, setParishes] = useState([]);
   const [totalParishes, setTotalParishes] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [page, setPage] = useState(1); // Start at page 1 (not 0)
+  const [limit, setLimit] = useState(10);
   const [filtering, setFiltering] = useState('');
+  const [sortField, setSortField] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     const loadParishes = async () => {
       setLoading(true);
       try {
-        const { parishes, totalCount } = await getParishes({
-          pageIndex: pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          sorting,
-          filtering
+        // Match the expected parameter structure of getParishes function
+        const result = await getParishes({
+          page,
+          limit,
+          filtering,
+          sortField,
+          sortOrder
         });
 
-        setParishes(parishes);
-        setTotalParishes(totalCount);
+        if (result.success) {
+          setParishes(result.parishes);
+          setTotalParishes(result.totalCount);
+          setTotalPages(result.totalPages);
+        } else {
+          console.error('Failed to load parishes', result);
+        }
       } catch (error) {
         console.error('Failed to load parishes', error);
       } finally {
@@ -45,7 +52,20 @@ function ParishesPage() {
     };
 
     loadParishes();
-  }, [pagination, sorting, filtering]);
+  }, [page, limit, filtering, sortField, sortOrder]);
+
+  // Handle sorting changes from the table
+  const handleSortingChange = (newSorting) => {
+    if (newSorting.length > 0) {
+      const column = newSorting[0].id;
+      const direction = newSorting[0].desc ? 'desc' : 'asc';
+      setSortField(column);
+      setSortOrder(direction);
+    } else {
+      setSortField('name');
+      setSortOrder('asc');
+    }
+  };
 
   // Column helper for type-safe column definitions
   const columnHelper = createColumnHelper();
@@ -95,20 +115,34 @@ function ParishesPage() {
     data: parishes,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    pageCount: Math.ceil(totalParishes / pagination.pageSize),
+    pageCount: totalPages,
     state: {
-      sorting,
-      pagination,
+      pagination: {
+        pageIndex: page - 1, // Convert from 1-based to 0-based for table
+        pageSize: limit,
+      },
+      sorting: sortField ? [{ id: sortField, desc: sortOrder === 'desc' }] : [],
+      globalFilter: filtering,
     },
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onSortingChange: handleSortingChange,
+    // We'll handle pagination manually
   });
+
+  // Handle manual pagination
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -122,7 +156,7 @@ function ParishesPage() {
           value={filtering}
           onChange={(e) => {
             setFiltering(e.target.value);
-            table.setPageIndex(0);
+            setPage(1); // Reset to first page on new search
           }}
           className="border rounded px-2 py-1 w-full"
         />
@@ -159,18 +193,26 @@ function ParishesPage() {
             ))}
             </thead>
             <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="border-b hover:bg-gray-50">
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="p-2">
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
-                  </td>
-                ))}
+            {parishes.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="p-4 text-center">
+                  No parishes found
+                </td>
               </tr>
-            ))}
+            ) : (
+              table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="border-b hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="p-2">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
             </tbody>
           </table>
 
@@ -178,15 +220,15 @@ function ParishesPage() {
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={handlePreviousPage}
+                disabled={page === 1}
                 className="flex items-center border rounded px-2 py-1 disabled:opacity-50"
               >
                 <ChevronLeft className="mr-1 h-4 w-4" /> Previous
               </button>
               <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={handleNextPage}
+                disabled={page >= totalPages}
                 className="flex items-center border rounded px-2 py-1 disabled:opacity-50"
               >
                 Next <ChevronRight className="ml-1 h-4 w-4" />
@@ -194,19 +236,21 @@ function ParishesPage() {
             </div>
 
             <div className="text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{' '} {Math.ceil(totalParishes / table.getState().pagination.pageSize)}
+              Page {page} of {Math.max(1, totalPages)}
             </div>
 
             <select
-              value={table.getState().pagination.pageSize}
+              value={limit}
               onChange={(e) => {
-                table.setPageSize(Number(e.target.value));
+                const newLimit = Number(e.target.value);
+                setLimit(newLimit);
+                setPage(1); // Reset to first page when changing page size
               }}
               className="border rounded px-2 py-1"
             >
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
+              {[10, 20, 30, 40, 50].map((size) => (
+                <option key={size} value={size}>
+                  Show {size}
                 </option>
               ))}
             </select>

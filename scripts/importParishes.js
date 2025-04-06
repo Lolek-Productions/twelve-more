@@ -48,8 +48,9 @@ async function readJsonFilesFromDirectory(directoryPath) {
 
 // Function to import parishes into MongoDB in batches without checking for duplicates
 async function importParishes() {
-  const directoryPath = "../../Desktop/json_results";
-  // return console.log(directoryPath);
+  const directoryPath = "../../Desktop/json_results_fixed";
+
+  return console.log(directoryPath);
 
   try {
     const parishes = await readJsonFilesFromDirectory(directoryPath);
