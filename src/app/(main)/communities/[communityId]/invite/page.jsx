@@ -214,7 +214,7 @@ export default function Invite() {
           <div>
             <h3 className="text-lg">1. QR Code to be printed or shared</h3>
             <h3 className="text-xs">Click to open the image so you can save to your device</h3>
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-5 items-center">
               <Link title="Share this QR code with people so that they can join this group." target="_blank" href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}>
                 <Image
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}
@@ -225,6 +225,10 @@ export default function Invite() {
                   priority
                 />
               </Link>
+
+              <Button asChild className="" >
+                <Link target="_blank" href={`/print/communities/${communityId}/invitation-sheet`}>Print Sheet</Link>
+              </Button>
             </div>
           </div>
         </div>

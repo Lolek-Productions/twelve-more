@@ -37,3 +37,7 @@ https://dashboard.clerk.com
 
 Remember that there are two instances of Clerk: a production instance and a development instance
 This should be kept in mind when testing
+
+<Button asChild className="mb-4" >
+  <Link href={`/organizations/${organization.id}/community/create`}>Create New Community</Link>
+</Button>
