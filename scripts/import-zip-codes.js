@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import ZipCode from '../src/lib/models/zip-code.model.js';
+import ZipCode from '@/lib/models/zipcode.model.js';
 
 dotenv.config({ path: '/Users/joshmccarty/Code-2022M1/twelve-more/.env.local' });
 
