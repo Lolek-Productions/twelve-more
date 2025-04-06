@@ -115,8 +115,8 @@ export async function createPost(postData) {
 
         const truncatedText = truncateText(text, 150);
 
-        const communityLink = `${PUBLIC_APP_URL}/communities/${communityId}/posts`;
-        const messageBody = `New post: ${user.firstName} ${user.lastName}-${community.name}: "${truncatedText}" Check it out: ${communityLink}`;
+        const postLink = `${PUBLIC_APP_URL}/posts/${newPost._id.toString()}`;
+        const messageBody = `New post by ${user.firstName} ${user.lastName} in ${community.name}: "${truncatedText}" Check it out: ${postLink}`;
 
         // Send batch SMS using Twilio Notify
         const batchResult = await twilioService.sendBatchSMS(otherMembersPhoneNumbers, messageBody);
@@ -132,14 +132,14 @@ export async function createPost(postData) {
           return { success: true, message: "Notification failed but post created" };
         }
 
-        return { success: true, message: "Post Created"};
+        return { success: true, message: "Post Created and community notified"};
       } catch (error) {
         console.error('Error in community notification:', error);
         return { success: true, message: "Error in community notification" };
       }
     } else {
       console.log('No communityId provided, skipping notification');
-      return { success: true, message: "No communityId provided, skipping notification", notificationSent: false };
+      return { success: true, message: "Post created" };
     }
   } catch (error) {
     console.log('Error creating post:', error);
