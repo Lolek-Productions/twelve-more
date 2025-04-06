@@ -80,9 +80,9 @@ function ParishesPage() {
       header: 'State',
       cell: info => info.getValue(),
     }),
-    columnHelper.accessor('phone', {
-      header: 'Phone',
-      cell: info => info.getValue() || 'No phone',
+    columnHelper.accessor('zipcode', {
+      header: 'Zipcode',
+      cell: info => info.getValue() || 'No Zipcode',
     }),
     columnHelper.accessor('address', {
       header: 'Address',

@@ -21,7 +21,8 @@ export async function getParishes(queryData) {
         $or: [
           { name: { $regex: search, $options: 'i' } },
           { city: { $regex: search, $options: 'i' } },
-          { state: { $regex: search, $options: 'i' } }
+          { state: { $regex: search, $options: 'i' } },
+          { zipcode: { $regex: search, $options: 'i' } }
         ]
       }
       : {};
