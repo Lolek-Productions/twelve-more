@@ -24,6 +24,18 @@ function ParishesPage() {
   const [sortField, setSortField] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
 
+  // Debugging for API parameters
+  useEffect(() => {
+    console.log('API Parameters:', {
+      page,
+      limit,
+      filtering,
+      sortField,
+      sortOrder
+    });
+  }, [page, limit, filtering, sortField, sortOrder]);
+
+  // Load parishes data
   useEffect(() => {
     const loadParishes = async () => {
       setLoading(true);
@@ -54,19 +66,6 @@ function ParishesPage() {
     loadParishes();
   }, [page, limit, filtering, sortField, sortOrder]);
 
-  // Handle sorting changes from the table
-  const handleSortingChange = (newSorting) => {
-    if (newSorting.length > 0) {
-      const column = newSorting[0].id;
-      const direction = newSorting[0].desc ? 'desc' : 'asc';
-      setSortField(column);
-      setSortOrder(direction);
-    } else {
-      setSortField('name');
-      setSortOrder('asc');
-    }
-  };
-
   // Column helper for type-safe column definitions
   const columnHelper = createColumnHelper();
 
@@ -76,10 +75,17 @@ function ParishesPage() {
       header: ({ column }) => (
         <button
           className="flex items-center"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            const isAsc = sortField === 'name' && sortOrder === 'asc';
+            setSortField('name');
+            setSortOrder(isAsc ? 'desc' : 'asc');
+          }}
         >
           Parish Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          {sortField === 'name' && (
+            <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+          )}
         </button>
       ),
       cell: info => info.getValue(),
@@ -88,24 +94,76 @@ function ParishesPage() {
       header: ({ column }) => (
         <button
           className="flex items-center"
-          onClick={() => column.toggleSorting()}
+          onClick={() => {
+            const isAsc = sortField === 'city' && sortOrder === 'asc';
+            setSortField('city');
+            setSortOrder(isAsc ? 'desc' : 'asc');
+          }}
         >
           City
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          {sortField === 'city' && (
+            <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+          )}
         </button>
       ),
       cell: info => info.getValue(),
     }),
     columnHelper.accessor('state', {
-      header: 'State',
+      header: ({ column }) => (
+        <button
+          className="flex items-center"
+          onClick={() => {
+            const isAsc = sortField === 'state' && sortOrder === 'asc';
+            setSortField('state');
+            setSortOrder(isAsc ? 'desc' : 'asc');
+          }}
+        >
+          State
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {sortField === 'state' && (
+            <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+          )}
+        </button>
+      ),
       cell: info => info.getValue(),
     }),
     columnHelper.accessor('zipcode', {
-      header: 'Zipcode',
+      header: ({ column }) => (
+        <button
+          className="flex items-center"
+          onClick={() => {
+            const isAsc = sortField === 'zipcode' && sortOrder === 'asc';
+            setSortField('zipcode');
+            setSortOrder(isAsc ? 'desc' : 'asc');
+          }}
+        >
+          Zipcode
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {sortField === 'zipcode' && (
+            <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+          )}
+        </button>
+      ),
       cell: info => info.getValue() || 'No Zipcode',
     }),
     columnHelper.accessor('address', {
-      header: 'Address',
+      header: ({ column }) => (
+        <button
+          className="flex items-center"
+          onClick={() => {
+            const isAsc = sortField === 'address' && sortOrder === 'asc';
+            setSortField('address');
+            setSortOrder(isAsc ? 'desc' : 'asc');
+          }}
+        >
+          Address
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {sortField === 'address' && (
+            <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+          )}
+        </button>
+      ),
       cell: info => info.getValue() || 'No address',
     }),
   ];
@@ -124,11 +182,8 @@ function ParishesPage() {
         pageIndex: page - 1, // Convert from 1-based to 0-based for table
         pageSize: limit,
       },
-      sorting: sortField ? [{ id: sortField, desc: sortOrder === 'desc' }] : [],
-      globalFilter: filtering,
     },
-    onSortingChange: handleSortingChange,
-    // We'll handle pagination manually
+    // We're handling sorting directly, not through the table's internal state
   });
 
   // Handle manual pagination
@@ -200,16 +255,13 @@ function ParishesPage() {
                 </td>
               </tr>
             ) : (
-              table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="border-b hover:bg-gray-50">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="p-2">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+              parishes.map((parish, index) => (
+                <tr key={parish.id || index} className="border-b hover:bg-gray-50">
+                  <td className="p-2">{parish.name}</td>
+                  <td className="p-2">{parish.city}</td>
+                  <td className="p-2">{parish.state}</td>
+                  <td className="p-2">{parish.zipcode || 'No Zipcode'}</td>
+                  <td className="p-2">{parish.address || 'No address'}</td>
                 </tr>
               ))
             )}
