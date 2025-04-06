@@ -226,7 +226,7 @@ export default function Invite() {
                 />
               </Link>
 
-              <Button asChild className="" >
+              <Button variant="outline" asChild className="" >
                 <Link target="_blank" href={`/print/communities/${communityId}/invitation-sheet`}>Print Sheet</Link>
               </Button>
             </div>
