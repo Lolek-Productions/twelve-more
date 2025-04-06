@@ -6,3 +6,5 @@ export const DEV_IDS = [
   '67c367148e1ad29f86735221', //Tim
   '67c5c6858e1ad29f8673833e', //Maria
 ]
+
+export const TAG_LINE = "12More is where communities grow";

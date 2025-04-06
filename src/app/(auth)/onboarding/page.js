@@ -15,6 +15,7 @@ import { z } from "zod"
 import React, { useEffect, useState } from "react";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {addCommunityToUser, addOrganizationToUser} from "@/lib/actions/user.js";
+import {TAG_LINE} from "@/lib/constants.js";
 
 const formSchema = z.object({
   organizationName: z
@@ -198,7 +199,12 @@ export default function OnboardingComponent() {
               height={45}
               priority
             />
-            <CardTitle className="text-center text-2xl">Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+            <CardTitle className="text-center">
+              <div className="text-2xl">
+                Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!
+              </div>
+              <div className={'pt-2'}>{TAG_LINE}</div>
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -272,7 +278,12 @@ export default function OnboardingComponent() {
             height={45}
             priority
           />
-          <CardTitle className="text-center text-2xl">Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!</CardTitle>
+          <CardTitle className="text-center">
+            <div className="text-2xl">
+              Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!
+            </div>
+            <div className={'pt-2'}>{TAG_LINE}</div>
+          </CardTitle>
         </CardHeader>
 
         <CardContent>
