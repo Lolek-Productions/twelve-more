@@ -20,12 +20,13 @@ export default function PostInput({
                                     refreshMainPage = null,
                                     autoFocus = false  // Added autoFocus prop with default value
                                   }) {
-  // console.log('parentId', parentId);
+
   const { user, isSignedIn, isLoaded } = useUser();
   const {appUser} = useAppUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showResponseToast, showErrorToast } = useApiToast();
   const [ community, setCommunity ] = useState(null);
+  const [draftKey, setDraftKey] = useState('');
 
   //Image
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -48,6 +49,84 @@ export default function PostInput({
       return () => clearTimeout(timer);
     }
   }, [autoFocus]);
+
+  const autoResizeTextarea = (element, maxHeight = 200) => {
+    // Reset height to auto to get the correct scrollHeight
+    element.style.height = 'auto';
+
+    // Set the height to the scrollHeight (content height)
+    element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
+
+    // If content exceeds maxHeight, enable scrolling
+    element.style.overflowY = element.scrollHeight > maxHeight ? 'auto' : 'hidden';
+  };
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Initial resize
+      autoResizeTextarea(textareaRef.current, 200);
+
+      // Apply resize after content is inserted programmatically too
+      if (text) {
+        autoResizeTextarea(textareaRef.current, 200);
+      }
+    }
+  }, [text, textareaRef.current]);
+
+  useEffect(() => {
+    // Create a unique key for this specific post input based on context
+    const key = `draft_${communityId || ''}_${organizationId || ''}_${parentId || 'main'}`;
+    setDraftKey(key);
+
+    // Load any saved draft on component mount
+    const savedDraft = localStorage.getItem(key);
+    if (savedDraft) {
+      setText(savedDraft);
+    }
+
+    // Clean up function to handle component unmount or page refresh
+    return () => {
+      // Optionally clear the draft when component unmounts
+      // If you want drafts to persist across sessions, comment this out
+      // localStorage.removeItem(key);
+    };
+  }, [communityId, organizationId, parentId]);
+
+  // Add this function to save drafts periodically
+  const saveDraft = (content) => {
+    if (!draftKey) return;
+
+    if (content.trim() === '') {
+      // If content is empty, remove the draft
+      localStorage.removeItem(draftKey);
+    } else {
+      // Save non-empty content
+      localStorage.setItem(draftKey, content);
+    }
+  };
+
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setText(newText);
+
+    // Auto-resize if you're using that functionality
+    if (typeof autoResizeTextarea === 'function') {
+      autoResizeTextarea(e.target, 500);
+    }
+
+    // Save draft after a short delay (debounce)
+    clearTimeout(window.saveTimeout);
+    window.saveTimeout = setTimeout(() => {
+      saveDraft(newText);
+    }, 500); // Save after 500ms of inactivity
+  };
+
+// Clear the draft after successful submission
+  const clearDraft = () => {
+    if (draftKey) {
+      localStorage.removeItem(draftKey);
+    }
+  };
 
   //Image
   const addImageToPost = (e) => {
@@ -147,6 +226,8 @@ export default function PostInput({
     setText('');
     setSelectedFile(null);
     setImageFileUrl(null);
+    clearDraft();
+
 
     // Call the refreshMainPage function if provided
     if (refreshMainPage && typeof refreshMainPage === 'function') {
@@ -193,10 +274,14 @@ export default function PostInput({
           ref={textareaRef}
           className='w-full border-none outline-none tracking-wide min-h-[50px] text-gray-700'
           placeholder={placeholder || (parentId ? 'Write a comment...' : 'What\'s on your mind?')}
-          rows={parentId ? '2' : '3'}
+          rows="2" // Start with 1 row
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleTextChange}
           onKeyDown={handleKeyDown}
+          style={{
+            resize: 'none',
+            overflowY: 'hidden', // Hide scrollbar initially
+          }}
         ></textarea>
         {selectedFile && (
           <img
