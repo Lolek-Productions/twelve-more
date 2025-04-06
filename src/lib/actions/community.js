@@ -243,7 +243,13 @@ export const getCommunityById = async function (communityId) {
     await connect();
 
     const community = await Community.findById(communityId)
-      .populate('organization')
+      .populate({
+        path: 'organization',
+        populate: [
+          { path: 'welcomingCommunity' },
+          { path: 'leadershipCommunity' }
+        ]
+      })
       .lean();
 
     if (!community) {
@@ -260,6 +266,8 @@ export const getCommunityById = async function (communityId) {
         organization: {
           name: community.organization?.name || "Unknown Organization",
           id: community.organization?._id?.toString() || "",
+          welcomingCommunityId: community.organization?.welcomingCommunity?._id?.toString(),
+          leadershipCommunityId: community.organization?.leadershipCommunity?._id?.toString(),
         },
       }
     };

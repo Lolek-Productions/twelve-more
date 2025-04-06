@@ -81,7 +81,7 @@ export default function CommunityContextSidebarComponent({ community, communityI
     <div className="flex flex-col h-full p-3">
       <div className="flex-1 overflow-auto">
 
-        <QuestionOfTheDay />
+        <QuestionOfTheDay community={community} />
         <MemberList community={community} members={members} />
 
         <div className="flex justify-center w-full pt-2">
