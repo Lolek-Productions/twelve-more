@@ -41,7 +41,7 @@ export default function CommunityPosts({ params }) {
 
   // Now this function can properly access fetchCommunityData
   const afterPostCreated = useCallback(async () => {
-    console.log("afterPostCreated");
+    // console.log("afterPostCreated");
     queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
   }, [fetchCommunityData]);
 
