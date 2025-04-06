@@ -74,11 +74,11 @@ export default function DevelopersPage() {
     <div className="p-4">
       <h2 className="text-2xl font-bold tracking-tight">Developers</h2>
       <p className="text-muted-foreground mb-4">
-        User documents for developers identified by phone numbers from constants.
+        User documents for developers identified by mobile phone numbers from constants.
       </p>
 
       {developers.length === 0 ? (
-        <p>No developers found matching the phone numbers.</p>
+        <p>No developers found matching the mobile phone numbers.</p>
       ) : (
         <ul className="space-y-4">
           {developers.map((dev) => (

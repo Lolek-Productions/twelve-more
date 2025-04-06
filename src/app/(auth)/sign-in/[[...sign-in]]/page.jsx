@@ -57,7 +57,7 @@ export default function SignInPage() {
                 className={`w-full rounded-md drop-shadow-none shadow-none bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950`}
               />
               <p className="text-xs text-zinc-500">
-                Enter your 10-digit US phone number (no +1 needed).
+                Enter your 10-digit US mobile phone number (no +1 needed).
               </p>
               <Clerk.FieldError className="block text-sm text-red-400"/>
             </Clerk.Field>

@@ -60,7 +60,7 @@ export default function Page() {
             router.push(`/sign-up?phone=${phoneNumber}`);
           }
         } catch (error) {
-          console.error('Error checking phone number:', error);
+          console.error('Error checking mobile phone number:', error);
           // If there's an error, default to sign-up
           router.push(`/sign-up?phone=${phoneNumber}`);
         } finally {

@@ -31,28 +31,22 @@ import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useApiToast} from "@/lib/utils.js";
 import {inviteCurrentUserToCommunity, sendCommunityInvitation} from "@/lib/actions/invite.js";
 
-// User lookup schema
 const userLookupSchema = z.object({
   query: z
     .string()
     .min(2, { message: "Search term must be at least 2 characters." })
 });
 
-// Profile form schema
 const profileFormSchema = z.object({
   phoneNumber: z
     .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid phone number (e.g., +12345678901)." })
-    .min(10, { message: "Phone Number must be 10 digits." })
-    .max(15, { message: "Phone Number must not exceed 10 digits." }),
-  // smsOptIn: z
-  //   .boolean()
-  //   .refine((val) => val === true, { message: "You must agree to receive SMS notifications." }),
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid mobile phone number (e.g., +12345678901)." })
+    .min(10, { message: "Mobile Phone Number must be 10 digits." })
+    .max(15, { message: "Mobile Phone Number must not exceed 10 digits." }),
 });
 
 const defaultValues = {
   phoneNumber: "",
-  // smsOptIn: false,
 };
 
 export default function Invite() {
@@ -256,7 +250,7 @@ export default function Invite() {
                     name="phoneNumber"
                     render={({field}) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel>Mobile Phone Number</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="e.g., 2025550123"
@@ -280,41 +274,12 @@ export default function Invite() {
                           />
                         </FormControl>
                         <FormDescription>
-                          Enter your 10-digit US phone number (no +1 needed).
+                          Enter your 10-digit US mobile phone number (no +1 needed).
                         </FormDescription>
                         <FormMessage/>
                       </FormItem>
                     )}
                   />
-
-                  {/*<FormField*/}
-                  {/*  control={inviteForm.control}*/}
-                  {/*  name="smsOptIn"*/}
-                  {/*  render={({field}) => (*/}
-                  {/*    <FormItem className="flex items-start space-x-4">*/}
-                  {/*      <FormControl>*/}
-                  {/*        <Checkbox*/}
-                  {/*          id="smsOptIn"*/}
-                  {/*          checked={field.value}*/}
-                  {/*          onCheckedChange={field.onChange}*/}
-                  {/*          className="mt-5"*/}
-                  {/*        />*/}
-                  {/*      </FormControl>*/}
-                  {/*      <div>*/}
-                  {/*        <FormLabel htmlFor="smsOptIn" className="text-sm">*/}
-                  {/*          I agree to receive SMS notifications from 12More.*/}
-                  {/*        </FormLabel>*/}
-                  {/*        <FormDescription className="text-sm">*/}
-                  {/*          Message & data rates may apply. Reply <strong>STOP</strong> to unsubscribe. See our{" "}*/}
-                  {/*          <Link target="_blank" href="/privacy" className="text-blue-500 hover:underline">*/}
-                  {/*            Privacy Policy*/}
-                  {/*          </Link>.*/}
-                  {/*        </FormDescription>*/}
-                  {/*        <FormMessage/>*/}
-                  {/*      </div>*/}
-                  {/*    </FormItem>*/}
-                  {/*  )}*/}
-                  {/*/>*/}
 
                   <div className="flex justify-end space-x-3 pt-2">
                     <Button type="submit" disabled={isSubmitting}>

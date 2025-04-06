@@ -77,7 +77,7 @@ export const normalizePhoneNumber = (phoneNumber) => {
   console.log('digitsOnly',digitsOnly)
 
   // Throw an error for invalid formats
-  throw new Error('Invalid phone number format. Please provide a 10-digit US number (e.g., 2708831110)');
+  throw new Error('Invalid mobile phone number format. Please provide a 10-digit US number (e.g., 2708831110)');
 };
 
 export function linkifyText(text) {

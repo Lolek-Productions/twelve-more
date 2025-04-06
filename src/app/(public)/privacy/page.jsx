@@ -13,7 +13,7 @@ export default function Privacy() {
         We collect several types of information to provide and improve our services:
       </p>
       <ul className="list-disc list-inside text-gray-700">
-        <li><strong>Account Information:</strong> When you sign up, we collect your name, email, phone number, and other necessary details to enable account creation and SMS notifications.</li>
+        <li><strong>Account Information:</strong> When you sign up, we collect your name, email, mobile phone number, and other necessary details to enable account creation and SMS notifications.</li>
         <li><strong>Usage Data:</strong> We track how you interact with the platform, including pages visited and actions taken.</li>
         <li><strong>Device Information:</strong> Your IP address, browser type, and device details may be logged automatically.</li>
         <li><strong>Cookies & Tracking:</strong> We use cookies to enhance your experience and analyze user activity.</li>
@@ -60,7 +60,7 @@ export default function Privacy() {
 
       <h2 className="text-2xl font-semibold mt-6">5. Data Security & Retention</h2>
       <p className="text-gray-700">
-        We implement strong security measures to protect your information, but no system is 100% secure. We retain your data, including phone numbers, as long as necessary to provide our services or comply with legal requirements. If you opt out of SMS notifications, your phone number will be removed from our messaging list within 10 business days, unless required for legal purposes.
+        We implement strong security measures to protect your information, but no system is 100% secure. We retain your data, including mobile phone numbers, as long as necessary to provide our services or comply with legal requirements. If you opt out of SMS notifications, your phone number will be removed from our messaging list within 10 business days, unless required for legal purposes.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6">6. Third-Party Links & Services</h2>
@@ -75,7 +75,7 @@ export default function Privacy() {
 
       <h2 className="text-2xl font-semibold mt-6">8. SMS Notifications and Mobile Information Protection</h2>
       <p className="text-gray-700">
-        <strong>SMS Usage:</strong> 12More collects your phone number to send SMS notifications, reminders, and engagement prompts related to your parish or small group (e.g., meeting updates, prayer requests, event RSVPs). <strong>Message and data rates may apply.</strong>
+        <strong>SMS Usage:</strong> 12More collects your mobile phone number to send SMS notifications, reminders, and engagement prompts related to your parish or small group (e.g., meeting updates, prayer requests, event RSVPs). <strong>Message and data rates may apply.</strong>
       </p>
       <p className="text-gray-700">
         <strong>Consent:</strong> During account registration, you explicitly consent to receive SMS notifications by agreeing to the statement: “I agree to receive SMS notifications from 12More. Message & data rates may apply. Reply STOP to unsubscribe.” This is a mandatory step in onboarding.

@@ -24,7 +24,7 @@ class TwilioService {
   async sendSMS(to, body) {
     try {
       if (!to) {
-        return { success: false, message: 'Recipient phone number is required' };
+        return { success: false, message: 'Recipient mobile phone number is required' };
       }
 
       const message = await client.messages.create({
@@ -49,15 +49,15 @@ class TwilioService {
   async sendBatchSMS(phoneNumbers, body) {
     try {
       if (!Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
-        return { success: false, message: 'Phone numbers must be a non-empty array' };
+        return { success: false, message: 'Mobile phone numbers must be a non-empty array' };
       }
 
       const validPhoneNumbers = phoneNumbers.filter((phone) => typeof phone === 'string' && phone.trim() !== '');
       if (validPhoneNumbers.length === 0) {
-        return { success: false, message: 'No valid phone numbers provided' };
+        return { success: false, message: 'No valid mobile phone numbers provided' };
       }
 
-      console.log('Sending to phone numbers:', validPhoneNumbers); // Debug log
+      console.log('Sending to mobile phone numbers:', validPhoneNumbers); // Debug log
       const toBinding = validPhoneNumbers.map((phone) => ({
         binding_type: 'sms',
         address: phone,

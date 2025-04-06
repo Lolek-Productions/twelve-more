@@ -29,7 +29,7 @@ export async function checkPhoneExists(phoneNumber) {
   try {
     const client = await clerkClient();
     if (!phoneNumber) {
-      return { success: false, message: 'Phone number is required' };
+      return { success: false, message: 'Mobile Phone number is required' };
     }
 
     const normalizedPhone = normalizePhoneNumber(phoneNumber);
@@ -47,10 +47,10 @@ export async function checkPhoneExists(phoneNumber) {
       exists
     };
   } catch (error) {
-    console.error('Error checking phone number:', error);
+    console.error('Error checking mobile phone number:', error);
     return {
       success: false,
-      message: 'Failed to check phone number'
+      message: 'Failed to check mobile phone number'
     };
   }
 }
