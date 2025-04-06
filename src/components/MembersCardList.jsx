@@ -50,28 +50,6 @@ export default function MembersCardList({community}) {
     fetchMembers();
   }, [appUser, community]);
 
-  async function handleAddCommunityToUser(communityId) {
-    if (!appUser?.id) {
-      setError('User not logged in');
-      return;
-    }
-    setJoinStatus((prev) => ({ ...prev, [communityId]: { loading: true, error: null } }));
-    try {
-      const result = await addCommunityToUser(communityId, appUser.id);
-      if(!result.success) {
-        return console.error(result.error);
-      }
-      await fetchCommunities();
-      toast({
-        title: "Community Added",
-        description: `You have been added to the community!`,
-      });
-      location.reload();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   async function handleRemoveCommunityFromUser(communityId, memberId) {
     if (!appUser?.id) {
       return;

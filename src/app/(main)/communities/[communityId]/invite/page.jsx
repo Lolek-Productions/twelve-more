@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import {getCommunityById} from "@/lib/actions/community";
 import {getCommunityMembers, searchUsersInUserOrganizations} from "@/lib/actions/user.js";
@@ -30,6 +30,8 @@ import {useContextContent} from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useApiToast} from "@/lib/utils.js";
 import {inviteCurrentUserToCommunity, sendCommunityInvitation} from "@/lib/actions/invite.js";
+import {PUBLIC_APP_URL} from "@/lib/constants.js";
+import {useClipboard} from "@/hooks/useClipboard.js";
 
 const userLookupSchema = z.object({
   query: z
@@ -62,6 +64,8 @@ export default function Invite() {
   const [accordionValue, setAccordionValue] = useState("");
   const {appUser} = useAppUser();
   const { showResponseToast, showErrorToast } = useApiToast();
+  const [isCopied, copyToClipboard] = useClipboard();
+
 
   const { setContextContent } = useContextContent();
   useEffect(() => {
@@ -207,14 +211,51 @@ export default function Invite() {
         </Link>
       </div>
 
+
+
       <div className="p-5">
-        <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">4 ways to invite to your community</h3>
+        </div>
+
+        <div className='py-5 flex justify-start'>
           <div>
-            <h3 className="text-lg font-medium">Community Members</h3>
-            <p className="text-sm text-gray-500">
-              Current members: {members?.length || 0}
-            </p>
+            <h3 className="text-lg">1. QR Code to be printed or shared</h3>
+            <h3 className="text-xs">Click to open the image so you can save</h3>
+            <div className="flex justify-start">
+              <Link title="Share this QR code with people so that they can join this group." target="_blank" href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}>
+                <Image
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}
+                  alt="12More"
+                  className={'mx-auto py-2'}
+                  width={45}
+                  height={45}
+                  priority
+                />
+              </Link>
+            </div>
           </div>
+        </div>
+
+        <div className="pb-5 space-y-2">
+          <h3 className="text-lg">2. Link to share</h3>
+          <button
+            onClick={() => copyToClipboard(`${PUBLIC_APP_URL}/join/${community?.id}/`)}
+            title={`${PUBLIC_APP_URL}/join/${community?.id}/`}
+            className="px-2 py-1 text-sm text-blue-600 hover:text-gray-600
+             bg-gray-100 hover:bg-gray-200 rounded
+             flex items-center gap-1 transition-colors duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            {isCopied ? 'Copied!' : 'Copy invite url'}
+          </button>
+        </div>
+
+        <div className="pb-5 pt-3">
+          <h3 className="text-lg">3. Search for Current Users</h3>
           <Button
             type="button"
             variant="outline"
@@ -228,69 +269,58 @@ export default function Invite() {
           </Button>
         </div>
 
-        {/* Accordion for the invite form */}
-        <Accordion
-          type="single"
-          collapsible
-          value={accordionValue}
-          onValueChange={setAccordionValue}
-          className="mb-6"
-        >
-          <AccordionItem value="invite-form" className="border rounded-md">
-            <AccordionTrigger className="px-4">
-              <span className="text-md font-medium">
-                Invite New Member
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              <Form {...inviteForm}>
-                <form onSubmit={inviteForm.handleSubmit(onSubmitInvite)} className="space-y-4">
-                  <FormField
-                    control={inviteForm.control}
-                    name="phoneNumber"
-                    render={({field}) => (
-                      <FormItem>
-                        <FormLabel>Mobile Phone Number</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., 2025550123"
-                            {...field}
-                            maxLength={10}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                return; // Allow Enter key
-                              }
-                              const isNumber = /^[0-9]$/.test(e.key);
-                              if (!isNumber) {
-                                e.preventDefault();
-                              }
-                            }}
-                            onPaste={(e) => {
-                              e.preventDefault();
-                              const pastedText = e.clipboardData.getData('text');
-                              const numericText = pastedText.replace(/[^0-9]/g, '');
-                              field.onChange(numericText);
-                            }}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Enter your 10-digit US mobile phone number (no +1 needed).
-                        </FormDescription>
-                        <FormMessage/>
-                      </FormItem>
-                    )}
-                  />
+        <div className="pt-5">
+          <h3 className="text-lg">4. Invite a New User</h3>
+          <div className="border border-gray-200 rounded-md p-4">
 
-                  <div className="flex justify-end space-x-3 pt-2">
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Sending..." : "Send Invite"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          <Form {...inviteForm}>
+            <form onSubmit={inviteForm.handleSubmit(onSubmitInvite)} className="space-y-4">
+              <FormField
+                control={inviteForm.control}
+                name="phoneNumber"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>Mobile Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., 2025550123"
+                        {...field}
+                        maxLength={10}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            return; // Allow Enter key
+                          }
+                          const isNumber = /^[0-9]$/.test(e.key);
+                          if (!isNumber) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const pastedText = e.clipboardData.getData('text');
+                          const numericText = pastedText.replace(/[^0-9]/g, '');
+                          field.onChange(numericText);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the 10-digit US mobile phone number (no +1 needed).
+                    </FormDescription>
+                    <FormMessage/>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Sending..." : "Send Invite"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+          </div>
+
+        </div>
 
       </div>
 
