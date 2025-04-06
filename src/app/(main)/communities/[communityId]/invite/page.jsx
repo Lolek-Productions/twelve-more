@@ -20,12 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {useContextContent} from "@/components/ContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useApiToast} from "@/lib/utils.js";
@@ -211,8 +205,6 @@ export default function Invite() {
         </Link>
       </div>
 
-
-
       <div className="p-5">
         <div>
           <h3 className="text-lg font-semibold">4 ways to invite to your community</h3>
@@ -221,7 +213,7 @@ export default function Invite() {
         <div className='py-5 flex justify-start'>
           <div>
             <h3 className="text-lg">1. QR Code to be printed or shared</h3>
-            <h3 className="text-xs">Click to open the image so you can save</h3>
+            <h3 className="text-xs">Click to open the image so you can save to your device</h3>
             <div className="flex justify-start">
               <Link title="Share this QR code with people so that they can join this group." target="_blank" href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${PUBLIC_APP_URL}/join/${community?.id}`}>
                 <Image

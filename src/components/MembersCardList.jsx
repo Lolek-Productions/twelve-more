@@ -5,15 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
 import {
-  deleteCommunities,
-  getCommunitiesByUser
-} from '@/lib/actions/community';
-import {
-  addCommunityToUser, changeRoleOnUserInCommunity,
+  changeRoleOnUserInCommunity,
   getCommunityMembers,
   removeCommunityFromUser,
 } from '@/lib/actions/user';
-import { useToast } from "@/hooks/use-toast.js";
 import { useApiToast } from "@/lib/utils.js";
 import {
   DropdownMenu,
@@ -29,7 +24,6 @@ export default function MembersCardList({community}) {
   const [members, setMembers] = useState([]);
   const [joinStatus, setJoinStatus] = useState({});
   const { appUser } = useAppUser();
-  const { toast } = useToast();
   const { showResponseToast, showErrorToast } = useApiToast();
 
   const fetchMembers = async () => {
