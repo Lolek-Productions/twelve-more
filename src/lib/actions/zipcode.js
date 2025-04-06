@@ -1,9 +1,10 @@
 'use server';
 
 import Zipcode from '@/lib/models/zipcode.model';
+import Parish from '@/lib/models/parish.model';
 import { connect } from "@/lib/mongodb/mongoose";
 
-export async function getProximateZipcodes(zipcodeSearch, limit = 12) {
+export async function getProximateZipcodes(zipcodeSearch, limit = 12, includeOriginal = true) {
   try {
     // Ensure database connection
     await connect();
@@ -29,8 +30,11 @@ export async function getProximateZipcodes(zipcodeSearch, limit = 12) {
     const originLat = originZipcode.geo_point_2d.lat;
     const originLon = originZipcode.geo_point_2d.lon;
 
+    // Adjust limit for nearby zipcodes if we're including the original
+    // We'll need one less nearby zipcode if we're including the original
+    const nearbyLimit = includeOriginal ? limit - 1 : limit;
+
     // Find nearby zipcodes using MongoDB's geospatial query
-    // This assumes your Zipcode model has a 2dsphere index on geo_point_2d
     const nearbyZipcodes = await Zipcode.find({
       geo_point_2d: {
         $near: {
@@ -38,13 +42,13 @@ export async function getProximateZipcodes(zipcodeSearch, limit = 12) {
             type: "Point",
             coordinates: [originLon, originLat] // MongoDB uses [longitude, latitude] order
           },
-          $maxDistance: 50000 // 50 km radius, adjust as needed
+          $maxDistance: 70000 // 50 km radius, adjust as needed: 50000
         }
       },
       // Exclude the origin zipcode from results
       zip_code: { $ne: zipcodeSearch }
     })
-      .limit(limit)
+      .limit(nearbyLimit)
       .lean();
 
     // If geospatial query doesn't work (perhaps no 2dsphere index), fallback to manual calculation
@@ -71,11 +75,11 @@ export async function getProximateZipcodes(zipcodeSearch, limit = 12) {
       // Sort by distance and take the limit
       zipcodes = zipcodesWithDistance
         .sort((a, b) => a.distance - b.distance)
-        .slice(0, limit);
+        .slice(0, nearbyLimit);
     }
 
-    // Convert Mongoose documents to plain objects and format
-    const formattedZipcodes = zipcodes.map(zipcode => {
+    // Format the zipcodes
+    let formattedZipcodes = zipcodes.map(zipcode => {
       // Calculate distance if not already calculated
       const distance = zipcode.distance ||
         calculateDistance(
@@ -99,7 +103,27 @@ export async function getProximateZipcodes(zipcodeSearch, limit = 12) {
       };
     });
 
-    console.log(`Found ${formattedZipcodes.length} nearby zipcodes`);
+    // Add the original zipcode to the results if requested
+    if (includeOriginal) {
+      const formattedOriginZipcode = {
+        id: originZipcode._id.toString(),
+        name: originZipcode.zip_code,
+        description: `${originZipcode.usps_city || 'Unknown City'} (Your location)`,
+        zip_code: originZipcode.zip_code,
+        usps_city: originZipcode.usps_city,
+        geo_point_2d: {
+          lat: originZipcode.geo_point_2d.lat,
+          lon: originZipcode.geo_point_2d.lon
+        },
+        distance: 0, // Distance is 0 since this is the origin
+        isOrigin: true // Flag to identify this as the origin zipcode
+      };
+
+      // Add the origin zipcode to the beginning of the array
+      formattedZipcodes = [formattedOriginZipcode, ...formattedZipcodes];
+    }
+
+    console.log(`Returning ${formattedZipcodes.length} zipcodes (including original: ${includeOriginal})`);
 
     return {
       success: true,
@@ -133,4 +157,91 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const distance = earthRadius * c;
 
   return distance;
+}
+
+export async function getProximateParishesByZipcode(zipcodeSearch, limit = 12) {
+  try {
+    // Ensure database connection
+    await connect();
+
+    console.log('Searching for parishes near zipcode:', zipcodeSearch);
+
+    // Step 1: Get nearby zipcodes using the existing function
+    // We'll get more zipcodes than needed as we don't know how many parishes each contains
+    const zipcodesResult = await getProximateZipcodes(zipcodeSearch, 70);
+    console.log('zipcode count', zipcodesResult.zipcodes.length)
+
+    if (!zipcodesResult.success || zipcodesResult.zipcodes.length === 0) {
+      return {
+        success: false,
+        parishes: [],
+        message: zipcodesResult.message || 'No nearby zipcodes found'
+      };
+    }
+
+    const nearbyZipcodes = zipcodesResult.zipcodes;
+
+    console.log(`Found ${nearbyZipcodes.length} nearby zipcodes to search for parishes`);
+
+    // Step 2: Search for parishes in each zipcode until we have enough
+    const foundParishes = [];
+    const processedZipcodes = new Set();
+
+    // Loop through each zipcode
+    for (const zipcode of nearbyZipcodes) {
+      // Skip if we already have enough parishes
+      if (foundParishes.length >= limit) break;
+
+      // Skip if we've already processed this zipcode
+      if (processedZipcodes.has(zipcode.zip_code)) continue;
+
+      processedZipcodes.add(zipcode.zip_code);
+
+      // Find parishes in this zipcode
+      const parishesInZipcode = await Parish.find({
+        zipcode: zipcode.zip_code
+      }).lean();
+
+      if (parishesInZipcode.length > 0) {
+        console.log(`Found ${parishesInZipcode.length} parishes in zipcode ${zipcode.zip_code}`);
+
+        // Process each parish
+        for (const parish of parishesInZipcode) {
+          // Skip if we already have enough parishes
+          if (foundParishes.length >= limit) break;
+
+          // Check if this parish is already in our results (by ID)
+          const isDuplicate = foundParishes.some(p => p.id === parish._id.toString());
+
+          if (!isDuplicate) {
+            // Add distance information from the zipcode
+            foundParishes.push({
+              id: parish._id.toString(),
+              name: parish.name,
+              description: parish.description || `${parish.city || ''}, ${parish.state || ''}`,
+              distance: zipcode.distance,
+              zipcode: zipcode.zip_code,
+              city: parish.city || zipcode.usps_city,
+              // Add any other parish fields you need
+            });
+          }
+        }
+      }
+    }
+
+    // Sort parishes by distance
+    const sortedParishes = foundParishes.sort((a, b) => a.distance - b.distance);
+
+    console.log(`Found ${sortedParishes.length} unique parishes in nearby zipcodes`);
+
+    return {
+      success: true,
+      parishes: sortedParishes.slice(0, limit),
+      total: sortedParishes.length
+    };
+
+  } catch (error) {
+    console.error('Error getting proximate parishes:', error);
+    throw new Error('Failed to fetch parishes by zipcode: ' + error.message);
+  }
 }

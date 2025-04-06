@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {getProximateZipcodes} from "@/lib/actions/zipcode.js";
+import {getProximateParishesByZipcode} from "@/lib/actions/zipcode.js";
 
 export default function SearchComponent() {
   const [results, setResults] = useState([]);
@@ -16,10 +16,10 @@ export default function SearchComponent() {
     console.log('Search query:', query);
 
     try {
-      const searchResults = await getProximateZipcodes(query);
+      const searchResults = await getProximateParishesByZipcode(query);
       console.log('Search results:', searchResults);
 
-      setResults(searchResults.zipcodes);
+      setResults(searchResults.parishes);
     } catch (error) {
       console.error('Search failed:', error);
     } finally {
@@ -29,7 +29,7 @@ export default function SearchComponent() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6">Get Nearest Zipcodes</h1>
+      <h1 className="text-2xl font-bold mb-6">Get Nearest Parishes to Zipcode</h1>
 
       {/* Form using the server action */}
       <form action={handleSearch} className="mb-6">
@@ -60,14 +60,14 @@ export default function SearchComponent() {
             </div>
           ) : results.length > 0 ? (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+              <h2 className="text-xl font-semibold mb-4">Search Results ({results?.length})</h2>
               <ul className="space-y-4">
                 {results.map((item) => (
                   <li key={item.id} className="p-4 border border-gray-200 rounded-md hover:bg-gray-50">
-                    <h3 className="font-medium text-lg">Zipcode: {item.zip_code}</h3>
-                    <h3 className="font-medium text-lg">City: {item.usps_city}</h3>
-                    <h3 className="font-medium text-lg">Latitude: {item.geo_point_2d.lat} Longitude: {item.geo_point_2d.lon}</h3>
-                    <h3 className="font-medium text-lg">Distance: {item.distance} mi</h3>
+                    <h3 className="font-medium text-lg">Name: {item.name}</h3>
+                    <h3 className="font-medium text-lg">City: {item.city}</h3>
+                    <h3 className="font-medium text-lg">State: {item.state}</h3>
+                    <h3 className="font-medium text-lg">Zipcode: {item.zipcode}</h3>
                   </li>
                 ))}
               </ul>

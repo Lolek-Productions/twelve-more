@@ -38,8 +38,12 @@ const sidebarNavItems = [
     href: "/developer/parishes",
   },
   {
-    title: "Zipcodes",
+    title: "Zipcode Proximity",
     href: "/developer/zipcodes",
+  },
+  {
+    title: "Parish Proximity",
+    href: "/developer/parish-proximity",
   },
   {
     title: "Phone Lookup",

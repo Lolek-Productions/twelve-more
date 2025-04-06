@@ -113,6 +113,36 @@ export async function searchParishes(query) {
   }
 }
 
+export async function getParishesByZipcode(zipcode, limit=10) {
+  try {
+    await connect();
+
+    // Create a case-insensitive search regex
+    const searchRegex = new RegExp(query, 'i');
+
+    const parishes = await Parish.find({zipcode: zipcode})
+      .sort({ name: 1 })
+      .limit(limit)
+      .lean();
+
+    return parishes.map(parish => ({
+      id: parish._id.toString(),
+      name: parish.name,
+      address: parish.address,
+      city: parish.city,
+      state: parish.state,
+      zipcode: parish.zipcode,
+      phone: parish.phone,
+      createdAt: parish.createdAt ? new Date(parish.createdAt).toISOString() : null,
+      updatedAt: parish.updatedAt ? new Date(parish.updatedAt).toISOString() : null,
+    }));
+  } catch (error) {
+    console.error('Error searching parishes:', error);
+    throw new Error('Failed to search parishes');
+  }
+}
+
+
 /**
  * Get a parish by ID
  * @param {string} id - Parish ID
