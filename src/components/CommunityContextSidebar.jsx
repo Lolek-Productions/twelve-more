@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import MemberList from "@/components/MemberList.jsx";
+import QuestionOfTheDay from "@/components/QuestionOfTheDay.jsx";
 import {getCommunityMembers, removeCommunityFromUser} from "@/lib/actions/user.js";
 import {useAppUser} from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import {useApiToast} from "@/lib/utils.js";
-
 
 export default function CommunityContextSidebarComponent({ community, communityId }) {
   const [members, setMembers] = useState([]);
@@ -23,7 +23,6 @@ export default function CommunityContextSidebarComponent({ community, communityI
           setLoading(false);
           return;
         }
-
         const membersResponse = await getCommunityMembers(communityId);
 
         if (!membersResponse.success) {
@@ -81,6 +80,8 @@ export default function CommunityContextSidebarComponent({ community, communityI
   return (
     <div className="flex flex-col h-full p-3">
       <div className="flex-1 overflow-auto">
+
+        <QuestionOfTheDay />
         <MemberList community={community} members={members} />
 
         <div className="flex justify-center w-full pt-2">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RecentMembersToOrganization from "@/components/RecentMembersToOrganizations.jsx";
+import QuestionOfTheDay from "@/components/QuestionOfTheDay.jsx";
 
 export default function HomeContextSidebar() {
   const [input, setInput] = useState('');
@@ -30,7 +31,10 @@ export default function HomeContextSidebar() {
           />
         </form>
       </div>
-      <RecentMembersToOrganization />
+
+      <QuestionOfTheDay />
+
+      {/*<RecentMembersToOrganization />*/}
     </div>
   );
 }

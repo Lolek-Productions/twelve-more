@@ -4,7 +4,7 @@ import Link from "next/link"
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {useEffect, useState} from "react";
 import {getRecentOrganizationsMembers} from "@/lib/actions/user.js";
-import moment from "moment/moment.js";
+import moment from "moment/moment";
 
 export default function MemberList() {
   const {appUser} = useAppUser();
