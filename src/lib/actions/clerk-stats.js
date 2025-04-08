@@ -40,10 +40,10 @@ export async function getActiveUsers(startDate, endDate) {
     const activeUsers = await client.users.getUserList({
       last_active_at_before: endTimestamp,
       last_active_at_after: startTimestamp,
-      limit: 500  // Adjust based on your needs
+      limit: 10000  // Adjust based on your needs
     })
 
-    console.log('Active users:', activeUsers.data.length);
+    // console.log('Active users:', activeUsers.data.length);
 
     return {
       success: true,
