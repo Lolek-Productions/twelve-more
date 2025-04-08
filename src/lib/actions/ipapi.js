@@ -1,6 +1,7 @@
 'use server';
 
-export async function getLocationData() {
+// This server action accepts the IP address from the client
+export async function getLocationData(ip) {
   try {
     // Get the API key from server-side environment variables
     const apiKey = process.env.IP_API_KEY;
@@ -9,16 +10,11 @@ export async function getLocationData() {
       throw new Error('Missing API key for IP geolocation service');
     }
 
-    // We'll need to get the IP from the request headers
-    // In a real server action, you'd use the headers() function from next/headers
-    // However, this requires the action to be called from a Server Component
-    // For this example, we're using a public IP detection API as a fallback
-    const ipResponse = await fetch('https://api.ipify.org?format=json');
+    if (!ip) {
+      throw new Error('IP address is required');
+    }
 
-    const ipData = await ipResponse.json();
-    const ip = ipData.ip;
-
-    // Use the IP to fetch location data
+    // Use the provided IP to fetch location data
     const url = `https://api.ipapi.is?q=${ip}&key=${apiKey}`;
     const response = await fetch(url, { cache: 'no-store' });
 
@@ -27,8 +23,6 @@ export async function getLocationData() {
     }
 
     const data = await response.json();
-
-    // console.log('ipapi data:', data);
 
     return {
       success: true,

@@ -13,7 +13,12 @@ export default function LookupIp() {
       try {
         setLoading(true);
 
-        const result = await getLocationData();
+        // First get the IP address from the browser
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip = ipData.ip;
+
+        const result = await getLocationData(ip);
 
         console.log(result);
 
