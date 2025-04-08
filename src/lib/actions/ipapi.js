@@ -28,7 +28,7 @@ export async function getLocationData() {
 
     const data = await response.json();
 
-    console.log('ipapi data:', data);
+    // console.log('ipapi data:', data);
 
     return {
       success: true,
