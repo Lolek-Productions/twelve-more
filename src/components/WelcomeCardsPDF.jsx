@@ -119,7 +119,7 @@ const WelcomeCardsPDF = () => {
                 />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-[18px] mb-0">Welcome to {community?.name}</p>
+                <p className="font-bold text-[18px] mb-0">{community?.name}</p>
                 <p className="text-[14px] mb-0.5">Join our community at 12More.co</p>
                 <p className="text-[11px] mb-0">Scan the QR code to become a part</p>
               </div>
