@@ -41,3 +41,9 @@ This should be kept in mind when testing
 <Button asChild className="mb-4" >
   <Link href={`/organizations/${organization.id}/community/create`}>Create New Community</Link>
 </Button>
+
+# Clerk and querying
+Unix timestamp with day precision
+Clerk is using: Unix timestamp in milliseconds when calculating last_active_at
+console.log('Active users:', activeUsers.data[0].lastActiveAt);
+

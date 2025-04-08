@@ -17,21 +17,33 @@ export async function getActiveUsers(startDate, endDate) {
       ? new Date(endDate)
       : new Date(start) // Default to start date if no end date provided
 
-    // Ensure we're using the start of the start date and end of the end date
-    const startISO = new Date(start.getFullYear(), start.getMonth(), start.getDate()).toISOString()
-    const endISO = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).toISOString()
+    // Convert to Unix timestamps in milliseconds
+    // Set start to beginning of day (00:00:00)
+    const startTimestamp = new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate(),
+      0, 0, 0, 0
+    ).getTime();
 
+    // Set end to end of day (23:59:59.999)
+    const endTimestamp = new Date(
+      end.getFullYear(),
+      end.getMonth(),
+      end.getDate(),
+      23, 59, 59, 999
+    ).getTime();
 
     // Query Clerk API for users active within the date range
     const client = await clerkClient();
 
     const activeUsers = await client.users.getUserList({
-      last_active_at: {
-        gte: startISO,
-        lte: endISO
-      },
+      last_active_at_before: endTimestamp,
+      last_active_at_after: startTimestamp,
       limit: 500  // Adjust based on your needs
     })
+
+    console.log('Active users:', activeUsers.data.length);
 
     return {
       success: true,
