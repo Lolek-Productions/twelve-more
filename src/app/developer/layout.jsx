@@ -54,6 +54,10 @@ const sidebarNavItems = [
     href: "/developer/parish-proximity",
   },
   {
+    title: "Lookup IP",
+    href: "/developer/lookup-ip",
+  },
+  {
     title: "Phone Lookup",
     href: "/developer/phone-lookup",
   },
