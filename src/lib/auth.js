@@ -1,16 +1,16 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from '@clerk/nextjs/server';
 
 export async function requireUser() {
-  const { userId } = auth();
+  const user = await currentUser();
 
-  if (!userId) {
+  if (!user) {
     throw new Error("Unauthorized");
   }
 
-  return { userId };
+  return { user };
 
   //How to use:
-  //const { userId } = await requireUser();
+  //await requireUser();
 }

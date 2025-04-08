@@ -30,6 +30,10 @@ const sidebarNavItems = [
     href: "/developer/posts",
   },
   {
+    title: 'User Stats',
+    href: "/developer/user-stats",
+  },
+  {
     title: "Commands",
     href: "/developer/commands",
   },
