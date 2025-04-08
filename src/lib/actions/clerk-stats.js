@@ -3,7 +3,6 @@
 import {requireUser} from "@/lib/auth.js";
 import {clerkClient} from "@clerk/nextjs/server";
 
-
 export async function getActiveUsers(startDate, endDate) {
   try {
     await requireUser();
