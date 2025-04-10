@@ -39,7 +39,7 @@ export async function getActiveUsers(startDate, endDate) {
     const activeUsers = await client.users.getUserList({
       last_active_at_before: endTimestamp,
       last_active_at_after: startTimestamp,
-      limit: 10000  // Adjust based on your needs
+      limit: 500  //The number of results to return. Must be an integer greater than zero and less than 501. Can be used for paginating the results together with offset. Defaults to 10
     })
 
     // console.log('Active users:', activeUsers.data.length);
