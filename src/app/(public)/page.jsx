@@ -43,7 +43,7 @@ export default function Landing() {
       </p>
 
       <Button asChild className='mt-9'>
-        <Link href="/sign-up">Join Us</Link>
+        <Link href="/sign-up">Get Started</Link>
       </Button>
     </div>
 )

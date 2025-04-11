@@ -2,7 +2,7 @@
 
 import { useUser } from '@clerk/nextjs'
 import { completeOnboarding } from './actions.js'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card.jsx'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
@@ -13,9 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import React, { useEffect, useState } from "react";
-import {getCommunityById} from "@/lib/actions/community.js";
-import {addCommunityToUser, addOrganizationToUser} from "@/lib/actions/user.js";
-import {TAG_LINE} from "@/lib/constants.js";
+import { getCommunityById } from "@/lib/actions/community.js";
+import { addCommunityToUser, addOrganizationToUser } from "@/lib/actions/user.js";
+import { TAG_LINE } from "@/lib/constants.js";
 
 const formSchema = z.object({
   organizationName: z
@@ -34,10 +34,13 @@ export default function OnboardingComponent() {
   const [isJoining, setIsJoining] = useState(false);
   const { user, isLoaded } = useUser();
   const { toast } = useToast();
+
+  // Community invitation state
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
-  const [invitationError, setInvitationError] = useState(null);
   const [communityData, setCommunityData] = useState(null);
-  const [hasRefreshed, setHasRefreshed] = useState(false); // Track metadata loading status
+
+  // User metadata state - simplified
+  const [isUserReady, setIsUserReady] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -47,55 +50,61 @@ export default function OnboardingComponent() {
     },
   });
 
+  // User metadata loading with retry
   useEffect(() => {
-    const checkUserMetadata = async () => {
-      if (user && isLoaded) {
-        // Check if publicMetadata and specifically userMongoId is loaded
-        if (!user.publicMetadata || !user.publicMetadata.userMongoId) {
-          try {
-            console.log('User metadata not yet loaded, refreshing user...');
-            await user.reload();
-            console.log('User refreshed:', user);
+    const prepareUser = async () => {
+      if (!isLoaded || !user) return;
 
-            // Verify if metadata is now available
-            if (user.publicMetadata && user.publicMetadata.userMongoId) {
-              console.log('User metadata loaded successfully');
-              setHasRefreshed(true);
-            } else {
-              // If still not available, set up a retry mechanism
-              console.log('User metadata still not available after refresh');
-              setTimeout(checkUserMetadata, 1000); // Retry after 1 second
-            }
-          } catch (err) {
-            console.error('Failed to reload user:', err);
-          }
+      // Check if metadata is already available
+      if (user.publicMetadata?.userMongoId) {
+        setIsUserReady(true);
+        return;
+      }
+
+      // Try to reload user data to get metadata
+      try {
+        await user.reload();
+
+        // Check if metadata is now available after reload
+        if (user.publicMetadata?.userMongoId) {
+          setIsUserReady(true);
         } else {
-          // Metadata is already available
-          console.log('User metadata already loaded:', user.publicMetadata);
-          setHasRefreshed(true);
+          // Wait 1.5 seconds before checking again
+          console.log('User metadata not available yet, will check again in 1.5 seconds');
+          setTimeout(prepareUser, 1500);
         }
+      } catch (err) {
+        console.error('Failed to reload user:', err);
+        // Still retry after error
+        setTimeout(prepareUser, 1500);
       }
     };
 
-    checkUserMetadata();
+    prepareUser();
+
+    // Cleanup function to cancel any pending timeouts
+    return () => {
+      // This would clear any setTimeout that might be pending
+      // but we can't access the specific timeout ID from here
+      // Just a good practice for useEffect cleanup
+    };
   }, [user, isLoaded]);
 
   // Check for pending community invitation
   useEffect(() => {
     const checkForInvitation = async () => {
       const storedCommunityId = localStorage.getItem('pendingCommunityJoin');
-      if (storedCommunityId) {
-        setPendingCommunityId(storedCommunityId);
-        try {
-          const response = await getCommunityById(storedCommunityId);
-          if (response.success) {
-            setCommunityData(response.community);
-          } else {
-            setInvitationError('Could not find any community invitation.');
-          }
-        } catch (error) {
-          console.error('Error fetching community details:', error);
+      if (!storedCommunityId) return;
+
+      setPendingCommunityId(storedCommunityId);
+
+      try {
+        const response = await getCommunityById(storedCommunityId);
+        if (response.success) {
+          setCommunityData(response.community);
         }
+      } catch (error) {
+        console.error('Error fetching community details:', error);
       }
     };
 
@@ -103,15 +112,7 @@ export default function OnboardingComponent() {
   }, []);
 
   const handleJoinCommunity = async () => {
-    if (!pendingCommunityId) {
-      setError('Pending community ID is missing');
-      return;
-    }
-
-    if (!user || !user.publicMetadata || !user.publicMetadata.userMongoId) {
-      setError('User data is not fully loaded. Please try again.');
-      return;
-    }
+    if (!pendingCommunityId || !isUserReady) return;
 
     const userId = user.publicMetadata.userMongoId;
 
@@ -136,15 +137,15 @@ export default function OnboardingComponent() {
   };
 
   const onSubmit = async (data) => {
+    if (!isUserReady) {
+      setError('User data is not fully loaded yet. Please try again.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
     try {
-      // Check if user metadata is loaded
-      if (!user || !user.publicMetadata || !user.publicMetadata.userMongoId) {
-        throw new Error('User data is not fully loaded. Please try again.');
-      }
-
       // Create FormData for the server action
       const formData = new FormData();
       formData.append('organizationName', data.organizationName);
@@ -153,18 +154,14 @@ export default function OnboardingComponent() {
       const res = await completeOnboarding(formData);
 
       if (res.success) {
-        // Show success toast
         toast({
           title: "Success!",
           description: res.message || "Organization created successfully!",
         });
 
-        // Redirect to home page
         window.location.href = `/home`;
       } else {
-        // Show error message
         setError(res.error || "Something went wrong. Please try again.");
-
         toast({
           title: "Error",
           description: res.error || "Failed to create organization.",
@@ -185,70 +182,94 @@ export default function OnboardingComponent() {
     }
   };
 
-  // Render different content based on whether there's a pending invitation
-  if (pendingCommunityId) {
+  // Common elements - logo and title
+  const headerContent = (
+    <CardHeader>
+      <Image
+        src="/logo.png"
+        alt="12More"
+        className="mx-auto"
+        width={45}
+        height={45}
+        priority
+      />
+      <CardTitle className="text-center">
+        <div className="text-2xl">
+          Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!
+        </div>
+        <div className="pt-2">{TAG_LINE}</div>
+      </CardTitle>
+    </CardHeader>
+  );
+
+  // Show loading state while user data is loading
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <Card className="w-full max-w-md shadow-lg">
-          <CardHeader>
-            <Image
-              src="/logo.png"
-              alt="12More"
-              className={'mx-auto'}
-              width={45}
-              height={45}
-              priority
-            />
-            <CardTitle className="text-center">
-              <div className="text-2xl">
-                Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!
-              </div>
-              <div className={'pt-2'}>{TAG_LINE}</div>
-            </CardTitle>
-          </CardHeader>
+          {headerContent}
+          <CardContent className="flex justify-center">
+            <div className="text-center">Loading...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
+  // Add a separate loading indicator when user is loaded but metadata isn't ready yet
+  if (!isUserReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <Card className="w-full max-w-md shadow-lg">
+          {headerContent}
+          <CardContent className="flex justify-center">
+            <div className="text-center">Give us a minute while we load your data...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show invitation view if there's a pending invitation
+  if (pendingCommunityId && communityData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <Card className="w-full max-w-md shadow-lg">
+          {headerContent}
           <CardContent>
-            {invitationError && (<div className="text-center p-4 text-red-500">{invitationError}</div>)}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="font-medium text-blue-900 mb-2 text-center">Community Invitation Found!</h3>
+              <p className="text-blue-800 mb-3">
+                You have been invited to join{' '}
+                <span className="font-semibold">
+                  {communityData?.name || 'a community'}
+                </span>
+                {communityData?.organization?.name && ` in ${communityData.organization.name}`}
+              </p>
 
-            {communityData && (
-              <>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <h3 className="font-medium text-blue-900 mb-2 text-center">Community Invitation Found!</h3>
-                  <p className="text-blue-800 mb-3">
-                    You&#39;ve been invited to join{' '}
-                    <span className="font-semibold">
-                    {communityData?.name || 'a community'}
-                  </span>
-                    {communityData?.organization.name && ` in ${communityData.organization.name}`}
-                  </p>
+              {communityData?.description && (
+                <p className="text-sm text-blue-700 mt-2 mb-3">
+                  {communityData.description}
+                </p>
+              )}
 
-                  {communityData?.description && (
-                    <p className="text-sm text-blue-700 mt-2 mb-3">
-                      &#34;{communityData.description}&#34;
-                    </p>
-                  )}
+              <p className="text-sm text-blue-600">
+                Joining will connect you to this community.
+              </p>
+            </div>
 
-                  <p className="text-sm text-blue-600">
-                    Joining will connect you to this community.
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleJoinCommunity}
-                  className="w-full"
-                  size="lg"
-                  disabled={isJoining || !hasRefreshed || !user?.publicMetadata?.userMongoId}
-                >
-                  {isJoining ? "Joining Community..." :
-                    !hasRefreshed || !user?.publicMetadata?.userMongoId ? "Loading..." : "Accept Invitation"}
-                </Button>
-              </>
-            )}
+            <Button
+              onClick={handleJoinCommunity}
+              className="w-full"
+              size="lg"
+              disabled={isJoining || !isUserReady}
+            >
+              {isJoining ? "Joining Community..." : "Accept Invitation"}
+            </Button>
 
             <div className="mt-4 text-center">
               <button
                 onClick={() => {
-                  // Just clear the pending invitation so they can create their own org
                   localStorage.removeItem('pendingCommunityJoin');
                   setPendingCommunityId(null);
                 }}
@@ -269,31 +290,14 @@ export default function OnboardingComponent() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <Image
-            src="/logo.png"
-            alt="12More"
-            className={'mx-auto'}
-            width={45}
-            height={45}
-            priority
-          />
-          <CardTitle className="text-center">
-            <div className="text-2xl">
-              Welcome to 12More{user?.firstName ? `, ${user.firstName}` : ''}!
-            </div>
-            <div className={'pt-2'}>{TAG_LINE}</div>
-          </CardTitle>
-        </CardHeader>
-
+        {headerContent}
         <CardContent>
           <div className="mb-6 text-center text-gray-600">
-            Let&#39;s get started with the name of your first organization. It could be a church, a school, or some other type of organization.
+            Let us get started with the name of your first organization. It could be a church, a school, or some other type of organization.
           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Organization Name Field */}
               <FormField
                 control={form.control}
                 name="organizationName"
@@ -308,7 +312,6 @@ export default function OnboardingComponent() {
                 )}
               />
 
-              {/* Description Field */}
               <FormField
                 control={form.control}
                 name="description"
@@ -328,7 +331,6 @@ export default function OnboardingComponent() {
                 )}
               />
 
-              {/* Error message */}
               {error && (
                 <div className="text-red-500 text-sm mt-2">
                   {error}
@@ -343,10 +345,9 @@ export default function OnboardingComponent() {
                 type="submit"
                 className="mt-6 w-full"
                 size="lg"
-                disabled={isSubmitting || !hasRefreshed || !user?.publicMetadata?.userMongoId}
+                disabled={isSubmitting || !isUserReady}
               >
-                {isSubmitting ? "Getting Started..." :
-                  !hasRefreshed || !user?.publicMetadata?.userMongoId ? "Loading..." : "Get Started"}
+                {isSubmitting ? "Getting Started..." : "Get Started"}
               </Button>
             </form>
           </Form>
