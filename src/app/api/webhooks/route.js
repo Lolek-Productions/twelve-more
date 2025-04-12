@@ -5,6 +5,8 @@ import { createOrUpdateUser, deleteUserByClerkId } from '@/lib/actions/user';
 import User from '@/lib/models/user.model.js';
 
 export async function POST(req) {
+  console.error(req);
+
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
