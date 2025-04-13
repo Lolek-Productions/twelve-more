@@ -4,22 +4,25 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RecentMembersToOrganization from "@/components/RecentMembersToOrganizations.jsx";
 import QuestionOfTheDay from "@/components/QuestionOfTheDay.jsx";
+import {useContextContent} from "@/components/ContextProvider.jsx";
 
 export default function HomeContextSidebar() {
   const [input, setInput] = useState('');
   const router = useRouter();
+  const { setIsRightSheetOpen } = useContextContent();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
     router.push(`/search/${input}`);
+    setIsRightSheetOpen(false);
     setTimeout(() => {
       router.refresh();
     }, 100);
   };
 
   return (
-    <div  className={'p-3'}>
+    <div className={'p-3'}>
       <div className='sticky top-0 bg-white py-2'>
         <form onSubmit={handleSubmit}>
           <input

@@ -11,7 +11,7 @@ export default function AutoClosingSidebar({ children }) {
     // Function to handle clicks inside the sidebar
     const handleSidebarClick = (e) => {
       // Check if the click is on an interactive element
-      const isClickable = e.target.closest('a, button, [role="button"], input, select, textarea');
+      const isClickable = e.target.closest('a, button, [role="button"]');
 
       // If it's a clickable element, close the sidebar
       if (isClickable) {
