@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-export default function MiniProfile() {
+export default function MiniProfile({ onHandleClick }) {
   const { user, isLoaded } = useUser();
   const { openUserProfile } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
@@ -66,7 +66,7 @@ export default function MiniProfile() {
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-80">
+        <PopoverContent className="w-80 z-[110]">
           <div className="flex flex-col gap-4">
             {/* Profile Header with Avatar */}
             <div className="flex items-center gap-3">
