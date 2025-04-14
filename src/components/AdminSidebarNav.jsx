@@ -14,7 +14,7 @@ export function AdminSidebarNav({ className, items, onLinkClick, ...props }) {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full overflow-y-auto">
       <Link href="/home" onClick={handleLinkClick} className="flex items-center gap-2 mb-4">
         <Image
           src="/logo.png"
@@ -25,7 +25,6 @@ export function AdminSidebarNav({ className, items, onLinkClick, ...props }) {
         />
         <div className="font-semibold text-xl">12More</div>
       </Link>
-
       <nav
         className={cn(
           "flex flex-col",
@@ -51,5 +50,5 @@ export function AdminSidebarNav({ className, items, onLinkClick, ...props }) {
         ))}
       </nav>
     </div>
-      )
-      }
+  )
+}
