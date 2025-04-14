@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
           },
           role: {
             type: String,
-            required: true, // e.g., "member", "admin", "moderator"
+            required: true, // e.g., "member", "leader"
             default: 'member',
           },
         },

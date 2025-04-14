@@ -380,11 +380,10 @@ export const getAllCommunities = async function () {
   }
 };
 
-export async function updateCommunity(formData) {
-  if (!formData.id) return { success: false, message: "Community ID is required." };
+export async function updateCommunity(communityId, formData) {
+  if (!communityId) return { success: false, message: "Community ID is required." };
 
   try {
-    const id = formData.id;
     const name = formData.name?.trim();
     const purpose = formData.purpose?.trim();
     const visibility = formData.visibility?.trim();
@@ -396,7 +395,7 @@ export async function updateCommunity(formData) {
     await connect();
 
     const updatedCommunity = await Community.findByIdAndUpdate(
-      id,
+      communityId,
       {
         name,
         purpose,

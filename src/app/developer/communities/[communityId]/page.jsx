@@ -104,12 +104,7 @@ export default function EditCommunityPage() {
   });
 
   const onSubmit = async (formData) => {
-    const updatedData = {
-      ...formData, // Spread existing formData (id, name, purpose, visibility)
-      id: communityId,
-    };
-
-    const response = await updateCommunity(updatedData)
+    const response = await updateCommunity(communityId, formData)
 
     if(!response.success) {
       showErrorToast(response.error);
