@@ -9,7 +9,7 @@ import {
   getCommunityMembers,
   removeCommunityFromUser,
 } from '@/lib/actions/user';
-import { useApiToast } from "@/lib/utils.js";
+import {capitalizeFirstLetter, useApiToast} from "@/lib/utils.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,7 +112,7 @@ export default function MembersCardList({community}) {
                     <h4 className="text-lg font-medium">
                       {member.firstName} {member.lastName}
                     </h4>
-                    Role: {member.role}
+                    Role: {capitalizeFirstLetter(member.role)}
                   </div>
                 </Link>
 

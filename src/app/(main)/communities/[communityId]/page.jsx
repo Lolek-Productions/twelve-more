@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import VisibilityLabel from "@/components/VisibilityLabel.jsx";
 
 // Define Zod schema for form validation
 const formSchema = z.object({
@@ -144,6 +145,7 @@ export default function CommunityPage() {
           <div>
             <h2 className="text-lg sm:text-xl font-bold">Community: {community?.name}</h2>
             <h2 className="">Purpose: {community?.purpose}</h2>
+            <VisibilityLabel visibility={community?.visibility} />
           </div>
         </Link>
 
