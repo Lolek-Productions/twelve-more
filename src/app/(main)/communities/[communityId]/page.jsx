@@ -20,7 +20,7 @@ import VisibilityLabel from "@/components/VisibilityLabel.jsx";
 
 // Define Zod schema for form validation
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }).max(50, { message: "Name must be less than 50 characters" }),
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }).max(150, { message: "Name must be less than 150 characters" }),
   purpose: z.string().min(10, { message: "Purpose must be at least 10 characters" }).max(500, { message: "Purpose must be less than 500 characters" }),
   visibility: z.enum(["public", "private"], {
     required_error: "Please select a visibility option",
