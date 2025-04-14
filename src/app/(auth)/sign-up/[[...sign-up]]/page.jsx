@@ -9,6 +9,7 @@ import {Label} from "@/components/ui/label";
 import Link from "next/link";
 import * as React from "react";
 import {useSearchParams} from "next/navigation";
+import {TAG_LINE} from "@/lib/constants.js";
 
 export default function SignUpPage() {
   const searchParams = useSearchParams();
@@ -47,7 +48,10 @@ export default function SignUpPage() {
               height={45}
               priority
             />
-            <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950">
+            <div className="text-gray-600 pt-2">
+              {TAG_LINE}
+            </div>
+            <h1 className="pt-2 text-xl font-medium tracking-tight text-zinc-950">
               Create an account
             </h1>
           </header>

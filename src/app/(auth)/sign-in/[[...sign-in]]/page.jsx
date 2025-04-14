@@ -5,6 +5,7 @@ import * as SignIn from '@clerk/elements/sign-in'
 import Image from "next/image";
 import * as React from "react";
 import {useState} from "react";
+import {TAG_LINE} from "@/lib/constants.js";
 
 export default function SignInPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -26,9 +27,12 @@ export default function SignInPage() {
               height={45}
               priority
             />
-            <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950">
+            <div className="text-gray-600 pt-2">
+              {TAG_LINE}
+            </div>
+            <div className="pt-3 text-xl font-medium tracking-tight text-zinc-950">
               Sign In to 12More
-            </h1>
+            </div>
           </header>
 
           <Clerk.GlobalError className="block text-sm text-red-400"/>

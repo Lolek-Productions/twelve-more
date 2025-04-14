@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import {useRouter} from "next/navigation";
+import {TAG_LINE} from "@/lib/constants.js";
 
 export default function Landing() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -38,9 +39,12 @@ export default function Landing() {
       <h1 className="mt-3 text-[50px] font-bold text-gray-800 leading-normal">
         12More
       </h1>
-      <p className=" text-2xl text-gray-600">
+      <div className="text-2xl text-gray-600">
+        {TAG_LINE}
+      </div>
+      <div className="pt-2">
         Sign in and find your community
-      </p>
+      </div>
 
       <Button asChild className='mt-9'>
         <Link href="/sign-up">Get Started</Link>
