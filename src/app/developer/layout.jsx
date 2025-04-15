@@ -29,42 +29,60 @@ const sidebarNavItems = [
     title: "Posts",
     href: "/developer/posts",
   },
+  // Stats submenu
   {
-    title: 'User Stats',
-    href: "/developer/user-stats",
-  },
-  {
-    title: 'Community Stats',
-    href: "/developer/community-stats",
+    title: "Stats",
+    children: [
+      {
+        title: "User Stats",
+        href: "/developer/user-stats",
+      },
+      {
+        title: "Community Stats",
+        href: "/developer/community-stats",
+      }
+    ]
   },
   {
     title: "Commands",
     href: "/developer/commands",
   },
+  // Location submenu
   {
-    title: "Parishes",
-    href: "/developer/parishes",
+    title: "Location Services",
+    children: [
+      {
+        title: "Parishes",
+        href: "/developer/parishes",
+      },
+      {
+        title: "Zipcode Proximity",
+        href: "/developer/zipcodes",
+      },
+      {
+        title: "Parish Proximity",
+        href: "/developer/parish-proximity",
+      }
+    ]
   },
+  // Communication submenu
   {
-    title: "Zipcode Proximity",
-    href: "/developer/zipcodes",
-  },
-  {
-    title: "Parish Proximity",
-    href: "/developer/parish-proximity",
-  },
-  {
-    title: "Lookup IP",
-    href: "/developer/lookup-ip",
-  },
-  {
-    title: "Phone Lookup",
-    href: "/developer/phone-lookup",
-  },
-  {
-    title: "Send SMS",
-    href: "/developer/send-sms",
-  },
+    title: "Communication",
+    children: [
+      {
+        title: "Lookup IP",
+        href: "/developer/lookup-ip",
+      },
+      {
+        title: "Phone Lookup",
+        href: "/developer/phone-lookup",
+      },
+      {
+        title: "Send SMS",
+        href: "/developer/send-sms",
+      }
+    ]
+  }
 ];
 
 export default function DeveloperLayout({ children }) {
