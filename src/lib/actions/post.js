@@ -1097,6 +1097,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
     return { success: false, error: error.message };
   }
 }
+
 export async function getPostForPostPage(postId) {
   try {
     await connect();
@@ -1396,6 +1397,61 @@ export async function setUserLikesAction(post, user) {
       status: false,
       message: 'Error updating like: ' + error.message
     };
+  }
+}
+
+export async function updatePost(postData) {
+  const user = await currentUser();
+
+  try {
+    await connect();
+
+    // Extract data from postData object
+    const postId = postData.id;
+    const text = postData.text;
+    const image = postData.image;
+    const audio = postData.audio;
+    const organizationId = postData.organizationId;
+
+    if (!postId) {
+      return { success: false, message: 'Post ID is required' };
+    }
+
+    // Find the post to update
+    const existingPost = await Post.findById(postId);
+
+    if (!existingPost) {
+      return { success: false, message: 'Post not found' };
+    }
+
+    // Check if user is authorized to update this post
+    if (!user || user.publicMetadata.userMongoId !== existingPost.user._id.toString()) {
+      return { success: false, message: 'Unauthorized to update this post' };
+    }
+
+    // Update post fields
+    existingPost.text = text || existingPost.text;
+
+    // Only update these fields if they are provided
+    if (image !== undefined) existingPost.image = image;
+    if (audio !== undefined) existingPost.audio = audio;
+
+    // Save the updated post
+    await existingPost.save();
+
+    // If this is a community post, optionally notify about the update
+    if (existingPost.community) {
+      // You could add community notification logic here if needed
+      // Similar to createPost, but for updates
+
+      console.log('Post updated in community:', existingPost.community);
+      return { success: true, message: "Post updated successfully" };
+    }
+
+    return { success: true, message: "Post updated successfully", post: existingPost };
+  } catch (error) {
+    console.log('Error updating post:', error);
+    return { success: false, message: error.message || 'Error updating post' };
   }
 }
 

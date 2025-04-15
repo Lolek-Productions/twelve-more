@@ -6,6 +6,7 @@ import Icons from './Icons';
 import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
 import PostText from "@/components/PostText.jsx";
+import HorizontalDots from "@/components/HorizontalDots.jsx";
 
 export default function Post({ post, clickableText = true, showComments = false, isAncestor = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -28,6 +29,13 @@ export default function Post({ post, clickableText = true, showComments = false,
     e.preventDefault();
     e.stopPropagation();
     setIsCommentsOpen(!isCommentsOpen);
+  };
+
+  // Handle post deletion
+  const handleDeletePost = (postId) => {
+    // Implement delete functionality here
+    console.log('Delete post:', postId);
+    // You could call an API here to delete the post
   };
 
   return (
@@ -65,6 +73,8 @@ export default function Post({ post, clickableText = true, showComments = false,
                   {moment(post?.createdAt).fromNow()}
                 </span>
               </div>
+
+              <HorizontalDots post={post} onDelete={handleDeletePost} />
             </div>
 
             <div className="flex items-center gap-2 -mt-1">

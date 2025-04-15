@@ -18,6 +18,7 @@ import { MainContextProvider } from "@/components/MainContextProvider";
 import { RightSidebarContextProvider, useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import AutoClosingSidebar from "@/components/AutoClosingSidebarWrapper.jsx";
 import TanstackQueryProvider from "@/components/TanstackQueryProvider.jsx";
+import EditModal from "@/components/EditModal.jsx";
 
 // Inner layout component that has access to the context
 function InnerLayout({ children }) {
@@ -147,6 +148,7 @@ function InnerLayout({ children }) {
 
       {/* Modals and Toasts */}
       <CommentModal />
+      <EditModal />
       <Toaster />
     </div>
   );
