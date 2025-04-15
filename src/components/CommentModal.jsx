@@ -94,15 +94,17 @@ export default function CommentModal() {
 
             {/* Post Content */}
             <div className="flex items-center space-x-1 relative mb-4">
-              <img
-                src={
-                  post
-                    ? 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'
-                    : post?.profileImg
-                }
-                alt="user-img"
-                className="h-11 w-11 rounded-full mr-4"
-              />
+              <div className="h-11 w-11 rounded-full mr-4 overflow-hidden flex-shrink-0">
+                <img
+                  src={
+                    post
+                      ? post?.profileImg
+                      : 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'
+                  }
+                  alt="user-img"
+                  className="h-full w-full object-cover"
+                />
+              </div>
               <div>
                 <h4 className="font-bold sm:text-[16px] text-[15px] hover:underline truncate">
                   {`${post?.user?.firstName} ${post?.user?.lastName}`}
@@ -145,11 +147,13 @@ export default function CommentModal() {
               <div className="space-y-4 mb-4">
                 {comments?.map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-3 group">
-                    <img
-                      src={comment.profileImg || 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'}
-                      alt="commenter"
-                      className="h-9 w-9 rounded-full"
-                    />
+                    <div className="h-9 w-9 rounded-full overflow-hidden flex-shrink-0">
+                      <img
+                        src={comment.profileImg || 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'}
+                        alt="commenter"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                     <div className="bg-gray-100 rounded-2xl px-4 py-2 flex-1">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-sm">
