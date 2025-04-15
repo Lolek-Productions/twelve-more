@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import moment from "moment/moment";
+import CommunitySelector from "@/components/CommunitySelector.jsx";
 
 // Questions array
 const questions = [
@@ -247,9 +248,10 @@ export default function QuestionOfTheDay({community}) {
         <p className="font-medium text-gray-800 text-lg">{dailyQuestion.question}</p>
         <p className="text-gray-600 text-sm italic">{dailyQuestion.description}</p>
 
-        <div className="mt-2 w-full text-gray-600 font-medium py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center justify-center">
-          Post to your 12
-        </div>
+        <CommunitySelector />
+        {/*<div className="mt-2 w-full text-gray-600 font-medium py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center justify-center">*/}
+        {/*  Post to your 12*/}
+        {/*</div>*/}
       </div>
     </div>
   );

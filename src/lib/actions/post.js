@@ -1768,3 +1768,87 @@ export async function searchPosts(searchTerm, appUser, limit = 20) {
     return {success: false, message: `Error searching posts: ${err.message}` };
   }
 };
+
+export async function getRecentPostCommunities(userId, limit = 5) {
+  try {
+    // First, find the communities the user has posted to most recently
+    const recentCommunities = await Post.aggregate([
+      // Match posts from this user
+      { $match: {
+          user: new mongoose.Types.ObjectId(userId),
+          community: { $ne: null } // Only include posts with communities
+        }},
+
+      // Sort by newest first
+      { $sort: { createdAt: -1 } },
+
+      // Group by community to get unique communities with most recent post date
+      { $group: {
+          _id: "$community",
+          mostRecentPost: { $max: "$createdAt" }
+        }},
+
+      // Sort by most recent post
+      { $sort: { mostRecentPost: -1 } },
+
+      // Limit to top 5
+      { $limit: limit },
+
+      // Lookup to get community details
+      { $lookup: {
+          from: "communities",
+          localField: "_id",
+          foreignField: "_id",
+          as: "communityDetails"
+        }},
+
+      // Unwind the community details
+      { $unwind: "$communityDetails" },
+
+      // Lookup to get organization details
+      { $lookup: {
+          from: "organizations",
+          localField: "communityDetails.organization",
+          foreignField: "_id",
+          as: "organizationDetails"
+        }},
+
+      // Unwind organization details (if they exist)
+      { $unwind: {
+          path: "$organizationDetails",
+          preserveNullAndEmptyArrays: true
+        }},
+
+      // Format the output
+      { $project: {
+          _id: "$communityDetails._id",
+          name: "$communityDetails.name",
+          purpose: "$communityDetails.purpose",
+          visibility: "$communityDetails.visibility",
+          "organization.name": {
+            $ifNull: ["$organizationDetails.name", "Unknown Organization"]
+          }
+        }}
+    ]);
+
+    return {
+      success: true,
+      communities: recentCommunities.map((community) => ({
+        id: community._id?.toString() || "",
+        name: community.name,
+        purpose: community.purpose,
+        visibility: community.visibility,
+        organization: {
+          name: community.organization?.name || "Unknown Organization"
+        }
+      }))
+    };
+
+  } catch (error) {
+    console.error('Error fetching recent post groups:', error);
+    return {
+      success: false,
+      message: error.message
+    };
+  }
+}
