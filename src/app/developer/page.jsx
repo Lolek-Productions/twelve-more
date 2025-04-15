@@ -110,7 +110,7 @@ export default function StatsPage() {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Dashboard Statistics</h1>
+      <h1 className="text-2xl font-bold mb-1">New Activity</h1>
       <h2 className="mb-2">The start date will set the beginning of the selected day.  The end date will select the end of the selected date.</h2>
       <h2 className="text-sm mb-3">All data is in Central Time.</h2>
 

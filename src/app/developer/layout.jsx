@@ -6,30 +6,30 @@ const sidebarNavItems = [
     href: "/home",
   },
   {
-    title: "Developer",
+    title: "New Activity",
     href: "/developer",
   },
   {
-    title: "Developers",
-    href: "/developer/developers",
+    title: "Database",
+    children: [
+      {
+        title: "Organizations",
+        href: "/developer/organizations",
+      },
+      {
+        title: "Communities",
+        href: "/developer/communities",
+      },
+      {
+        title: "Users",
+        href: "/developer/users",
+      },
+      {
+        title: "Posts",
+        href: "/developer/posts",
+      },
+    ]
   },
-  {
-    title: "Organizations",
-    href: "/developer/organizations",
-  },
-  {
-    title: "Communities",
-    href: "/developer/communities",
-  },
-  {
-    title: "Users",
-    href: "/developer/users",
-  },
-  {
-    title: "Posts",
-    href: "/developer/posts",
-  },
-  // Stats submenu
   {
     title: "Stats",
     children: [
@@ -44,11 +44,6 @@ const sidebarNavItems = [
     ]
   },
   {
-    title: "Commands",
-    href: "/developer/commands",
-  },
-  // Location submenu
-  {
     title: "Location Services",
     children: [
       {
@@ -62,13 +57,7 @@ const sidebarNavItems = [
       {
         title: "Parish Proximity",
         href: "/developer/parish-proximity",
-      }
-    ]
-  },
-  // Communication submenu
-  {
-    title: "Communication",
-    children: [
+      },
       {
         title: "Lookup IP",
         href: "/developer/lookup-ip",
@@ -77,12 +66,25 @@ const sidebarNavItems = [
         title: "Phone Lookup",
         href: "/developer/phone-lookup",
       },
+    ]
+  },
+  {
+    title: "Developer",
+    children: [
+      {
+        title: "Developers Themselves",
+        href: "/developer/developers",
+      },
       {
         title: "Send SMS",
         href: "/developer/send-sms",
-      }
+      },
+      {
+        title: "Commands",
+        href: "/developer/commands",
+      },
     ]
-  }
+  },
 ];
 
 export default function DeveloperLayout({ children }) {
