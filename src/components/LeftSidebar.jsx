@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { HiCommandLine } from "react-icons/hi2";
+import { HiCommandLine, HiKey } from "react-icons/hi2";
 import {HiHome, HiOutlinePlus, HiBriefcase, HiChevronDown, HiChevronRight} from 'react-icons/hi';
 import { HiMegaphone } from "react-icons/hi2";
 import MiniProfile from './MiniProfile';
@@ -134,17 +134,28 @@ export default function LeftSidebar({ onLinkClick }) {
               <span className="font-bold">Home</span>
             </Link>
 
-            {/*Purpose*/}
             <Link
-              href='/purpose'
+              href='/why'
               className={cn(
-                pathname === '/purpose' ? 'bg-muted' : 'hover:bg-muted/50',
+                pathname === '/why' ? 'bg-muted' : 'hover:bg-muted/50',
                 'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
               )}
               onClick={handleLinkClick}
             >
               <HiMegaphone className="w-6 h-6" />
               <span className="font-bold">Why 12More?</span>
+            </Link>
+
+            <Link
+              href='/how'
+              className={cn(
+                pathname === '/how' ? 'bg-muted' : 'hover:bg-muted/50',
+                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+              )}
+              onClick={handleLinkClick}
+            >
+              <HiKey className="w-6 h-6" />
+              <span className="font-bold">How to do it?</span>
             </Link>
           </div>
 
