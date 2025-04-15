@@ -8,12 +8,10 @@ import {
   HiChat,
 } from 'react-icons/hi';
 import { useState, useEffect } from 'react';
-import {atomPostState, modalState, postIdState} from '@/modalState/modalStateDefinition';
-import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
 import { sayPrayerAction, setUserLikesAction } from "@/lib/actions/post.js";
 import { useApiToast } from "@/lib/utils.js";
-import {useMainContext} from "@/components/MainContextProvider.jsx";
+import { useMainContext } from "@/components/MainContextProvider.jsx";
 
 export default function Icons({ post, commentCount = 0, onCommentClick = null }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -21,10 +19,13 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
   const [showComments, setShowComments] = useState(false);
   const [likes, setLikes] = useState(post.likes || []);
   const [prayers, setPrayers] = useState(post.prayers || []);
-  const [open, setOpen] = useAtom(modalState);
-  const [postId, setPostId] = useAtom(postIdState);
-  const [atomPost, setAtomPost] = useAtom(atomPostState);
-  const { appUser } = useMainContext();
+
+  const {
+    appUser,
+    setSelectedPostId,
+    setShowingPostCommentModal
+  } = useMainContext();
+
   const { showResponseToast, showErrorToast } = useApiToast();
 
   const likePost = async () => {
@@ -123,9 +124,8 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
     e.preventDefault();
     e.stopPropagation();
 
-    setOpen(!open);
-    setPostId(post.id);
-    setAtomPost(post);
+    setSelectedPostId(post.id);
+    setShowingPostCommentModal(true);
   };
 
   return (

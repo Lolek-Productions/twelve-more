@@ -1,42 +1,39 @@
 'use client';
 
-import {atomPostState, modalState, postIdState} from '../modalState/modalStateDefinition';
-import { useAtom } from 'jotai';
+import { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { linkifyText } from "@/lib/utils.js";
 import { useQueryClient } from '@tanstack/react-query';
-import {getPostByIdWithComments} from "@/lib/actions/post.js";
+import { getPostByIdWithComments } from "@/lib/actions/post.js";
 import PostInput from "@/components/PostInput.jsx";
-import {useMainContext} from "@/components/MainContextProvider.jsx";
+import { useMainContext } from "@/components/MainContextProvider.jsx";
 
 export default function CommentModal() {
-  const [open, setOpen] = useAtom(modalState);
-  const [postId, setPostId] = useAtom(postIdState);
-  const [atomPost, setAtomPost] = useAtom(atomPostState);
+  const {
+    showingPostCommentModal,
+    setShowingPostCommentModal,
+    selectedPostId,
+    setSelectedPostId
+  } = useMainContext();
+
+  const [post, setPost] = useState(null);
   const [commentsLoading, setCommentsLoading] = useState(false);
-  const [comments, setComments] = useState(false);
-  const [input, setInput] = useState('');
-  const { appUser } = useMainContext();
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
+  const [comments, setComments] = useState([]);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!postId) {
+    if (!selectedPostId) {
       return;
     }
 
     const fetchComments = async () => {
-      if (postId !== '') {
+      if (selectedPostId !== '') {
         setCommentsLoading(true);
-        setInput('');
-        const postResponse = await getPostByIdWithComments(postId);
-        // console.log(postResponse);
+        const postResponse = await getPostByIdWithComments(selectedPostId);
 
         if (postResponse.success) {
+          setPost(postResponse.post);
           setComments(postResponse.post.comments);
           setCommentsLoading(false);
         } else {
@@ -46,36 +43,40 @@ export default function CommentModal() {
       }
     };
     fetchComments();
-  }, [postId]);
+  }, [selectedPostId]);
 
   // Function to refresh main page data
   const refreshMainPage = () => {
     // Invalidate and refetch main posts query
-    queryClient.invalidateQueries(['post', atomPost.id]);
+    if (post?.id) {
+      queryClient.invalidateQueries(['post', post.id]);
+    }
 
     // If you have organization-specific queries
-    if (atomPost?.organization?.id) {
-      queryClient.invalidateQueries(['infiniteOrganizationFeed', atomPost.organization.id]);
+    if (post?.organization?.id) {
+      queryClient.invalidateQueries(['infiniteOrganizationFeed', post.organization.id]);
     }
     // If you have community-specific queries
-    if (atomPost?.community?.id) {
-      queryClient.invalidateQueries(['infiniteCommunityFeed', atomPost.community.id]);
+    if (post?.community?.id) {
+      queryClient.invalidateQueries(['infiniteCommunityFeed', post.community.id]);
     }
   };
 
   const afterPostCreated = () => {
-    setOpen(false);
+    setShowingPostCommentModal(false);
     refreshMainPage();
+  };
+
+  const handleClose = () => {
+    setShowingPostCommentModal(false);
+    setSelectedPostId(null);
   };
 
   return (
     <div>
       <Modal
-        isOpen={open}
-        onRequestClose={() => {
-          setOpen(false);
-          setPostId(null);
-        }}
+        isOpen={showingPostCommentModal}
+        onRequestClose={handleClose}
         ariaHideApp={false}
         className="max-w-lg w-[90%] absolute top-24 left-[50%] translate-x-[-50%] bg-white border-2 border-gray-200 rounded-xl shadow-md z-[80]"
         overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-[70]"
@@ -84,10 +85,7 @@ export default function CommentModal() {
           <div className="border-b border-gray-200 py-2 px-1.5 flex justify-end shrink-0">
             <HiX
               className="text-3xl text-gray-700 p-1.5 hover:bg-gray-200 rounded-full cursor-pointer"
-              onClick={() => {
-                setOpen(false);
-                setPostId(null);
-              }}
+              onClick={handleClose}
             />
           </div>
 
@@ -98,32 +96,39 @@ export default function CommentModal() {
             <div className="flex items-center space-x-1 relative mb-4">
               <img
                 src={
-                  atomPost
+                  post
                     ? 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg'
-                    : atomPost?.profileImg
+                    : post?.profileImg
                 }
                 alt="user-img"
                 className="h-11 w-11 rounded-full mr-4"
               />
               <div>
                 <h4 className="font-bold sm:text-[16px] text-[15px] hover:underline truncate">
-                  {`${atomPost?.user?.firstName} ${atomPost?.user?.lastName}`}
+                  {`${post?.user?.firstName} ${post?.user?.lastName}`}
                 </h4>
                 <h4 className="font-bold text-xs">
-                  {atomPost?.organization?.name} - {atomPost?.community?.name}
+                  {post?.organization?.name} - {post?.community?.name}
                 </h4>
                 <p
                   className="mt-2 text-gray-500 text-[15px] sm:text-[16px] whitespace-pre-wrap break-words overflow-hidden hyphens-auto"
                   style={{wordBreak: 'break-word', overflowWrap: 'break-word'}}>
-                  {!atomPost ? 'Loading...' : linkifyText(atomPost?.text)}
+                  {!post ? 'Loading...' : linkifyText(post?.text)}
                 </p>
               </div>
             </div>
 
             <div className="border border-b border-gray-200"></div>
             {/* Comment Input */}
-            {atomPost && atomPost.id &&
-              <PostInput parentId={atomPost.id} organizationId={atomPost.organization.id} placeholder={`Respond to this Post by ${atomPost.user.firstName} ${atomPost.user.lastName}`} communityId={atomPost.community?.id} onPostCreated={() => afterPostCreated()} autoFocus={true} />
+            {post && post.id &&
+              <PostInput
+                parentId={post.id}
+                organizationId={post.organization.id}
+                placeholder={`Respond to this Post by ${post.user.firstName} ${post.user.lastName}`}
+                communityId={post.community?.id}
+                onPostCreated={() => afterPostCreated()}
+                autoFocus={true}
+              />
             }
 
             {/* Comments Section Title */}
