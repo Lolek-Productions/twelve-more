@@ -14,12 +14,14 @@ import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getRecentPostCommunities } from "@/lib/actions/post.js";
 import { useMainContext } from "@/components/MainContextProvider.jsx";
+import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 
 export default function CommunitySelector() {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { appUser } = useMainContext();
+  const { setIsRightSheetOpen } = useRightSidebarContextContent();
 
   const fetchCommunities = async () => {
     if (communities.length === 0 && !loading) {
@@ -41,6 +43,7 @@ export default function CommunitySelector() {
   };
 
   const handleCommunitySelect = (communityId) => {
+    setIsRightSheetOpen(false);
     router.push(`/communities/${communityId}/posts`);
   };
 
@@ -89,7 +92,10 @@ export default function CommunitySelector() {
 
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => router.push('/organizations')}
+          onClick={() => {
+            setIsRightSheetOpen(false);
+            router.push('/organizations');
+          }}
           className="text-blue-600 cursor-pointer"
         >
           View all communities
