@@ -7,4 +7,4 @@ export const DEV_IDS = [
   '67c5c6858e1ad29f8673833e', //Maria
 ]
 
-export const TAG_LINE = "12More is where communities grow";
+export const TAG_LINE = "Jesus' missionary method for the digital age";
