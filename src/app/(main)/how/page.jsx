@@ -42,9 +42,7 @@ export default function HowPage() {
 - Ministry-active families drive parish vitality
 - A culture of welcoming creates a positive flywheel effect
 - The welcoming role typically becomes self-funding through increased giving
-
-*For further information: Tim Connors, tim@connors.org*
-  `;
+`;
 
   return (
     <div className="container mx-auto p-4">
