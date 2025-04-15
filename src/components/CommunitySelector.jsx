@@ -13,7 +13,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getRecentPostCommunities } from "@/lib/actions/post.js";
-import {useMainContext} from "@/components/MainContextProvider.jsx";
+import { useMainContext } from "@/components/MainContextProvider.jsx";
 
 export default function CommunitySelector() {
   const [communities, setCommunities] = useState([]);
@@ -55,7 +55,16 @@ export default function CommunitySelector() {
           <ChevronDown className="h-4 w-4 ml-2" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent
+        className="w-56"
+        sideOffset={5}
+        align="center"
+        side="bottom"
+        alignOffset={0}
+        avoidCollisions={true}
+        collisionPadding={16}
+        style={{ zIndex: 100 }}
+      >
         <DropdownMenuLabel>Recent Communities</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
