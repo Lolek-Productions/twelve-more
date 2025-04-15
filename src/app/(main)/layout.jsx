@@ -15,13 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, EllipsisVertical } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import SessionWrapper from "@/components/SessionWrapper";
-import { ContextProvider, useContextContent } from "@/components/ContextProvider";
+import { RightSidebarContextProvider, useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import AutoClosingSidebar from "@/components/AutoClosingSidebarWrapper.jsx";
 import TanstackQueryProvider from "@/components/TanstackQueryProvider.jsx";
 
 // Inner layout component that has access to the context
 function InnerLayout({ children }) {
-  const { contentComponent, isRightSheetOpen, setIsRightSheetOpen  } = useContextContent();
+  const { contentComponent, isRightSheetOpen, setIsRightSheetOpen  } = useRightSidebarContextContent();
   const [isLeftSheetOpen, setIsLeftSheetOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -162,9 +162,9 @@ export default function RootLayout({ children }) {
       <SignedIn>
         <SessionWrapper>
           <TanstackQueryProvider>
-            <ContextProvider>
+            <RightSidebarContextProvider>
               <InnerLayout>{children}</InnerLayout>
-            </ContextProvider>
+            </RightSidebarContextProvider>
           </TanstackQueryProvider>
         </SessionWrapper>
       </SignedIn>

@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {useContextContent} from "@/components/ContextProvider.jsx";
+import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useApiToast} from "@/lib/utils.js";
 import {inviteCurrentUserToCommunity, sendCommunityInvitation} from "@/lib/actions/invite.js";
@@ -55,16 +55,14 @@ export default function Invite() {
   const [isSearching, setIsSearching] = useState(false);
   const [showLookupModal, setShowLookupModal] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [accordionValue, setAccordionValue] = useState("");
   const {appUser} = useAppUser();
   const { showResponseToast, showErrorToast } = useApiToast();
   const [isCopied, copyToClipboard] = useClipboard();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
 
-
-  const { setContextContent } = useContextContent();
   useEffect(() => {
-    setContextContent(<CommunityContextSidebar community={community} communityId={communityId} />);
-  }, [setContextContent, community, communityId]);
+    setRightSidebarContextContent(<CommunityContextSidebar community={community} communityId={communityId} />);
+  }, [setRightSidebarContextContent, community, communityId]);
 
   // Form for the main invite
   const inviteForm = useForm({
@@ -164,7 +162,6 @@ export default function Invite() {
 
   const createNewUser = () => {
     inviteForm.reset();
-    setAccordionValue("invite-form");
   };
 
   const sendInvite = async (data) => {
@@ -176,7 +173,6 @@ export default function Invite() {
 
       if (response.success) {
         inviteForm.reset();
-        setAccordionValue("");
       }
     } catch (error) {
       showErrorToast(error);
@@ -257,7 +253,6 @@ export default function Invite() {
             variant="outline"
             onClick={() => {
               setShowLookupModal(true);
-              setAccordionValue("")
               lookupForm.reset();
             }}
           >

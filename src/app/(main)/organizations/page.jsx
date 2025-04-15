@@ -2,14 +2,14 @@
 
 import HomeContextSidebar from "@/components/HomeContextSidebar.jsx";
 import {useEffect} from "react";
-import {useContextContent} from "@/components/ContextProvider.jsx";
+import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 import OrganizationList from "@/components/OrganizationList.jsx";
 
 export default function CommunitiesPage() {
-  const { setContextContent } = useContextContent();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
   useEffect(() => {
-    setContextContent(<HomeContextSidebar />);
-  }, [setContextContent]);
+    setRightSidebarContextContent(<HomeContextSidebar />);
+  }, [setRightSidebarContextContent]);
 
   return (
     <>

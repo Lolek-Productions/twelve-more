@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link"
 import {useAppUser} from "@/hooks/useAppUser.js";
 import {getOrganizationById} from "@/lib/actions/organization.js";
-import {useContextContent} from "@/components/ContextProvider.jsx";
+import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 import OrganizationContextSidebar from "@/components/OrganizationContextSidebar";
 import OrganizationCommunityList from "@/components/OrganizationCommunityList.jsx";
 import {Button} from "@/components/ui/button.jsx";
@@ -19,10 +19,10 @@ export default function UserPage() {
   const [communities, setCommunities] = useState(null);
   const { appUser } = useAppUser();
 
-  const { setContextContent } = useContextContent();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
   useEffect(() => {
-    setContextContent(<OrganizationContextSidebar />);
-  }, [setContextContent]);
+    setRightSidebarContextContent(<OrganizationContextSidebar />);
+  }, [setRightSidebarContextContent]);
 
   useEffect(() => {
     if (!organizationId) {

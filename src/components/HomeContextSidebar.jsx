@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RecentMembersToOrganization from "@/components/RecentMembersToOrganizations.jsx";
 import QuestionOfTheDay from "@/components/QuestionOfTheDay.jsx";
-import {useContextContent} from "@/components/ContextProvider.jsx";
+import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 
 export default function HomeContextSidebar() {
   const [input, setInput] = useState('');
   const router = useRouter();
-  const { setIsRightSheetOpen } = useContextContent();
+  const { setIsRightSheetOpen } = useRightSidebarContextContent();
 
   const handleSubmit = (e) => {
     e.preventDefault();

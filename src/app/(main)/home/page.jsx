@@ -3,7 +3,7 @@
 import HomeFeed from '@/components/HomeFeed';
 // import PostInput from '@/components/PostInput.jsx';
 import { useEffect, useState } from "react";
-import { useContextContent } from "@/components/ContextProvider";
+import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import HomeContextSidebar from "@/components/HomeContextSidebar";
 import { useAppUser } from "@/hooks/useAppUser.js";
 import { getCommunityById } from "@/lib/actions/community.js";
@@ -22,7 +22,7 @@ import { addCommunityToUser, addOrganizationToUser } from "@/lib/actions/user.js
 export default function HomePage() {
   const { appUser } = useAppUser();
   const router = useRouter();
-  const { setContextContent } = useContextContent();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
 
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
   const [communityData, setCommunityData] = useState(null);
@@ -32,8 +32,8 @@ export default function HomePage() {
 
   // Set context sidebar
   useEffect(() => {
-    setContextContent(<HomeContextSidebar />);
-  }, [setContextContent]);
+    setRightSidebarContextContent(<HomeContextSidebar />);
+  }, [setRightSidebarContextContent]);
 
   // Check for pending community invitation
   useEffect(() => {

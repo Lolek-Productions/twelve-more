@@ -5,7 +5,7 @@ import { use } from 'react';
 import CommunityFeed from '@/components/CommunityFeed.jsx';
 import PostInput from '@/components/PostInput.jsx';
 import { getCommunityById } from "@/lib/actions/community.js";
-import { useContextContent } from "@/components/ContextProvider.jsx";
+import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import CommunityContextSidebar from "@/components/CommunityContextSidebar.jsx";
 import {useQueryClient} from "@tanstack/react-query";
 import Link from "next/link";
@@ -45,10 +45,10 @@ export default function CommunityPosts({ params }) {
     queryClient.invalidateQueries(['infiniteCommunityFeed', communityId]);
   }, [fetchCommunityData]);
 
-  const { setContextContent } = useContextContent();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
   useEffect(() => {
-    setContextContent(<CommunityContextSidebar community={community} communityId={communityId} />);
-  }, [setContextContent, community, communityId]);
+    setRightSidebarContextContent(<CommunityContextSidebar community={community} communityId={communityId} />);
+  }, [setRightSidebarContextContent, community, communityId]);
 
   if (loading) {
     return (

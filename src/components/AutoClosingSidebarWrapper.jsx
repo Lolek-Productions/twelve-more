@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { useContextContent } from "@/components/ContextProvider";
+import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 
 export default function AutoClosingSidebar({ children }) {
-  const { setIsRightSheetOpen } = useContextContent();
+  const { setIsRightSheetOpen } = useRightSidebarContextContent();
   const sidebarRef = useRef(null);
 
   useEffect(() => {

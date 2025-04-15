@@ -2,7 +2,7 @@
 
 import {useState, useEffect, useCallback} from 'react';
 import { use } from 'react';
-import { useContextContent } from "@/components/ContextProvider.jsx";
+import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import OrganizationContextSidebar from "@/components/OrganizationContextSidebar.jsx";
 import OrganizationFeed from "@/components/OrganizationFeed.jsx";
 import {getOrganizationById} from "@/lib/actions/organization.js";
@@ -42,10 +42,10 @@ export default function OrganizationPosts({ params }) {
     queryClient.invalidateQueries(['infiniteOrganizationFeed', organizationId]);
   }, [fetchOrganizationData]);
 
-  const { setContextContent } = useContextContent();
+  const { setRightSidebarContextContent } = useRightSidebarContextContent();
   useEffect(() => {
-    setContextContent(<OrganizationContextSidebar organization={organization} />);
-  }, [setContextContent, organization]);
+    setRightSidebarContextContent(<OrganizationContextSidebar organization={organization} />);
+  }, [setRightSidebarContextContent, organization]);
 
   if (loading) {
     return (
