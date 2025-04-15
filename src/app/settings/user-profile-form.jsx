@@ -17,8 +17,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {useEffect} from "react";
 import {useToast} from "@/hooks/use-toast";
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {updateUser} from "@/lib/actions/user.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 const profileFormSchema = z.object({
   firstname: z.string().min(2, { message: "First name must be at least 2 characters." }).max(30),
@@ -29,7 +29,7 @@ const profileFormSchema = z.object({
 })
 
 export function UserProfileForm() {
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const { toast } = useToast();
 
   const onUpdateUser = async (formData) => {

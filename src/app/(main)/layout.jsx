@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu, EllipsisVertical } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import SessionWrapper from "@/components/SessionWrapper";
+import { MainContextProvider } from "@/components/MainContextProvider";
 import { RightSidebarContextProvider, useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import AutoClosingSidebar from "@/components/AutoClosingSidebarWrapper.jsx";
 import TanstackQueryProvider from "@/components/TanstackQueryProvider.jsx";
@@ -160,13 +160,13 @@ export default function RootLayout({ children }) {
         <RedirectToSignIn />
       </SignedOut>
       <SignedIn>
-        <SessionWrapper>
+        <MainContextProvider>
           <TanstackQueryProvider>
             <RightSidebarContextProvider>
               <InnerLayout>{children}</InnerLayout>
             </RightSidebarContextProvider>
           </TanstackQueryProvider>
-        </SessionWrapper>
+        </MainContextProvider>
       </SignedIn>
     </div>
   );

@@ -14,16 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createOrganizationWithWelcomingCommunity } from "@/lib/actions/organization.js";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
 import { useState } from "react";
@@ -53,7 +45,7 @@ const defaultValues = {
 };
 
 export default function NewOrganizationPage() {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const { showResponseToast, showErrorToast } = useApiToast();
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
 import {
   changeRoleOnUserInCommunity,
@@ -17,13 +16,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function MembersCardList({community}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [members, setMembers] = useState([]);
   const [joinStatus, setJoinStatus] = useState({});
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const { showResponseToast, showErrorToast } = useApiToast();
 
   const fetchMembers = async () => {

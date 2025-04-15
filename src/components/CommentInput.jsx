@@ -5,12 +5,12 @@ import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {useApiToast} from "@/lib/utils.js";
 import {createPost} from "@/lib/actions/post.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function CommentInput({post, onCommentCreated = null}) {
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showResponseToast, showErrorToast } = useApiToast();
 

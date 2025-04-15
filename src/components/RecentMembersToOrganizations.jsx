@@ -1,13 +1,13 @@
 'use client';
 
 import Link from "next/link"
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {useEffect, useState} from "react";
 import {getRecentOrganizationsMembers} from "@/lib/actions/user.js";
 import moment from "moment/moment";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function MemberList() {
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const [members, setMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 

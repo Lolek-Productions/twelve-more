@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useAppUser } from '@/hooks/useAppUser';
 import OrganizationCommunityList from "@/components/OrganizationCommunityList.jsx";
 import React from "react";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function OrganizationList() {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
 
   return (
     <div className="p-4">

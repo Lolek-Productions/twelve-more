@@ -9,13 +9,13 @@ import MiniProfile from './MiniProfile';
 import {usePathname} from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {DEV_IDS} from '@/lib/constants';
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {Button} from "@/components/ui/button.jsx";
 import React, {useState, useMemo} from "react";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function LeftSidebar({ onLinkClick }) {
   const pathname = usePathname();
-  const {appUser, isLoaded} = useAppUser();
+  const { appUser } = useMainContext();
   const [organizationsOpen, setOrganizationsOpen] = useState(false);
   const [expandedOrgs, setExpandedOrgs] = useState({});
 
@@ -53,7 +53,7 @@ export default function LeftSidebar({ onLinkClick }) {
     }, {});
   }, [appUser?.communities]);
 
-  if (isLoaded || !appUser) {
+  if (!appUser) {
     return <div className="p-3">Loading...</div>;
   }
 

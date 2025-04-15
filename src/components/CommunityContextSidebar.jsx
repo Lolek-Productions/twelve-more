@@ -4,15 +4,15 @@ import { useState, useEffect } from "react";
 import MemberList from "@/components/MemberList.jsx";
 import QuestionOfTheDay from "@/components/QuestionOfTheDay.jsx";
 import {getCommunityMembers, removeCommunityFromUser} from "@/lib/actions/user.js";
-import {useAppUser} from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import {useApiToast} from "@/lib/utils.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function CommunityContextSidebarComponent({ community, communityId }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const { showResponseToast, showErrorToast } = useApiToast();
 

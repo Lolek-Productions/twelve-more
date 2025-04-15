@@ -3,20 +3,17 @@
 import Post from '@/components/Post';
 import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
-import {useParams, useRouter} from "next/navigation";
-import {useAppUser} from "@/hooks/useAppUser.js";
+import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {searchPosts} from "@/lib/actions/post.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function SearchPage() {
   const params = useParams();
   const { searchTerm } = params;
-  // console.log('sesarch term from front', searchTerm);
-
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState(null);
-  const router = useRouter();
 
   useEffect(() => {
     if (!searchTerm || !appUser) {

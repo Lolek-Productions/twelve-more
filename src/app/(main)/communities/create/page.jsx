@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createCommunity } from "@/lib/actions/community.js";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
 import { useState } from "react";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 const communityFormSchema = z.object({
   name: z
@@ -61,7 +61,7 @@ const defaultValues = {
 };
 
 export default function NewCommunityPage() {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const { showResponseToast, showErrorToast } = useApiToast();
   const [isSubmitting, setIsSubmitting] = useState(false);

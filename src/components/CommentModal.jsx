@@ -6,11 +6,11 @@ import Modal from 'react-modal';
 import { HiX } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { linkifyText } from "@/lib/utils.js";
 import { useQueryClient } from '@tanstack/react-query';
 import {getPostByIdWithComments} from "@/lib/actions/post.js";
 import PostInput from "@/components/PostInput.jsx";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function CommentModal() {
   const [open, setOpen] = useAtom(modalState);
@@ -19,7 +19,7 @@ export default function CommentModal() {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [comments, setComments] = useState(false);
   const [input, setInput] = useState('');
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const queryClient = useQueryClient();

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useAppUser } from '@/hooks/useAppUser';
 import Link from "next/link";
 import {
   deleteCommunities, getCommunitiesByOrganizationForUser,
@@ -10,13 +9,14 @@ import {
 import { addCommunityToUser, removeCommunityFromUser } from '@/lib/actions/user';
 import {useToast} from "@/hooks/use-toast.js";
 import VisibilityLabel from "@/components/VisibilityLabel.jsx";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function OrganizationCommunityList({organization}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [communities, setCommunities] = useState([]);
   const [joinStatus, setJoinStatus] = useState({});
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const { toast } = useToast();
 
   const fetchCommunities = async () => {

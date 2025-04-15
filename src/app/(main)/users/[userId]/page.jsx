@@ -1,23 +1,23 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { getUserByIdByAppUser } from "@/lib/actions/user";
 import Link from "next/link";
 import Post from "@/components/Post.jsx";
 import { getPostsByUserForAppUser } from "@/lib/actions/post.js";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import {
   useQuery,
   useInfiniteQuery
 } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import VisibilityLabel from "@/components/VisibilityLabel.jsx";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function UserPage() {
   const params = useParams();
   const { userId } = params;
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const observerRef = useRef(null);
 
   // User data query

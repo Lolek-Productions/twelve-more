@@ -11,9 +11,9 @@ import { useState, useEffect } from 'react';
 import {atomPostState, modalState, postIdState} from '@/modalState/modalStateDefinition';
 import { useAtom } from 'jotai';
 import { PiHandsPraying } from "react-icons/pi";
-import { useAppUser } from "@/hooks/useAppUser";
 import { sayPrayerAction, setUserLikesAction } from "@/lib/actions/post.js";
 import { useApiToast } from "@/lib/utils.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function Icons({ post, commentCount = 0, onCommentClick = null }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -24,7 +24,7 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
   const [open, setOpen] = useAtom(modalState);
   const [postId, setPostId] = useAtom(postIdState);
   const [atomPost, setAtomPost] = useAtom(atomPostState);
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const { showResponseToast, showErrorToast } = useApiToast();
 
   const likePost = async () => {

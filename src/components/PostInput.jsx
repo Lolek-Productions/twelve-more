@@ -6,10 +6,10 @@ import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
 import { Button } from "@/components/ui/button"
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {createPost} from "@/lib/actions/post.js";
 import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function PostInput({
                                     communityId,
@@ -22,7 +22,7 @@ export default function PostInput({
                                   }) {
 
   const { user, isSignedIn, isLoaded } = useUser();
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showResponseToast, showErrorToast } = useApiToast();
   const [ community, setCommunity ] = useState(null);

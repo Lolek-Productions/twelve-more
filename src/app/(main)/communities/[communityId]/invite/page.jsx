@@ -12,7 +12,6 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import {getCommunityById} from "@/lib/actions/community";
 import {getCommunityMembers, searchUsersInUserOrganizations} from "@/lib/actions/user.js";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +25,7 @@ import {useApiToast} from "@/lib/utils.js";
 import {inviteCurrentUserToCommunity, sendCommunityInvitation} from "@/lib/actions/invite.js";
 import {PUBLIC_APP_URL} from "@/lib/constants.js";
 import {useClipboard} from "@/hooks/useClipboard.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 const userLookupSchema = z.object({
   query: z
@@ -55,7 +55,7 @@ export default function Invite() {
   const [isSearching, setIsSearching] = useState(false);
   const [showLookupModal, setShowLookupModal] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
   const { showResponseToast, showErrorToast } = useApiToast();
   const [isCopied, copyToClipboard] = useClipboard();
   const { setRightSidebarContextContent } = useRightSidebarContextContent();

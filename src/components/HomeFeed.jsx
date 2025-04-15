@@ -4,11 +4,11 @@ import Post from './Post';
 import { useEffect, useRef, useCallback } from "react";
 import { getPostsForHomeFeed } from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function HomeFeed() {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const observerRef = useRef(null);
 
   // Modify your getPostsForHomeFeed to work with pageParam

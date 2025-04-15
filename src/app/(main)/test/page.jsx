@@ -1,31 +1,30 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
-import ExampleContextComponent from "./ExampleContextSidebar";
+import { useMainContext } from "@/components/MainContextProvider";
 
 export default function ExamplePage() {
-  const { setRightSidebarContextContent, clearContextContent } = useRightSidebarContextContent();
-
-  // Create a stable onClose callback that won't change on re-renders
-  const handleClose = useCallback(() => {
-    clearContextContent();
-  }, [clearContextContent]);
-
-  useEffect(() => {
-    // Create the context component once when the component mounts
-    const ContextComponent = <ExampleContextComponent onClose={handleClose} />;
-    setRightSidebarContextContent(ContextComponent);
-
-    // Clean up when the component unmounts
-    return () => {
-      clearContextContent();
-    };
-  }, [setRightSidebarContextContent, handleClose]);
+  const { appUser, clerkUser } = useMainContext();
 
   return (
     <div className="p-6">
+      {appUser ? (
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Welcome appUser, {appUser.firstName }</h1>
+          <h1 className="text-2xl font-bold mb-4">Welcome clerkUser, {clerkUser.firstName }</h1>
+          <p>You're signed in with ID: {appUser.id}</p>
 
+          {/* Example of using both auth contexts */}
+          {clerkUser && (
+            <p className="mt-2 text-gray-600">
+              Email: {clerkUser.primaryEmailAddress?.emailAddress}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Loading user data...</h1>
+        </div>
+      )}
     </div>
   );
 }

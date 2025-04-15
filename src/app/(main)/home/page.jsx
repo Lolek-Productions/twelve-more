@@ -1,11 +1,9 @@
 "use client";
 
 import HomeFeed from '@/components/HomeFeed';
-// import PostInput from '@/components/PostInput.jsx';
 import { useEffect, useState } from "react";
 import { useRightSidebarContextContent } from "@/components/RightSidebarContextProvider.jsx";
 import HomeContextSidebar from "@/components/HomeContextSidebar";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { getCommunityById } from "@/lib/actions/community.js";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,12 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { addCommunityToUser, addOrganizationToUser } from "@/lib/actions/user.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function HomePage() {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const { setRightSidebarContextContent } = useRightSidebarContextContent();
-
   const [pendingCommunityId, setPendingCommunityId] = useState(null);
   const [communityData, setCommunityData] = useState(null);
   const [showModal, setShowModal] = useState(false);

@@ -7,6 +7,7 @@ import OrganizationList from "@/components/OrganizationList.jsx";
 
 export default function CommunitiesPage() {
   const { setRightSidebarContextContent } = useRightSidebarContextContent();
+
   useEffect(() => {
     setRightSidebarContextContent(<HomeContextSidebar />);
   }, [setRightSidebarContextContent]);

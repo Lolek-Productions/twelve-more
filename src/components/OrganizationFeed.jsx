@@ -4,11 +4,11 @@ import Post from './Post';
 import { useRef, useCallback } from "react";
 import {getPostsForOrganizationFeed} from "@/lib/actions/post";
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function OrganizationFeed({ organizationId }) {
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const observerRef = useRef(null);
 
   // Set up function to fetch posts with pagination

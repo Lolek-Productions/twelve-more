@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { getCommunityById, updateCommunity } from "@/lib/actions/community.js";
 import Link from "next/link";
 import { Button } from "@/components/ui/button.jsx";
@@ -17,6 +16,7 @@ import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import VisibilityLabel from "@/components/VisibilityLabel.jsx";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 // Define Zod schema for form validation
 const formSchema = z.object({
@@ -32,7 +32,7 @@ export default function CommunityPage() {
   const { communityId } = params;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const [community, setCommunity] = useState({});
 
   // State for the edit modal

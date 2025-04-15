@@ -6,15 +6,15 @@ import AncestorPosts from '@/components/AncestorPosts';
 import { HiArrowLeft } from 'react-icons/hi';
 import { useEffect, useState } from "react";
 import { getPostByIdWithAncestorsAndDescendents } from "@/lib/actions/post.js";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import { useParams, useRouter } from "next/navigation";
 import PostInput from "@/components/PostInput.jsx";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function PostPage() {
   const params = useParams();
   const { postId } = params;
-  const { appUser } = useAppUser();
+  const { appUser } = useMainContext();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
   const queryClient = useQueryClient();

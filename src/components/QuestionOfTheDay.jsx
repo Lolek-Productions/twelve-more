@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useAppUser } from "@/hooks/useAppUser.js";
 import moment from "moment/moment";
-import Link from "next/link";
 
 // Questions array
 const questions = [
@@ -209,7 +207,6 @@ const determineCommunityType = (community) => {
 };
 
 export default function QuestionOfTheDay({community}) {
-  const { appUser } = useAppUser();
   const [currentDate, setCurrentDate] = useState("");
   const [dailyQuestion, setDailyQuestion] = useState({ question: "", description: "" });
   const [communityType, setCommunityType] = useState(null);

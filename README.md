@@ -48,4 +48,7 @@ Clerk is using: Unix timestamp in milliseconds when calculating last_active_at
 console.log('Active users:', activeUsers.data[0].lastActiveAt);
 
 # Using https://ipapi.is/ for ip lookup
-storing api key under: IP_API_KEY
+
+# change to using mainContextProvider:
+const { appUser, clerkUser } = useMainContext();
+const { appUser } = useMainContext();

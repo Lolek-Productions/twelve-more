@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link"
-import {useAppUser} from "@/hooks/useAppUser.js";
 import {getOrganizationById} from "@/lib/actions/organization.js";
 import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 import OrganizationContextSidebar from "@/components/OrganizationContextSidebar";
@@ -17,7 +16,6 @@ export default function UserPage() {
   const [error, setError] = useState(null);
   const [organization, setOrganization] = useState(null);
   const [communities, setCommunities] = useState(null);
-  const { appUser } = useAppUser();
 
   const { setRightSidebarContextContent } = useRightSidebarContextContent();
   useEffect(() => {

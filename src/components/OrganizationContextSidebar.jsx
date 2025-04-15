@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import RecentOrganizationMembers from "@/components/RecentOrganizationMembers.jsx";
 import {useApiToast} from "@/lib/utils.js";
 import {deleteOrganization} from "@/lib/actions/organization.js";
-import {useAppUser} from "@/hooks/useAppUser.js";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 export default function OrganizationContextSidebar({organization}) {
   const [input, setInput] = useState('');
   const router = useRouter();
   const { showResponseToast, showErrorToast } = useApiToast();
-  const {appUser} = useAppUser();
+  const { appUser } = useMainContext();
 
   const handleSubmit = (e) => {
     e.preventDefault();
