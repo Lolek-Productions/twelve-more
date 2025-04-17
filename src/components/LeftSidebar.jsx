@@ -159,12 +159,13 @@ export default function LeftSidebar({ onLinkClick }) {
             </Link>
           </div>
 
-
-          {/*My 12s - UPDATED*/}
+          {/* My 12s */}
           <div className="p-3 bg-gray-100 rounded-md">
-            <div className="flex items-center mb-1">
-              <div className="ml-2 text-lg font-bold whitespace-nowrap">My 12s</div>
-            </div>
+            <Link href="/communities" className="block">
+              <div className="flex items-center mb-1 hover:bg-gray-100 rounded-md py-2 transition-colors cursor-pointer">
+                <div className="ml-2 text-lg font-bold whitespace-nowrap">My 12s</div>
+              </div>
+            </Link>
 
             {/* Communities grouped by organization */}
             <div>

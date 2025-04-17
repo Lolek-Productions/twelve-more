@@ -122,10 +122,10 @@ export default function OrganizationCommunityList({organization}) {
                     <VisibilityLabel visibility={community?.visibility} />
                   </h4>
                 </Link>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   {!isMember ? (
                     <Button
-                      className="mt-2"
+                      className=""
                       variant="outline"
                       onClick={() => handleAddCommunityToUser(community.id)}
                       disabled={status.loading}
@@ -134,7 +134,7 @@ export default function OrganizationCommunityList({organization}) {
                     </Button>
                   ) : (
                     <Button
-                      className="mt-2"
+                      className=""
                       variant="outline"
                       onClick={() => handleRemoveCommunityFromUser(community.id)}
                       disabled={status.loading}
@@ -142,12 +142,12 @@ export default function OrganizationCommunityList({organization}) {
                       Leave
                     </Button>
                   )}
-                  <Button asChild className="mt-2" variant="outline">
+                  <Button asChild className="" variant="outline">
                     <Link href={`/communities/${community.id}/invite`}>Invite others to community</Link>
                   </Button>
 
                   {isCommunityLeader(community.id) && (
-                    <Button onClick={()=> handleDeleteCommunity(`${community.id}`)} className="mt-2" variant="outline">
+                    <Button onClick={()=> handleDeleteCommunity(`${community.id}`)} className="" variant="outline">
                       Delete
                     </Button>
                   )}

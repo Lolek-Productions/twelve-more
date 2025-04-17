@@ -94,7 +94,7 @@ export default function CommunitySelector() {
         <DropdownMenuItem
           onClick={() => {
             setIsRightSheetOpen(false);
-            router.push('/organizations');
+            router.push('/communities');
           }}
           className="text-blue-600 cursor-pointer"
         >

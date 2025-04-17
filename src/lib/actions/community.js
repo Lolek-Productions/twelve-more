@@ -111,9 +111,6 @@ export const deleteCommunities = async (ids) => {
   }
 }
 
-/**
- * Gets all communities for an organization
- */
 export const getCommunitiesByOrganization = async function (organizationId) {
   try {
     if (!organizationId) {
@@ -196,41 +193,68 @@ export const getCommunitiesByOrganizationForUser = async function (organizationI
 };
 
 export const getCommunitiesByUser = async function (appUser) {
-  if (!appUser) {return;}
+  if (!appUser) return { success: false, message: "User is required." };
 
   try {
-    await connect();
+    if (appUser.communities && Array.isArray(appUser.communities)) {
+      const userCommunityIds = appUser.communities.map(c => c.id);
 
-    const userCommunityIds = appUser.communities.map(c => c.id) || [];
-    const userOrganizationIds = appUser.organizations.map(c => c.id) || [];
+      const userRoleMap = {};
+      appUser.communities.forEach(comm => {
+        userRoleMap[comm.id] = comm.role;
+      });
 
-    const communities = await Community.find({
-      $or: [
-        {
-          organization: { $in: userOrganizationIds },
-          visibility: "public"
-        },
-        {
-          _id: { $in: userCommunityIds }
+      // console.warn(userRoleMap);
+      //  '67c7003cfc84d5f673d1fd54': 'leader',
+
+      const communities = await Community.find({ _id: { $in: userCommunityIds } })
+        .populate({
+          path: "organization",
+          select: "name",
+        })
+        .lean();
+
+      // console.log(communities);
+
+      // Process user's communities data
+      const memberCommunities = [];
+      const leaderCommunities = [];
+
+      // Iterate through each community and categorize based on user's role
+      communities.forEach(communityData => {
+        const communityId = communityData._id.toString();
+
+        // Create community object with needed details
+        const community = {
+          id: communityId,
+          name: communityData.name,
+          purpose: communityData.purpose,
+          visibility: communityData.visibility,
+          organization: {
+            name: communityData.organization?.name || "Unknown Organization"
+          },
+          role: userRoleMap[communityId] || "member"
+        };
+
+        // Sort into appropriate group based on role
+        if (community.role === "leader") {
+          leaderCommunities.push(community);
+        } else {
+          memberCommunities.push(community);
         }
-      ]
-    })
-      .populate({
-        path: "organization",
-        select: "name",
-      })
-      .lean();
+      });
 
-    return communities.map((community) => ({
-      id: community._id?.toString() || "",
-      name: community.name,
-      purpose: community.purpose,
-      visibility: community.visibility,
-      organization: { name: community.organization?.name || "Unknown Organization" },
-    }));
+      return {
+        success: true,
+        memberCommunities,
+        leaderCommunities
+      };
+    }
+
+    return { success: false, message: "Error processing user communities" };
   } catch (error) {
-    console.error("Error fetching communities by organization:", error);
-    return [];
+    console.error("Error processing user communities:", error);
+    return { success: false, message: "Error processing user communities" };
   }
 };
 

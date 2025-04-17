@@ -5,7 +5,7 @@ import {useEffect} from "react";
 import {useRightSidebarContextContent} from "@/components/RightSidebarContextProvider.jsx";
 import OrganizationList from "@/components/OrganizationList.jsx";
 
-export default function CommunitiesPage() {
+export default function OrganizationsPage() {
   const { setRightSidebarContextContent } = useRightSidebarContextContent();
 
   useEffect(() => {
