@@ -301,7 +301,7 @@ export default function PostInput({
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
                                  onClick={() => imagePickRef.current.click()}
             />
-            <span className="text-xs text-gray-500 ml-2">Tip: Press ⌘+Enter to post</span>
+            {/*<span className="text-xs text-gray-500 ml-2">Tip: Press ⌘+Enter to post</span>*/}
           </div>
           <input
             type='file'
