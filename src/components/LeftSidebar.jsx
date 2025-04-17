@@ -64,7 +64,6 @@ export default function LeftSidebar({ onLinkClick }) {
   };
 
   const getOrgCommunities = (orgId) => {
-    // Get all organizations the user belongs to
     const organizations = appUser?.organizations || [];
 
     // Find the current organization
