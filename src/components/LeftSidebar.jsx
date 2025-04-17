@@ -161,7 +161,7 @@ export default function LeftSidebar({ onLinkClick }) {
 
           {/* My 12s */}
           <div className="p-3 bg-gray-100 rounded-md">
-            <Link href="/communities" className="block">
+            <Link href="/communities" className="block" onClick={handleLinkClick}>
               <div className="flex items-center mb-1 hover:bg-gray-100 rounded-md py-2 transition-colors cursor-pointer">
                 <div className="ml-2 text-lg font-bold whitespace-nowrap">My 12s</div>
               </div>
