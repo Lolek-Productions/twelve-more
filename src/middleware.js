@@ -7,7 +7,9 @@ const isPublicRoute = createRouteMatcher([
   '/',          // Home page
   '/terms', // Match "/terms"
   '/privacy', // Match "/privacy"
+  '/about',
   '/join(.*)',
+  '/assets/(.*)',
 ]);
 
 const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']); // ✅ Allow API calls
