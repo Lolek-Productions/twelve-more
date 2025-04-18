@@ -9,7 +9,7 @@ export default function AboutPage() {
       id: 1,
       name: 'Tim Connors',
       role: 'Co-Founder',
-      bio: 'Tim Connors brings over 17 years of experience as a venture capitalist, founding PivotNorth Capital after serving as a partner at Sequoia Capital and USVP. With a background in computer science and business from Stanford, Harvard, and Notre Dame, he combines technical expertise with strategic Catholic Church insight.',
+      bio: 'Tim Connors brings over 17 years of experience as a venture capitalist, founding PivotNorth Capital after serving as a partner at Sequoia Capital and USVP. With a background in computer science and business from Stanford, Harvard, and Notre Dame, he combines technical expertise with strategic Catholic insight.',
       imagePath: '/assets/tim-connors.jpg',
     },
     {
