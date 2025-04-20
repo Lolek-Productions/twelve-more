@@ -19,6 +19,7 @@ import { createOrganizationWithWelcomingCommunity } from "@/lib/actions/organiza
 import { useRouter } from 'next/navigation';
 import { useApiToast } from "@/lib/utils";
 import { useState } from "react";
+import {useMainContext} from "@/components/MainContextProvider.jsx";
 
 const organizationFormSchema = z.object({
   name: z
