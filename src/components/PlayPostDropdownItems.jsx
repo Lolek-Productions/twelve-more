@@ -9,6 +9,8 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
+const TEXT_WORD_LIMIT = 200;
+
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
   const [playingLang, setPlayingLang] = useState(null);
@@ -26,10 +28,19 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   async function handlePlay(langCode) {
     setLoadingLang(langCode);
     setPlayingLang(null);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
     try {
       // Remove URLs from the post text
-      const textWithoutUrls = post.text.replace(/https?:\/\/[\w.-]+(?:\/[\w\-.~:/?#[\]@!$&'()*+,;=]*)?/gi, "");
-      const base64Audio = await openaiTtsAction(textWithoutUrls, { language: langCode });
+      let textWithoutUrls = post.text.replace(/https?:\/\/[\w.-]+(?:\/[\w\-.~:/?#[\]@!$&'()*+,;=]*)?/gi, "");
+      // Limit to 200 words
+      const words = textWithoutUrls.trim().split(/\s+/);
+      if (words.length > TEXT_WORD_LIMIT) {
+        textWithoutUrls = words.slice(0, TEXT_WORD_LIMIT).join(' ');
+        alert(`Audio limited to first ${TEXT_WORD_LIMIT} words.`);
+      }
+      const base64Audio = await openaiTtsAction(textWithoutUrls, { language: langCode, signal: controller.signal });
+      clearTimeout(timeoutId);
       setLoadingLang(null);
       const audioUrl = `data:audio/mp3;base64,${base64Audio}`;
       const audio = new Audio(audioUrl);
@@ -42,7 +53,12 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       };
       audio.onpause = () => setPlayingLang(null);
     } catch (err) {
-      alert("Audio playback failed: " + err.message);
+      clearTimeout(timeoutId);
+      if (err.name === "AbortError") {
+        alert("Audio generation timed out. Please try again.");
+      } else {
+        alert("Audio playback failed: " + err.message);
+      }
       setLoadingLang(null);
       setPlayingLang(null);
     }
