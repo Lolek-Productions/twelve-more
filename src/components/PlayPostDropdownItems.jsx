@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-const TEXT_WORD_LIMIT = 10;
+const TEXT_WORD_LIMIT = 20;
 
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
@@ -62,13 +62,27 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       let textWithoutUrls = post.text.replace(/https?:\/\/[\w.-]+(?:\/[\w\-.~:/?#[\]@!$&'()*+,;=]*)?/gi, "");
       // Limit to TEXT_WORD_LIMIT words
       const words = textWithoutUrls.trim().split(/\s+/);
+      // Prefer sentence-based chunking, but limit to 20 words per chunk
       let chunks = [];
-      if (words.length > TEXT_WORD_LIMIT) {
+      // Split into sentences (simple regex, can be improved for edge cases)
+      let sentences = textWithoutUrls.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
+      if (sentences) {
+        for (let sentence of sentences) {
+          const sentenceWords = sentence.trim().split(/\s+/);
+          if (sentenceWords.length <= TEXT_WORD_LIMIT) {
+            chunks.push(sentence.trim());
+          } else {
+            // Sentence too long, split into 20-word chunks
+            for (let i = 0; i < sentenceWords.length; i += TEXT_WORD_LIMIT) {
+              chunks.push(sentenceWords.slice(i, i + TEXT_WORD_LIMIT).join(' '));
+            }
+          }
+        }
+      } else {
+        // fallback: no sentence split, chunk by words
         for (let i = 0; i < words.length; i += TEXT_WORD_LIMIT) {
           chunks.push(words.slice(i, i + TEXT_WORD_LIMIT).join(' '));
         }
-      } else {
-        chunks = [textWithoutUrls];
       }
       // Streaming logic
       let audios = Array(chunks.length).fill(null); // Will be filled as chunks are ready
