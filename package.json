@@ -44,6 +44,7 @@
     "mongodb": "^6.13.0",
     "mongoose": "^8.9.6",
     "next": "^15.2.4",
+    "openai": "^4.95.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-day-picker": "^8.10.1",

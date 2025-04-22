@@ -1,12 +1,14 @@
 "use client";
 
 import { useMainContext } from "@/components/MainContextProvider";
+import OpenAITestButton from "./OpenAITestButton";
 
 export default function ExamplePage() {
   const { appUser, clerkUser } = useMainContext();
 
   return (
     <div className="p-6">
+      <OpenAITestButton />
       {appUser ? (
         <div>
           <h1 className="text-2xl font-bold mb-4">Welcome appUser, {appUser.firstName }</h1>
