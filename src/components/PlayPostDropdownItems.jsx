@@ -17,6 +17,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [limitingLang, setLimitingLang] = useState(null);
   const audioRef = React.useRef(null);
   const audioUnlocked = React.useRef(false);
+  const playbackAborted = React.useRef(false);
 
   // Play a silent audio to unlock the audio context on mobile (only once)
   function unlockAudioContext() {
@@ -38,11 +39,18 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   }
 
   React.useEffect(() => {
-    if (!dropdownOpen && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+    if (!dropdownOpen) {
+      playbackAborted.current = true;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
       setPlayingLang(null);
+      setLoadingLang(null);
+      setLimitingLang(null);
+    } else {
+      playbackAborted.current = false;
     }
   }, [dropdownOpen]);
 
@@ -70,6 +78,10 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       }
       let audios = [];
       for (let i = 0; i < chunks.length; i++) {
+        if (playbackAborted.current) {
+          // Stop generating further audio if aborted
+          return;
+        }
         try {
           const base64Audio = await openaiTtsAction(chunks[i], { language: langCode, signal: controller.signal });
           console.log(`Chunk ${i + 1} base64 length:`, base64Audio.length);
@@ -87,6 +99,11 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       setLoadingLang(null);
       let playIndex = 0;
       function playNext() {
+        if (playbackAborted.current) {
+          setPlayingLang(null);
+          setLimitingLang(null);
+          return;
+        }
         if (playIndex >= audios.length) {
           setPlayingLang(null);
           setLimitingLang(null);
