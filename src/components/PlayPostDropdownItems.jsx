@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-const TEXT_WORD_LIMIT = 150;
+const TEXT_WORD_LIMIT = 100;
 
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
@@ -41,7 +41,6 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
         textWithoutUrls = words.slice(0, TEXT_WORD_LIMIT).join(' ');
         showLimitNotice = true;
         setLimitingLang(langCode);
-        setTimeout(() => setLimitingLang(null), 3000);
       }
       const base64Audio = await openaiTtsAction(textWithoutUrls, { language: langCode, signal: controller.signal });
       clearTimeout(timeoutId);
@@ -55,6 +54,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       audio.onended = () => {
         setPlayingLang(null);
         if (onRequestClose) onRequestClose();
+        setLimitingLang(null);
       };
       audio.onpause = () => setPlayingLang(null);
     } catch (err) {
@@ -82,7 +82,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
             handlePlay(lang.code);
           }}
         >
-          {limitingLang === lang.code
+          {(limitingLang === lang.code && (loadingLang === lang.code || playingLang === lang.code))
             ? `Text limited to first ${TEXT_WORD_LIMIT} words. Generating in ${lang.label}...`
             : loadingLang === lang.code
               ? `Generating in ${lang.label}...`
