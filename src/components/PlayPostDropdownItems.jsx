@@ -69,7 +69,12 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
       setPlayingLang(langCode);
-      audio.play();
+      audio.play().catch((err) => {
+        console.error('Audio playback error:', err);
+        setPlayingLang(null);
+        setLimitingLang(null);
+        alert("Audio playback failed on your device. Try again or use a shorter post.");
+      });
 
       audio.onended = () => {
         setPlayingLang(null);
