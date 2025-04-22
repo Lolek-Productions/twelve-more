@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-const TEXT_WORD_LIMIT = 200;
+const TEXT_WORD_LIMIT = 150;
 
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
