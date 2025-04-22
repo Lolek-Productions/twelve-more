@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-const TEXT_WORD_LIMIT = 50;
+const TEXT_WORD_LIMIT = 20;
 
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
@@ -57,31 +57,58 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       // Limit to TEXT_WORD_LIMIT words
       const words = textWithoutUrls.trim().split(/\s+/);
       let showLimitNotice = false;
+      let chunks = [];
       if (words.length > TEXT_WORD_LIMIT) {
-        textWithoutUrls = words.slice(0, TEXT_WORD_LIMIT).join(' ');
         showLimitNotice = true;
         setLimitingLang(langCode);
+        // Split into 20-word chunks
+        for (let i = 0; i < words.length; i += TEXT_WORD_LIMIT) {
+          chunks.push(words.slice(i, i + TEXT_WORD_LIMIT).join(' '));
+        }
+      } else {
+        chunks = [textWithoutUrls];
       }
-      const base64Audio = await openaiTtsAction(textWithoutUrls, { language: langCode, signal: controller.signal });
+      let audios = [];
+      for (let i = 0; i < chunks.length; i++) {
+        try {
+          const base64Audio = await openaiTtsAction(chunks[i], { language: langCode, signal: controller.signal });
+          console.log(`Chunk ${i + 1} base64 length:`, base64Audio.length);
+          audios.push(`data:audio/mp3;base64,${base64Audio}`);
+        } catch (err) {
+          console.error(`TTS API error on chunk ${i + 1}:`, err, err.message, err.name);
+          setLoadingLang(null);
+          setPlayingLang(null);
+          setLimitingLang(null);
+          alert(`Audio generation failed for chunk ${i + 1}. Try again or use a shorter post.`);
+          return;
+        }
+      }
       clearTimeout(timeoutId);
       setLoadingLang(null);
-      const audioUrl = `data:audio/mp3;base64,${base64Audio}`;
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      setPlayingLang(langCode);
-      audio.play().catch((err) => {
-        console.error('Audio playback error:', err);
-        setPlayingLang(null);
-        setLimitingLang(null);
-        alert("Audio playback failed on your device. Try again or use a shorter post.");
-      });
-
-      audio.onended = () => {
-        setPlayingLang(null);
-        if (onRequestClose) onRequestClose();
-        setLimitingLang(null);
-      };
-      audio.onpause = () => setPlayingLang(null);
+      let playIndex = 0;
+      function playNext() {
+        if (playIndex >= audios.length) {
+          setPlayingLang(null);
+          setLimitingLang(null);
+          if (onRequestClose) onRequestClose();
+          return;
+        }
+        const audio = new Audio(audios[playIndex]);
+        audioRef.current = audio;
+        setPlayingLang(langCode);
+        audio.play().catch((err) => {
+          console.error('Audio playback error:', err, err.message, err.name);
+          setPlayingLang(null);
+          setLimitingLang(null);
+          alert("Audio playback failed on your device. Try again or use a shorter post.");
+        });
+        audio.onended = () => {
+          playIndex++;
+          playNext();
+        };
+        audio.onpause = () => setPlayingLang(null);
+      }
+      playNext();
     } catch (err) {
       clearTimeout(timeoutId);
       if (err.name === "AbortError") {
