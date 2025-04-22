@@ -441,8 +441,10 @@ export const getUsers = async () => {
   try {
     await connect();
 
-    // Fetch all users from MongoDB as plain objects
-    const users = await User.find().select('firstName lastName username clerkId').lean();
+    const users = await User.find()
+      .select('firstName lastName username clerkId')
+      .sort({ createdAt: -1 })
+      .lean();
 
     return {
       success: true,
