@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { HiPencil, HiTrash, HiExclamation, HiDotsHorizontal } from 'react-icons/hi';
 import { useMainContext } from "@/components/MainContextProvider.jsx";
 import {
@@ -10,7 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlayPostDropdownItems } from "@/components/PlayPostDropdownItems";
+import dynamic from 'next/dynamic';
+
+// Dynamically import PlayPostDropdownItems only when needed
+const PlayPostDropdownItems = dynamic(
+  () => import('./PlayPostDropdownItems.jsx').then(mod => mod.PlayPostDropdownItems),
+  { ssr: false, loading: () => <div>Loading translation controls...</div> }
+);
 
 export default function HiDotsHorizontalMenu({ post, onDelete }) {
   const [open, setOpen] = useState(false);
@@ -22,6 +28,7 @@ export default function HiDotsHorizontalMenu({ post, onDelete }) {
   } = useMainContext();
 
   const isAuthor = post?.user?.id === appUser?.id;
+
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -39,7 +46,9 @@ export default function HiDotsHorizontalMenu({ post, onDelete }) {
 
       <DropdownMenuContent align="end" className="w-48" onCloseAutoFocus={(e) => e.preventDefault()}>
         {/* Play Audio Section */}
-        <PlayPostDropdownItems post={post} dropdownOpen={open} onRequestClose={() => setOpen(false)} />
+        {open && (
+          <PlayPostDropdownItems post={post} dropdownOpen={open} onRequestClose={() => setOpen(false)} />
+        )}
 
         {/* Edit Section */}
         {isAuthor && (
