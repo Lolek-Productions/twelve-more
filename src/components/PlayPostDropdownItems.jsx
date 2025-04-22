@@ -16,6 +16,26 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [playingLang, setPlayingLang] = useState(null);
   const [limitingLang, setLimitingLang] = useState(null);
   const audioRef = React.useRef(null);
+  const audioUnlocked = React.useRef(false);
+
+  // Play a silent audio to unlock the audio context on mobile (only once)
+  function unlockAudioContext() {
+    if (audioUnlocked.current) return;
+    try {
+      const ctx = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+      if (ctx) {
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+        audioUnlocked.current = true;
+        setTimeout(() => ctx.close(), 100);
+      }
+    } catch (e) {
+      // fail silently
+    }
+  }
 
   React.useEffect(() => {
     if (!dropdownOpen && audioRef.current) {
@@ -79,6 +99,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
           disabled={loadingLang === lang.code || playingLang === lang.code}
           onClick={e => {
             e.stopPropagation();
+            unlockAudioContext();
             handlePlay(lang.code);
           }}
         >
