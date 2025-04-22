@@ -1,15 +1,13 @@
-// /lib/actions/comment.js
-
 'use server'
 
 import { connect } from "@/lib/mongodb/mongoose";
+import { requireUser } from "@/lib/auth";
 import Post from "@/lib/models/post.model";
-import { currentUser } from "@clerk/nextjs/server";
 import { notifyOnNewComment } from "@/lib/actions/post.js";
 
 // Add a comment to a post (creates a new post with parentId)
 export async function addCommentJSON(data) {
-  const user = await currentUser();
+  const user = await requireUser();
 
   try {
     await connect();
@@ -76,6 +74,8 @@ export async function addCommentJSON(data) {
 
 // Get comments for a post
 export async function getCommentsForPost(postId, limit = 5, page = 1) {
+  const user = await requireUser();
+
   try {
     await connect();
 

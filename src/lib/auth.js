@@ -2,6 +2,9 @@
 
 import { currentUser } from '@clerk/nextjs/server';
 
+//How to use:
+//await requireUser();
+
 export async function requireUser() {
   const user = await currentUser();
 
@@ -9,8 +12,5 @@ export async function requireUser() {
     throw new Error("Unauthorized");
   }
 
-  return { user };
-
-  //How to use:
-  //await requireUser();
+  return user;
 }

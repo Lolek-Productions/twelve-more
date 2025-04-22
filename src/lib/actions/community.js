@@ -3,12 +3,14 @@
 import mongoose from "mongoose";
 import Community from '../models/community.model';
 import User from '../models/user.model';
-import { connect } from '../mongodb/mongoose';
+import { connect } from '../mongodb/mongoose.js';
+import { requireUser } from "@/lib/auth";
 import { clerkClient } from '@clerk/nextjs/server';
 import {addCommunityToUser, removeCommunitiesFromAllUsers} from "@/lib/actions/user.js";
 import {getOrganizationById} from "@/lib/actions/organization.js";
 
 export async function createCommunity(data) {
+  await requireUser();
 
   try {
     const name = data.name?.trim();
@@ -75,6 +77,8 @@ export async function createCommunity(data) {
 
 //Takes a string or an array
 export const deleteCommunities = async (ids) => {
+  await requireUser();
+
   try {
     await connect();
 
@@ -112,6 +116,8 @@ export const deleteCommunities = async (ids) => {
 }
 
 export const getCommunitiesByOrganization = async function (organizationId) {
+  const user = await requireUser();
+
   try {
     if (!organizationId) {
       return { success: false, message: "Organization ID is required." };
@@ -149,6 +155,8 @@ export const getCommunitiesByOrganization = async function (organizationId) {
 };
 
 export const getCommunitiesByOrganizationForUser = async function (organizationId, appUser) {
+  if (!appUser) return { success: false, message: "User is required." };
+
   try {
     if (!organizationId) {
       return { success: false, message: "Organization ID is required." };
@@ -405,9 +413,10 @@ export const getAllCommunities = async function () {
 };
 
 export async function updateCommunity(communityId, formData) {
-  if (!communityId) return { success: false, message: "Community ID is required." };
-
+  await requireUser();
   try {
+    if (!communityId) return { success: false, message: "Community ID is required." };
+
     const name = formData.name?.trim();
     const purpose = formData.purpose?.trim();
     const visibility = formData.visibility?.trim();
@@ -449,6 +458,7 @@ export async function updateCommunity(communityId, formData) {
 }
 
 export async function changeOrganizationOfCommunity(organizationId, communityId) {
+  await requireUser();
   try {
     // Start a session for transaction
     const session = await mongoose.startSession();

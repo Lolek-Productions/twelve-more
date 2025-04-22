@@ -1,6 +1,7 @@
 "use server";
 
 import { connect } from '../mongodb/mongoose.js';
+import { requireUser } from "@/lib/auth";
 import mongoose from "mongoose";
 import User from '../models/user.model.js';
 import Organization from '../models/organization.model.js';
@@ -292,6 +293,7 @@ export const getUserByClerkId = async (clerkId) => {
 };
 
 export async function updateUser(user) {
+  await requireUser();
   try {
     await connect();
 
@@ -344,6 +346,7 @@ export async function updateUser(user) {
 }
 
 export async function addOrganizationToUser(organizationId, userId, role = 'member') {
+  await requireUser();
   try {
     await connect();
 
@@ -574,6 +577,7 @@ export async function searchUsersInUserOrganizations(appUser, query) {
 }
 
 export async function addCommunityToUser(communityId, userId, role = 'member', attemptToNotify = true) {
+  await requireUser();
   try {
     await connect();
 

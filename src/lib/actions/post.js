@@ -1,6 +1,7 @@
 'use server'
 
 import { connect } from "@/lib/mongodb/mongoose";
+import { requireUser } from "@/lib/auth";
 import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';
 import twilioService from "@/lib/services/twilioService.js";
@@ -14,7 +15,7 @@ import mongoose from "mongoose";
 import Community from "@/lib/models/community.model.js";
 
 export async function createPost(postData) {
-  const user = await currentUser();
+  const user = await requireUser();
 
   try {
     await connect();

@@ -2,6 +2,7 @@
 
 import Organization from "@/lib/models/organization.model"; // Define this model
 import { connect } from "@/lib/mongodb/mongoose";
+import { requireUser } from "@/lib/auth";
 import Community from "@/lib/models/community.model";
 import User from '../models/user.model';
 import {
@@ -18,6 +19,7 @@ import {currentUser} from "@clerk/nextjs/server";
 
 //This is the main function for creating a new organization
 export async function createOrganizationWithWelcomingCommunity(formData, userId) {
+  await requireUser();
   try {
     await connect();
 
@@ -123,33 +125,40 @@ export async function createOrganizationWithWelcomingCommunity(formData, userId)
 }
 
 export async function deleteOrganization(organizationId) {
-  console.log('organization Id:', organizationId);
-  // return;
-
-  const organizationToDelete = await getOrganizationById(organizationId);
-
-  const communitiesResponse = await getCommunitiesByOrganization(organizationId);
-  const communitiesToDelete = communitiesResponse.communities;
-
-  const communitiesToDeleteArray = communitiesToDelete.map((com) => {
-    return com.id;
-  })
-
-  const response = await deleteCommunities(communitiesToDeleteArray);
-
-  const responseOrg = await removeOrganizationsFromAllUsers(organizationId);
-
+  await requireUser();
   try {
+    console.log('organization Id:', organizationId);
+    // return;
+
+    const organizationToDelete = await getOrganizationById(organizationId);
+    if (!organizationToDelete) {
+      return { success: false, message: 'Organization not found'};
+    }
+
     await connect();
+
+    // Delete all communities in this organization
+    const communities = await getCommunitiesByOrganization(organizationId);
+    if (communities.length > 0) {
+      const communityIds = communities.map(community => community.id);
+      await deleteCommunities(communityIds);
+    }
+
+    // Remove organization from all users
+    await removeOrganizationsFromAllUsers(organizationId);
+
+    // Finally, delete the organization itself
     await Organization.findByIdAndDelete(organizationId);
+
+    return { success: true, message: "Successfully deleted organization" };
   } catch (error) {
+    console.error('Error deleting organization:', error);
     return { success: false, message: 'Problem deleting organization'};
   }
-
-  return { success: true, message: "Successfully deleted organization" };
 }
 
 export async function getOrganizations() {
+  await requireUser();
   try {
     await connect();
     const orgs = await Organization.find().lean();
@@ -160,7 +169,8 @@ export async function getOrganizations() {
       members: org.members || [],
     }));
   } catch (error) {
-    throw error;
+    console.error('Error getting organizations:', error);
+    return { success: false, message: 'Failed to get organizations' };
   }
 }
 
@@ -248,6 +258,7 @@ export async function searchOrganizations(query) {
 }
 
 export async function setWelcomingCommunity(organizationId, communityId) {
+  await requireUser();
   try {
     await connect();
 
@@ -270,6 +281,7 @@ export async function setWelcomingCommunity(organizationId, communityId) {
 }
 
 export async function setLeadershipCommunity(organizationId, communityId) {
+  await requireUser();
   try {
     await connect();
 
