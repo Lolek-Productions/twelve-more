@@ -2,6 +2,11 @@
 
 This document describes the code style conventions used in this project. It should be followed for all new code and when refactoring existing code.
 
+## UI Components
+- Use [shadcn/ui](https://ui.shadcn.com/) components for all modal, dialog, and similar UI elements.
+- Prefer the shadcn `Dialog` component (see `/components/ui/dialog.jsx`) for modals and popups.
+- Maintain consistency by using shadcn components for new UI features where available.
+
 ## General Formatting
 - **Indentation:** 2 spaces per indentation level.
 - **Semicolons:** Omit semicolons at the end of statements (unless required for clarity).
@@ -66,6 +71,30 @@ This document describes the code style conventions used in this project. It shou
 - Use environment variables via `.env.local` for secrets and configuration.
 - Keep sensitive information out of source control.
 - Use clear, descriptive commit messages.
+
+## Database: MongoDB
+
+- **Database:** This project uses MongoDB as its primary database, accessed via Mongoose ODM.
+- **Connect Strategy:**
+  - All database operations use a shared async connect utility located at `/src/lib/mongodb/mongoose.js`.
+  - The `connect` function ensures a single connection per process using `mongoose.connection.readyState` to prevent duplicate connections.
+  - Usage: `await connect();` before any DB operation in server actions or services.
+  - The MongoDB URI is provided via the `MONGODB_URI` environment variable, and the database name is set as `twelve-more-app`.
+- **Model Locations:**
+  - All Mongoose models are defined in `/src/lib/models/`.
+  - Example model files include:
+    - `user.model.js`
+    - `post.model.js`
+    - `community.model.js`
+    - `organization.model.js`
+    - `parish.model.js`
+    - `contact.model.js`
+    - `zipcode.model.js`
+  - Each model file exports a default Mongoose model instance (e.g., `export default User;`).
+- **Best Practices:**
+  - Always ensure `await connect();` is called before any Mongoose model operation in server actions.
+  - Use lean queries (`.lean()`) when returning plain JS objects for serialization.
+  - Keep all schema definitions and model logic in the `/src/lib/models/` directory for maintainability.
 
 ---
 Feel free to update this guide as your team or codebase evolves.

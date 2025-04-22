@@ -214,6 +214,31 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
           }
         }
       },
+      // Lookup to get user info for likes
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'likes',
+          foreignField: '_id',
+          as: 'likeUsers'
+        }
+      },
+      // Add likes array with userId, firstName, lastName
+      {
+        $addFields: {
+          likes: {
+            $map: {
+              input: '$likeUsers',
+              as: 'user',
+              in: {
+                userId: { $toString: '$$user._id' },
+                firstName: '$$user.firstName',
+                lastName: '$$user.lastName'
+              }
+            }
+          }
+        }
+      },
       // Lookup to get user details
       {
         $lookup: {
@@ -303,9 +328,11 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
       organization: post.organization,
       profileImg: post.profileImg,
       commentCount: post.commentCount,
-      likes: post.likes?.map(like => ({
-        userId: like._id.toString(),
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like.userId?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
       prayers: post.prayers?.map(prayer => ({
         userId: prayer._id.toString(),
       })) || [],
@@ -371,6 +398,31 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
               if: { $gt: [{ $size: '$commentData' }, 0] },
               then: { $arrayElemAt: ['$commentData.count', 0] },
               else: 0
+            }
+          }
+        }
+      },
+      // Lookup to get user info for likes
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'likes',
+          foreignField: '_id',
+          as: 'likeUsers'
+        }
+      },
+      // Add likes array with userId, firstName, lastName
+      {
+        $addFields: {
+          likes: {
+            $map: {
+              input: '$likeUsers',
+              as: 'user',
+              in: {
+                userId: { $toString: '$$user._id' },
+                firstName: '$$user.firstName',
+                lastName: '$$user.lastName'
+              }
             }
           }
         }
@@ -464,9 +516,12 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
       organization: post.organization,
       profileImg: post.profileImg,
       commentCount: post.commentCount,
-      likes: post.likes?.map(like => ({
-        userId: like._id.toString(), // this is the id of the user
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like.userId?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map(prayer => ({
         userId: prayer._id.toString(),
       })) || [],
@@ -550,9 +605,12 @@ export async function getPostsForOrganizationFeed(limit = 10, appUser, organizat
       },
       profileImg: post.profileImg,
       commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        userId: like._id.toString(), //this is the id of the user
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
       })) || [],
@@ -621,9 +679,12 @@ export async function getAllPosts({limit = 10}) {
       },
       profileImg: post.profileImg,
       commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        id: like._id.toString(), //this is the id of the user
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       createdAt: post.createdAt,
     }));
   } catch (error) {
@@ -704,9 +765,12 @@ export async function getPostByIdWithComments(postId) {
           lastName: comment.user?.lastName,
         },
       })) || [],
-      likes: post.likes?.map((like) => ({
-        userId: like._id?.toString(),
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
       })) || [],
@@ -1051,7 +1115,9 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
         likesCount: comment.likesCount,
         prayersCount: comment.prayersCount,
         likes: (comment.likes || []).map(like => ({
-          userId: like._id?.toString()
+          userId: like._id?.toString?.() || like.userId,
+          firstName: like.firstName || '',
+          lastName: like.lastName || ''
         })),
         prayers: (comment.prayers || []).map((prayer) => {
           if (!prayer || !prayer.user) return { userId: '', name: '' };
@@ -1070,8 +1136,11 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
 
       // Format likes
       likes: (mainPostResult.likes || []).map(like => ({
-        userId: like._id?.toString()
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
       })),
+
 
       // Format prayers
       prayers: (mainPostResult.prayers || []).map((prayer) => {
@@ -1261,9 +1330,12 @@ export async function getPostForPostPage(postId) {
         createdAt: comment.createdAt,
         user: comment.user
       })),
-      likes: post.likes?.map(like => ({
-        userId: like._id?.toString()
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map(prayer => ({
         userId: prayer._id.toString()
       })) || [],
@@ -1387,9 +1459,12 @@ export async function setUserLikesAction(post, user) {
     return {
       success: true,
       message: actionMessage,
-      likes: updatedPost.likes?.map((like) => ({
-        userId: like._id.toString(),
-      })) || [],
+      likes: (updatedPost.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
     };
 
   } catch (error) {
@@ -1552,9 +1627,12 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
       },
       profileImg: post.profileImg,
       commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        userId: like._id?.toString(),
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
       })) || [],
@@ -1753,9 +1831,12 @@ export async function searchPosts(searchTerm, appUser, limit = 20) {
       },
       profileImg: post.profileImg,
       commentCount: post.commentCount || 0, // Add comment count
-      likes: post.likes?.map((like) => ({
-        userId: like._id?.toString(),
-      })) || [],
+      likes: (post.likes || []).map(like => ({
+        userId: like._id?.toString?.() || like.userId,
+        firstName: like.firstName || '',
+        lastName: like.lastName || ''
+      })),
+
       prayers: post.prayers?.map((prayer) => ({
         userId: prayer._id.toString(),
       })) || [],

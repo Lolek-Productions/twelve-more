@@ -7,6 +7,7 @@ import {
   HiHeart,
   HiChat,
 } from 'react-icons/hi';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState, useEffect } from 'react';
 import { PiHandsPraying } from "react-icons/pi";
 import { sayPrayerAction, setUserLikesAction } from "@/lib/actions/post.js";
@@ -19,6 +20,7 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
   const [showComments, setShowComments] = useState(false);
   const [likes, setLikes] = useState(post.likes || []);
   const [prayers, setPrayers] = useState(post.prayers || []);
+  const [showLikesModal, setShowLikesModal] = useState(false);
 
   const {
     appUser,
@@ -128,8 +130,41 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
     setShowingPostCommentModal(true);
   };
 
+  // Handler for heart button
+  const handleHeartClick = () => {
+    if (appUser && appUser.id === post.user?.id) {
+      setShowLikesModal(true);
+    } else {
+      likePost();
+    }
+  };
+
   return (
-    <div className='flex justify-start gap-5 p-2 text-gray-500'>
+    <>
+      {/* Likes Modal for Post Owner using shadcn Dialog */}
+      <Dialog open={showLikesModal} onOpenChange={setShowLikesModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>People who like this post</DialogTitle>
+            <DialogDescription>
+              {likes && likes.length > 0
+                ? `This post has ${likes.length} like${likes.length > 1 ? 's' : ''}.`
+                : 'No one has liked this post yet.'}
+            </DialogDescription>
+            {likes && likes.length > 0 ? (
+              <ul className="space-y-2 max-h-60 overflow-y-auto mt-2">
+                {likes.map((like, idx) => (
+                  <li key={like.userId || idx} className="text-gray-700">
+                    {like.firstName || like.firstname || ''} {like.lastName || like.lastname || ''}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <div className='flex justify-start gap-5 p-2 text-gray-500'>
       <div className='flex items-center'>
         {showComments ? (
           <HiChat
@@ -149,12 +184,12 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
       <div className='flex items-center'>
         {isLiked ? (
           <HiHeart
-            onClick={likePost}
+            onClick={handleHeartClick}
             className='h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 text-red-600 hover:text-red-500 hover:bg-red-100'
           />
         ) : (
           <HiOutlineHeart
-            onClick={likePost}
+            onClick={handleHeartClick}
             className='h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-red-500 hover:bg-red-100'
           />
         )}
@@ -191,5 +226,6 @@ export default function Icons({ post, commentCount = 0, onCommentClick = null })
         />
       )}
     </div>
+    </>
   );
 }
