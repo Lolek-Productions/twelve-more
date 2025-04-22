@@ -14,6 +14,7 @@ const TEXT_WORD_LIMIT = 150;
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
   const [playingLang, setPlayingLang] = useState(null);
+  const [limitingLang, setLimitingLang] = useState(null);
   const audioRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -33,11 +34,14 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
     try {
       // Remove URLs from the post text
       let textWithoutUrls = post.text.replace(/https?:\/\/[\w.-]+(?:\/[\w\-.~:/?#[\]@!$&'()*+,;=]*)?/gi, "");
-      // Limit to 200 words
+      // Limit to TEXT_WORD_LIMIT words
       const words = textWithoutUrls.trim().split(/\s+/);
+      let showLimitNotice = false;
       if (words.length > TEXT_WORD_LIMIT) {
         textWithoutUrls = words.slice(0, TEXT_WORD_LIMIT).join(' ');
-        alert(`Audio limited to first ${TEXT_WORD_LIMIT} words.`);
+        showLimitNotice = true;
+        setLimitingLang(langCode);
+        setTimeout(() => setLimitingLang(null), 3000);
       }
       const base64Audio = await openaiTtsAction(textWithoutUrls, { language: langCode, signal: controller.signal });
       clearTimeout(timeoutId);
@@ -47,6 +51,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       audioRef.current = audio;
       setPlayingLang(langCode);
       audio.play();
+
       audio.onended = () => {
         setPlayingLang(null);
         if (onRequestClose) onRequestClose();
@@ -77,11 +82,13 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
             handlePlay(lang.code);
           }}
         >
-          {loadingLang === lang.code
-            ? `Generating in ${lang.label}...`
-            : playingLang === lang.code
-              ? `Playing in ${lang.label}...`
-              : lang.label}
+          {limitingLang === lang.code
+            ? `Text limited to first ${TEXT_WORD_LIMIT} words. Generating in ${lang.label}...`
+            : loadingLang === lang.code
+              ? `Generating in ${lang.label}...`
+              : playingLang === lang.code
+                ? `Playing in ${lang.label}...`
+                : lang.label}
         </button>
       ))}
     </>
