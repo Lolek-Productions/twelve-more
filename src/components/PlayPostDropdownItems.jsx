@@ -3,7 +3,7 @@ import { openaiTtsAction } from "@/app/(main)/test/openaiTtsAction";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
-  { code: "es-419", label: "Spanish" },
+  { code: "es-mx", label: "Spanish" },
   { code: "fr", label: "French" },
   { code: "de", label: "German" },
   { code: "la", label: "Latin" },
