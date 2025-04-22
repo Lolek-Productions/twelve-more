@@ -9,12 +9,11 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-const TEXT_WORD_LIMIT = 20;
+const TEXT_WORD_LIMIT = 10;
 
 export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
   const [playingLang, setPlayingLang] = useState(null);
-  const [limitingLang, setLimitingLang] = useState(null);
   const audioRef = React.useRef(null);
   const audioUnlocked = React.useRef(false);
   const playbackAborted = React.useRef(false);
@@ -48,7 +47,6 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       }
       setPlayingLang(null);
       setLoadingLang(null);
-      setLimitingLang(null);
     } else {
       playbackAborted.current = false;
     }
@@ -64,51 +62,58 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       let textWithoutUrls = post.text.replace(/https?:\/\/[\w.-]+(?:\/[\w\-.~:/?#[\]@!$&'()*+,;=]*)?/gi, "");
       // Limit to TEXT_WORD_LIMIT words
       const words = textWithoutUrls.trim().split(/\s+/);
-      let showLimitNotice = false;
       let chunks = [];
       if (words.length > TEXT_WORD_LIMIT) {
-        showLimitNotice = true;
-        setLimitingLang(langCode);
-        // Split into 20-word chunks
         for (let i = 0; i < words.length; i += TEXT_WORD_LIMIT) {
           chunks.push(words.slice(i, i + TEXT_WORD_LIMIT).join(' '));
         }
       } else {
         chunks = [textWithoutUrls];
       }
-      let audios = [];
-      for (let i = 0; i < chunks.length; i++) {
-        if (playbackAborted.current) {
-          // Stop generating further audio if aborted
-          return;
-        }
+      // Streaming logic
+      let audios = Array(chunks.length).fill(null); // Will be filled as chunks are ready
+      let audioPromises = [];
+      let errored = false;
+      // Helper to fetch audio for a chunk
+      async function fetchAudioChunk(i) {
+        if (playbackAborted.current || errored) return;
         try {
           const base64Audio = await openaiTtsAction(chunks[i], { language: langCode, signal: controller.signal });
-          console.log(`Chunk ${i + 1} base64 length:`, base64Audio.length);
-          audios.push(`data:audio/mp3;base64,${base64Audio}`);
+          audios[i] = `data:audio/mp3;base64,${base64Audio}`;
         } catch (err) {
-          console.error(`TTS API error on chunk ${i + 1}:`, err, err.message, err.name);
+          errored = true;
           setLoadingLang(null);
           setPlayingLang(null);
-          setLimitingLang(null);
+
           alert(`Audio generation failed for chunk ${i + 1}. Try again or use a shorter post.`);
-          return;
         }
       }
-      clearTimeout(timeoutId);
-      setLoadingLang(null);
+      // Start fetching all chunks in parallel, but only play as they arrive
+      // Start fetching the first chunk immediately
+      audioPromises[0] = fetchAudioChunk(0);
+      // Begin fetching the rest in background
+      for (let i = 1; i < chunks.length; i++) {
+        audioPromises[i] = fetchAudioChunk(i);
+      }
+      // Playback logic: play as soon as each chunk is ready
       let playIndex = 0;
-      function playNext() {
-        if (playbackAborted.current) {
+      async function playNext() {
+        if (playbackAborted.current || errored) {
           setPlayingLang(null);
-          setLimitingLang(null);
+
           return;
         }
-        if (playIndex >= audios.length) {
+        if (playIndex >= chunks.length) {
           setPlayingLang(null);
-          setLimitingLang(null);
+
           if (onRequestClose) onRequestClose();
           return;
+        }
+        // Wait for the audio chunk to be ready
+        while (!audios[playIndex]) {
+          if (errored || playbackAborted.current) return;
+          // Wait a short interval before checking again
+          await new Promise(res => setTimeout(res, 120));
         }
         const audio = new Audio(audios[playIndex]);
         audioRef.current = audio;
@@ -116,7 +121,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
         audio.play().catch((err) => {
           console.error('Audio playback error:', err, err.message, err.name);
           setPlayingLang(null);
-          setLimitingLang(null);
+
           alert("Audio playback failed on your device. Try again or use a shorter post.");
         });
         audio.onended = () => {
@@ -125,7 +130,13 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
         };
         audio.onpause = () => setPlayingLang(null);
       }
-      playNext();
+      // Start playback as soon as the first chunk is ready
+      (async () => {
+        await audioPromises[0];
+        clearTimeout(timeoutId);
+        setLoadingLang(null);
+        playNext();
+      })();
     } catch (err) {
       clearTimeout(timeoutId);
       if (err.name === "AbortError") {
@@ -152,13 +163,11 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
             handlePlay(lang.code);
           }}
         >
-          {(limitingLang === lang.code && (loadingLang === lang.code || playingLang === lang.code))
-            ? `Text limited to first ${TEXT_WORD_LIMIT} words. Generating in ${lang.label}...`
-            : loadingLang === lang.code
-              ? `Generating in ${lang.label}...`
-              : playingLang === lang.code
-                ? `Playing in ${lang.label}...`
-                : lang.label}
+          {loadingLang === lang.code
+            ? `Generating in ${lang.label}...`
+            : playingLang === lang.code
+              ? `Playing in ${lang.label}...`
+              : lang.label}
         </button>
       ))}
     </>
