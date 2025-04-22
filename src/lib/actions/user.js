@@ -446,8 +446,6 @@ export const getUsers = async () => {
       .sort({ createdAt: -1 })
       .lean();
 
-    console.log(users);
-
     return {
       success: true,
       users: users.map(user => ({
