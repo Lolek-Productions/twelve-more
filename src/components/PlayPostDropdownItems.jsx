@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "la", label: "Latin" },
 ];
 
-export function PlayPostDropdownItems({ post, dropdownOpen }) {
+export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
   const [loadingLang, setLoadingLang] = useState(null);
   const [playingLang, setPlayingLang] = useState(null);
   const audioRef = React.useRef(null);
@@ -36,7 +36,10 @@ export function PlayPostDropdownItems({ post, dropdownOpen }) {
       audioRef.current = audio;
       setPlayingLang(langCode);
       audio.play();
-      audio.onended = () => setPlayingLang(null);
+      audio.onended = () => {
+        setPlayingLang(null);
+        if (onRequestClose) onRequestClose();
+      };
       audio.onpause = () => setPlayingLang(null);
     } catch (err) {
       alert("Audio playback failed: " + err.message);

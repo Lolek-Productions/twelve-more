@@ -39,7 +39,7 @@ export default function HiDotsHorizontalMenu({ post, onDelete }) {
 
       <DropdownMenuContent align="end" className="w-48" onCloseAutoFocus={(e) => e.preventDefault()}>
         {/* Play Audio Section */}
-        <PlayPostDropdownItems post={post} dropdownOpen={open} />
+        <PlayPostDropdownItems post={post} dropdownOpen={open} onRequestClose={() => setOpen(false)} />
 
         {/* Edit Section */}
         {isAuthor && (
