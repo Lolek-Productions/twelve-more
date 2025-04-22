@@ -442,14 +442,16 @@ export const getUsers = async () => {
     await connect();
 
     const users = await User.find()
-      .select('firstName lastName username clerkId')
+      .select('firstName lastName username clerkId createdAt')
       .sort({ createdAt: -1 })
       .lean();
+
+    console.log(users);
 
     return {
       success: true,
       users: users.map(user => ({
-        id: user._id.toString(), // Use MongoDB _id as the identifier
+        id: user._id.toString(),
         name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
         firstName: user.firstName || '',
         lastName: user.lastName || '',
