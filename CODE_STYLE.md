@@ -7,6 +7,55 @@ This document describes the code style conventions used in this project. It shou
 - Prefer the shadcn `Dialog` component (see `/components/ui/dialog.jsx`) for modals and popups.
 - Maintain consistency by using shadcn components for new UI features where available.
 
+## Form Validation & Usage Patterns
+
+### Zod for Schema Validation
+- Use [Zod](https://zod.dev/) to define validation schemas for forms, ensuring strong runtime validation and clear error messages.
+- Place Zod schemas near the top of the file for visibility, e.g.:
+  ```js
+  const profileFormSchema = z.object({
+    phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: "Please enter a valid mobile phone number (e.g., +12345678901)." })
+      .min(10, { message: "Mobile Phone Number must be 10 digits." })
+      .max(15, { message: "Mobile Phone Number must not exceed 10 digits." }),
+  });
+  ```
+- Use descriptive custom error messages in Zod schemas for better user feedback.
+
+### React Hook Form Integration
+- Use [react-hook-form](https://react-hook-form.com/) for form state management.
+- Integrate Zod schemas with React Hook Form using `zodResolver` from `@hookform/resolvers/zod`:
+  ```js
+  const form = useForm({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues,
+    mode: "onChange",
+  });
+  ```
+- Use the `Form` and related shadcn/ui components (`FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`, `FormDescription`) for structure and accessibility.
+- Use `mode: "onChange"` for instant validation feedback as the user types.
+
+### shadcn/ui Components for Forms
+- Use shadcn/ui form primitives for all form elements:
+  - `Form`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`, `FormDescription`
+  - Input components like `Input`, `Button` from shadcn/ui
+- Compose forms as:
+  ```jsx
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField ... />
+      <Button type="submit">Submit</Button>
+    </form>
+  </Form>
+  ```
+- Use `FormMessage` to show validation errors and `FormDescription` for helpful hints.
+- Use shadcn/ui `Dialog` for modals, with `DialogHeader`, `DialogTitle`, and `DialogDescription` for structure.
+
+### Additional Best Practices
+- Debounce user search inputs in forms to avoid excessive API calls.
+- Use `defaultValues` for form initialization and controlled input handling.
+- Use React state and hooks to manage loading, searching, and submission states for responsive UI.
+- Place form and modal logic within the same component for clarity unless shared across multiple pages.
+
 ## General Formatting
 - **Indentation:** 2 spaces per indentation level.
 - **Semicolons:** Omit semicolons at the end of statements (unless required for clarity).
@@ -98,3 +147,15 @@ This document describes the code style conventions used in this project. It shou
 
 ---
 Feel free to update this guide as your team or codebase evolves.
+
+---
+
+# Project Code Notes
+
+## Main Navigation Location
+- The main navigation for the app is implemented in the `LeftSidebar` component (`/src/components/LeftSidebar.jsx`).
+- If you need to add global navigation links (such as a link to a user settings page), update the `LeftSidebar` component.
+
+## Settings Page Location
+- The recommended location for a global user settings page is `/src/app/(main)/settings/page.jsx`.
+- Add a link to this settings page in the `LeftSidebar` for easy access by all users.

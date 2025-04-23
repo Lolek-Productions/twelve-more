@@ -241,9 +241,15 @@ export default function PostInput({
 
     // Focus the textarea again after posting
     if (autoFocus && textareaRef.current) {
-      setTimeout(() => {
-        textareaRef.current.focus();
+      // Short timeout to ensure DOM is ready and any animations have completed
+      const timer = setTimeout(() => {
+        // Check if textareaRef.current exists inside the callback
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
       }, 100);
+
+      return () => clearTimeout(timer);
     }
   };
 

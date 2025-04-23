@@ -1023,3 +1023,36 @@ export async function changeRoleOnUserInOrganization(userId, organizationId, rol
     };
   }
 }
+
+export async function getUserSettings(userId) {
+  try {
+    await connect();
+    const user = await User.findById(userId);
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    return { success: true, settings: user.settings };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+
+export async function saveUserSettings(userId, settings) {
+  try {
+    await connect();
+    if (!userId || typeof userId !== 'string') {
+      return { success: false, message: 'Invalid or missing user ID' };
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { settings } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return { success: false, message: 'User not found' };
+    }
+    return { success: true, message: 'User saved', settings: updatedUser.settings };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}

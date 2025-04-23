@@ -75,6 +75,30 @@ const userSchema = new mongoose.Schema(
       ref: 'Organization',
       default: null,
     },
+    settings: {
+      type: {
+        notifyOnNewPostInCommunity: { type: Boolean, default: true },
+        notifyOnPostLiked: { type: Boolean, default: true },
+        notifyOnPostPrayedFor: { type: Boolean, default: true },
+        notifyOnNewMemberInCommunity: { type: Boolean, default: false },
+        notifyOnCommentOnMyPost: { type: Boolean, default: true },
+        notifyOnCommentOnCommentedPost: { type: Boolean, default: false },
+        preferredCommunication: {
+          type: String,
+          enum: ['email', 'sms', 'push'],
+          default: 'sms'
+        }
+      },
+      default: () => ({
+        notifyOnNewPostInCommunity: true,
+        notifyOnPostLiked: true,
+        notifyOnPostPrayedFor: true,
+        notifyOnNewMemberInCommunity: false,
+        notifyOnCommentOnMyPost: true,
+        notifyOnCommentOnCommentedPost: false,
+        preferredCommunication: 'sms'
+      })
+    },
   },
   { timestamps: true }
 );

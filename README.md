@@ -24,6 +24,7 @@ throw new Error("This is a test error message");
 4. Join the website as a completely new user. 
 
 # toast:
+import {useApiToast} from "@/lib/utils.js";
 const { showResponseToast, showErrorToast } = useApiToast();
 
 # Example from public metadata in Clerk:

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HiCommandLine, HiKey } from "react-icons/hi2";
-import {HiHome, HiOutlinePlus, HiBriefcase, HiChevronDown, HiChevronRight} from 'react-icons/hi';
+import {HiHome, HiOutlinePlus, HiBriefcase, HiChevronDown, HiChevronRight, HiCog} from 'react-icons/hi';
 import { HiMegaphone } from "react-icons/hi2";
 import MiniProfile from './MiniProfile';
 import {usePathname} from 'next/navigation';
@@ -318,12 +318,24 @@ export default function LeftSidebar({ onLinkClick }) {
             )}
           </div>
 
+          {/* <Link
+            href="/settings"
+            className={cn(
+              pathname === '/settings' ? 'bg-muted' : 'hover:bg-muted/50',
+              'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+            )}
+            onClick={handleLinkClick}
+          >
+            <HiCog className="w-6 h-6" />
+            <span className="font-bold">Settings</span>
+          </Link> */}
+
           { appUser?.id && DEV_IDS.includes(appUser.id) &&
             <Link
               href='/developer'
               className={cn(
                 pathname === '/developer' ? 'bg-muted' : 'hover:bg-muted/50',
-                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full'
+                'flex items-center p-2 rounded-md transition-all duration-200 gap-2 w-full mt-1'
               )}
               onClick={handleLinkClick}
             >
