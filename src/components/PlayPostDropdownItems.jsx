@@ -41,8 +41,12 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
     if (!dropdownOpen) {
       playbackAborted.current = true;
       if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        try {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current.onended = null;
+          audioRef.current.onpause = null;
+        } catch (e) {}
         audioRef.current = null;
       }
       setPlayingLang(null);
@@ -50,6 +54,21 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
     } else {
       playbackAborted.current = false;
     }
+    // Cleanup: also stop audio if component is unmounted
+    return () => {
+      playbackAborted.current = true;
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current.onended = null;
+          audioRef.current.onpause = null;
+        } catch (e) {}
+        audioRef.current = null;
+      }
+      setPlayingLang(null);
+      setLoadingLang(null);
+    };
   }, [dropdownOpen]);
 
   async function handlePlay(langCode) {
@@ -88,19 +107,26 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
       let audios = Array(chunks.length).fill(null); // Will be filled as chunks are ready
       let audioPromises = [];
       let errored = false;
-      // Helper to fetch audio for a chunk
+      // Helper to fetch audio for a chunk, retry up to 3 times
       async function fetchAudioChunk(i) {
-        if (playbackAborted.current || errored) return;
-        try {
-          const base64Audio = await openaiTtsAction(chunks[i], { language: langCode, signal: controller.signal });
-          audios[i] = `data:audio/mp3;base64,${base64Audio}`;
-        } catch (err) {
-          errored = true;
-          setLoadingLang(null);
-          setPlayingLang(null);
-
-          alert(`Audio generation failed for chunk ${i + 1}. Try again or use a shorter post.`);
+        let attempts = 0;
+        while (attempts < 3 && !playbackAborted.current) {
+          try {
+            const base64Audio = await openaiTtsAction(chunks[i], { language: langCode, signal: controller.signal });
+            audios[i] = `data:audio/mp3;base64,${base64Audio}`;
+            return; // Success
+          } catch (err) {
+            attempts++;
+            if (playbackAborted.current) return;
+            if (attempts < 3) {
+              await new Promise(res => setTimeout(res, 500));
+            }
+          }
         }
+        // If we get here, all attempts failed
+        setLoadingLang(null);
+        setPlayingLang(null);
+        alert(`Audio generation failed for chunk ${i + 1} after 3 attempts. Try again or use a shorter post.`);
       }
       // Start fetching all chunks in parallel, but only play as they arrive
       // Start fetching the first chunk immediately
