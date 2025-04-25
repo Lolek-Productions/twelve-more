@@ -1027,12 +1027,25 @@ export async function changeRoleOnUserInOrganization(userId, organizationId, rol
 export async function getUserSettings(userId) {
   try {
     await connect();
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).lean();
     if (!user) {
       return { success: false, message: "User not found" };
     }
-    return { success: true, settings: user.settings };
+
+    return {
+      success: true,
+      settings: {
+        notifyOnNewPostInCommunity: user.settings.notifyOnNewPostInCommunity,
+        notifyOnPostLiked: user.settings.notifyOnPostLiked,
+        notifyOnPostPrayedFor: user.settings.notifyOnPostPrayedFor,
+        notifyOnNewMemberInCommunity: user.settings.notifyOnNewMemberInCommunity,
+        notifyOnCommentOnMyPost: user.settings.notifyOnCommentOnMyPost,
+        notifyOnCommentOnCommentedPost: user.settings.notifyOnCommentOnCommentedPost,
+        preferredCommunication: user.settings.preferredCommunication,
+      },
+    };
   } catch (error) {
+    console.error("Error getting user settings:", error);
     return { success: false, message: error.message };
   }
 }
@@ -1051,7 +1064,7 @@ export async function saveUserSettings(userId, settings) {
     if (!updatedUser) {
       return { success: false, message: 'User not found' };
     }
-    return { success: true, message: 'User saved', settings: updatedUser.settings };
+    return { success: true, message: 'User settings updated'};
   } catch (error) {
     return { success: false, message: error.message };
   }

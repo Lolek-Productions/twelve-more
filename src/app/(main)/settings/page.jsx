@@ -11,7 +11,7 @@ const defaultSettings = {
   notifyOnNewPostInCommunity: true,
   notifyOnPostLiked: true,
   notifyOnPostPrayedFor: true,
-  notifyOnNewMemberInCommunity: false,
+  notifyOnNewMemberInCommunity: true,
   notifyOnCommentOnMyPost: true,
   notifyOnCommentOnCommentedPost: false,
   preferredCommunication: "sms",
@@ -53,7 +53,7 @@ export default function SettingsPage() {
       const response = await saveUserSettings(appUser.id, settings)
       showResponseToast(response);
 
-      if (response.success) {
+      if (response.success && response.settings) {
         setSettings(response.settings);
       }
     } catch (error) {
@@ -79,28 +79,28 @@ export default function SettingsPage() {
       <form onSubmit={handleSaveNotifications} className="bg-white rounded-lg shadow p-6 mb-8 m-6">
         <h2 className="text-lg font-semibold mb-4">Notification Preferences</h2>
         <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <span>Notify when a new post is created in a community I belong to</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify me when a new post is created in a community I belong to</span>
             <Switch checked={settings.notifyOnNewPostInCommunity} onCheckedChange={val => handleNotificationChange('notifyOnNewPostInCommunity', val)} />
           </div>
-          <div className="flex items-center justify-between">
-            <span>Notify when my post is liked</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify me when my post is liked</span>
             <Switch checked={settings.notifyOnPostLiked} onCheckedChange={val => handleNotificationChange('notifyOnPostLiked', val)} />
           </div>
-          <div className="flex items-center justify-between">
-            <span>Notify when my post is prayed for</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify me when my post is prayed for</span>
             <Switch checked={settings.notifyOnPostPrayedFor} onCheckedChange={val => handleNotificationChange('notifyOnPostPrayedFor', val)} />
           </div>
-          <div className="flex items-center justify-between">
-            <span>Notify when someone new joins a community I am part of</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify me when someone new joins a community I am part of</span>
             <Switch checked={settings.notifyOnNewMemberInCommunity} onCheckedChange={val => handleNotificationChange('notifyOnNewMemberInCommunity', val)} />
           </div>
-          <div className="flex items-center justify-between">
-            <span>Notify when someone comments on my post</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify  me when someone comments on my post</span>
             <Switch checked={settings.notifyOnCommentOnMyPost} onCheckedChange={val => handleNotificationChange('notifyOnCommentOnMyPost', val)} />
           </div>
-          <div className="flex items-center justify-between">
-            <span>Notify when someone comments on a post I have commented on</span>
+          <div className="flex items-center justify-between gap-1">
+            <span>Notify me when someone comments on a post I have commented on</span>
             <Switch checked={settings.notifyOnCommentOnCommentedPost} onCheckedChange={val => handleNotificationChange('notifyOnCommentOnCommentedPost', val)} />
           </div>
         </div>
