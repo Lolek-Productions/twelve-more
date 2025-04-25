@@ -11,12 +11,13 @@ import { NextResponse } from "next/server";
  * @returns {Promise<string>} base64-encoded mp3 audio
  */
 export async function openaiTtsAction(text, options = {}) {
-  if (!text) throw new Error("No text provided");
+  if (!text) return null; // Skip empty chunk
   const { language = "en" } = options;
   let ttsText = text;
   if (language && language !== "en") {
     ttsText = await translateText(text, language);
   }
   const audioBuffer = await textToSpeech(ttsText, { ...options });
+  if (!audioBuffer) return null;
   return audioBuffer.toString("base64");
 }

@@ -150,12 +150,24 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
           return;
         }
         // Wait for the audio chunk to be ready
-        while (!audios[playIndex]) {
+        while (audios[playIndex] === null) {
           if (errored || playbackAborted.current) return;
           // Wait a short interval before checking again
           await new Promise(res => setTimeout(res, 120));
         }
-        const audio = new Audio(audios[playIndex]);
+        // Skip empty or unsupported audio sources
+        const src = audios[playIndex];
+        if (
+          !src ||
+          typeof src !== 'string' ||
+          !src.startsWith('data:audio/mp3') ||
+          src.length < 30 // arbitrary minimum length for a valid base64 mp3
+        ) {
+          playIndex++;
+          playNext();
+          return;
+        }
+        const audio = new Audio(src);
         audioRef.current = audio;
         setPlayingLang(langCode);
         audio.play().catch((err) => {
@@ -209,7 +221,7 @@ export function PlayPostDropdownItems({ post, dropdownOpen, onRequestClose }) {
               ? `Playing in ${lang.label}...`
               : lang.label}
         </button>
-      ))}
+      ))} 
     </>
   );
 }
