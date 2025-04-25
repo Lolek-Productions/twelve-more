@@ -50,9 +50,12 @@ async function textToSpeech(text, options = {}) {
  * @returns {Promise<string>} Translated text
  */
 async function translateText(text, targetLang) {
-  if (!targetLang || targetLang === 'en') return text;
-  const prompt = `Translate the following text to ${targetLang} (just the translation, no explanation):\n"""${text}"""`;
-  const response = await openai.chat.completions.create({
+  if (!targetLang) return text;
+  const langNames = { en: "English", es: "Spanish", fr: "French", de: "German", la: "Latin" };
+  const langLabel = langNames[targetLang] || targetLang;
+  let prompt = `Translate the following text to ${langLabel}. Respond with only the translation:\n"""${text}"""`;
+  
+  let response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [
       { role: 'system', content: 'You are a translation assistant.' },
@@ -61,7 +64,26 @@ async function translateText(text, targetLang) {
     max_tokens: 1000,
     temperature: 0.3,
   });
-  return response.choices[0].message.content.trim();
+  let translated = response.choices[0].message.content.trim();
+  
+
+  // Fallback: If translation is identical to input, try a more explicit prompt
+  if (translated === text) {
+    prompt = `Translate to ${langLabel}. Only output the translation.\nText: ${text}`;
+    
+    response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a translation assistant.' },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 1000,
+      temperature: 0.3,
+    });
+    translated = response.choices[0].message.content.trim();
+    
+  }
+  return translated;
 }
 
 export { textToSpeech, translateText };
