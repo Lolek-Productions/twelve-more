@@ -96,13 +96,13 @@ export default function SettingsPage() {
             <Switch checked={settings.notifyOnNewMemberInCommunity} onCheckedChange={val => handleNotificationChange('notifyOnNewMemberInCommunity', val)} />
           </div>
           <div className="flex items-center justify-between gap-1">
-            <span>Notify  me when someone comments on my post</span>
+            <span>Notify me when someone comments on my post</span>
             <Switch checked={settings.notifyOnCommentOnMyPost} onCheckedChange={val => handleNotificationChange('notifyOnCommentOnMyPost', val)} />
           </div>
-          <div className="flex items-center justify-between gap-1">
+          {/* <div className="flex items-center justify-between gap-1">
             <span>Notify me when someone comments on a post I have commented on</span>
             <Switch checked={settings.notifyOnCommentOnCommentedPost} onCheckedChange={val => handleNotificationChange('notifyOnCommentOnCommentedPost', val)} />
-          </div>
+          </div> */}
         </div>
         <Button type="submit" className="mt-6" disabled={savingSettings} onClick={handleSaveNotifications}>
           {savingSettings ? "Saving..." : "Save Notification Settings"}

@@ -615,24 +615,30 @@ export async function addCommunityToUser(communityId, userId, role = 'member', a
     .populate('communities.community')
     .lean();
 
-    //Notify the leaders of this organization that someone has joined
-    const leadersResponse = await getPrivateLeadersByCommunityId(communityId);
-
-    if(leadersResponse.success && leadersResponse.leaders?.length > 0 && attemptToNotify) {
-      const leadersPhoneNumbers = leadersResponse.leaders
-        .map((leader) => leader.phoneNumber)
-        .filter(phoneNumber => phoneNumber && typeof phoneNumber === 'string' && phoneNumber.trim() !== '');
-
-      if (leadersPhoneNumbers.length > 0) {
-        // Find the community that was just added
-        const addedCommunity = updatedUser.communities.find(
-          comm => comm.community._id.toString() === communityId
+    // Notify all existing community members (not just leaders) if their settings allow
+    if (attemptToNotify) {
+      // Get all members of the community
+      const membersResponse = await getCommunityMembers(communityId);
+      if (membersResponse.success && membersResponse.data?.length > 0) {
+        // Exclude the new member from notifications
+        const notifyMembers = membersResponse.data.filter(m => m.id !== userId);
+        // Fetch full user objects to access notification settings and phone numbers
+        const memberIds = notifyMembers.map(m => m.id);
+        const memberUsers = await User.find({ _id: { $in: memberIds } }).lean();
+        // Only notify those with notifyOnNewMemberInCommunity !== false and valid phone number
+        const eligibleMembers = memberUsers.filter(u =>
+          u.settings?.notifyOnNewMemberInCommunity !== false &&
+          u.phoneNumber && typeof u.phoneNumber === 'string' && u.phoneNumber.trim() !== ''
         );
-        const addedCommunityName = addedCommunity ? addedCommunity.community.name : null;
-
-        const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}!  Be sure to welcome them to the 12!  ${PUBLIC_APP_URL}/communities/${communityId}/posts`;
-
-        const smsResponse = await twilioService.sendBatchSMS(leadersPhoneNumbers, message);
+        if (eligibleMembers.length > 0) {
+          const addedCommunity = updatedUser.communities.find(
+            comm => comm.community._id.toString() === communityId
+          );
+          const addedCommunityName = addedCommunity ? addedCommunity.community.name : null;
+          const message = `${updatedUser.firstName} ${updatedUser.lastName} has joined your community ${addedCommunityName}!  Be sure to welcome them to the 12!  ${PUBLIC_APP_URL}/communities/${communityId}/posts`;
+          const phoneNumbers = eligibleMembers.map(u => u.phoneNumber);
+          await twilioService.sendBatchSMS(phoneNumbers, message);
+        }
       }
     }
 

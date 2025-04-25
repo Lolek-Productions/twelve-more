@@ -103,10 +103,15 @@ export async function createPost(postData) {
           return { success: true, message: "No members found in community" };
         }
 
-        // Filter out the current user and ensure valid phone numbers
+        // Filter out the current user and ensure valid phone numbers and notifyOnNewPostInCommunity is not explicitly set to false
         const otherMembersPhoneNumbers = members
           .filter((member) => member._id.toString() !== userId)
-          .filter((member) => member.phoneNumber && typeof member.phoneNumber === 'string' && member.phoneNumber.trim() !== '')
+          .filter((member) => {
+            const phoneNumberIsValid = member.phoneNumber && typeof member.phoneNumber === 'string' && member.phoneNumber.trim() !== '';
+            const notifyOnNewPostInCommunityIsNotFalse = member.settings?.notifyOnNewPostInCommunity !== false;
+
+            return phoneNumberIsValid && notifyOnNewPostInCommunityIsNotFalse;
+          })
           .map((member) => member.phoneNumber);
 
         if (!otherMembersPhoneNumbers.length) {
@@ -1383,13 +1388,14 @@ export async function sayPrayerAction(post, appUser) {
       try {
         // Only send if this isn't the user's own post
         const phoneNumber = existingPost?.user?.phoneNumber;
-        if (phoneNumber && existingPost.user._id.toString() !== appUser.id) {
-
-          const message = `${appUser.firstName} ${appUser.lastName} is praying for you. ${PUBLIC_APP_URL}/posts/${existingPost._id.toString()}`
-          // console.log(phoneNumber, message);
-
-          await sendSMS({phoneNumber, message});
-          // console.log('Prayer notification SMS sent to post creator');
+        const notifyOnPostPrayedFor = existingPost?.user?.settings?.notifyOnPostPrayedFor;
+        if (
+          phoneNumber &&
+          existingPost.user._id.toString() !== appUser.id &&
+          notifyOnPostPrayedFor !== false
+        ) {
+          const message = `${appUser.firstName} ${appUser.lastName} is praying for you. ${PUBLIC_APP_URL}/posts/${existingPost._id.toString()}`;
+          await sendSMS({ phoneNumber, message });
         }
       } catch (notificationError) {
         console.error('Failed to send prayer notification:', notificationError);
@@ -1449,6 +1455,21 @@ export async function setUserLikesAction(post, user) {
     if (!updatedPost) {
       console.log('Failed to update post');
       return { success: false, message: 'Failed to update post' };
+    }
+
+    // Notify the post owner if the post was liked (not unliked)
+    if (!hasLiked) {
+      // Only notify when a like is added
+      const postOwnerId = existingPost.user?.toString?.() || (existingPost.user?._id?.toString?.());
+      if (postOwnerId) {
+        const ownerResponse = await getPrivateUserById(postOwnerId);
+        const postOwner = ownerResponse?.user;
+        if (postOwner && postOwner.id !== user.id && postOwner.phoneNumber && postOwner.settings?.notifyOnPostLiked !== false) {
+          const likerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+          const messageBody = `${likerName} liked your post! Check it out here: ${PUBLIC_APP_URL}/posts/${post.id}`;
+          await twilioService.sendSMS(postOwner.phoneNumber, messageBody);
+        }
+      }
     }
 
     const actionMessage = hasLiked
@@ -1727,6 +1748,11 @@ export async function notifyOnNewComment(post, commentData) {
     // If no phone number found, exit early
     if (!postOwner.phoneNumber) {
       console.error(`No phone number available for notification with ownerId ${postOwner.id}`);
+      return;
+    }
+
+    if (postOwner.settings?.notifyOnCommentOnMyPost === false) {
+      // console.log('Notification disabled by user settings');
       return;
     }
 

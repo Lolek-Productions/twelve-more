@@ -318,7 +318,7 @@ export default function LeftSidebar({ onLinkClick }) {
             )}
           </div>
 
-          {/* <Link
+          <Link
             href="/settings"
             className={cn(
               pathname === '/settings' ? 'bg-muted' : 'hover:bg-muted/50',
@@ -328,7 +328,7 @@ export default function LeftSidebar({ onLinkClick }) {
           >
             <HiCog className="w-6 h-6" />
             <span className="font-bold">Settings</span>
-          </Link> */}
+          </Link>
 
           { appUser?.id && DEV_IDS.includes(appUser.id) &&
             <Link
