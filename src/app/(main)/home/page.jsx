@@ -91,7 +91,6 @@ export default function HomePage() {
   };
 
   const handleDecline = () => {
-    // Clear localStorage and close modal
     localStorage.removeItem('pendingCommunityJoin');
     setShowModal(false);
   };
