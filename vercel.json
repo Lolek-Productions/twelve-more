@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "src/api/system-post/route.js",
+      "path": "/api/system-post",
       "schedule": "0 8 * * *"
     }
   ]
