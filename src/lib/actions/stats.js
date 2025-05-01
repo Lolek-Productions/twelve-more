@@ -202,19 +202,15 @@ export async function getNewOrganizationsForDailyStats() {
 
 export async function getActiveUsersForDailyStats() {
   const rangeStart = getYesterdayAt8();
+  const rangeStartTimestamp = rangeStart.getTime();
 
   try {
     const client = await clerkClient();
-    const rangeStartUnix = Math.floor(rangeStart.getTime() / 1000);
-
-    console.log('rangeStartUnix', rangeStartUnix);
 
     const activeUsers = await client.users.getUserList({
-      last_active_at_after: rangeStartUnix,
+      last_active_at_after: rangeStartTimestamp,
       limit: 500  //The number of results to return. Must be an integer greater than zero and less than 501. Can be used for paginating the results together with offset. Defaults to 10
     })
-
-    console.log('activeUsers', activeUsers);
 
     return { success: true, count: activeUsers.data.length };
   } catch (error) {
