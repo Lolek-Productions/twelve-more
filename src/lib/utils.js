@@ -170,3 +170,14 @@ export function capitalizeFirstLetter(string) {
   if (!string) return '';
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
+
+export function getYesterdayAt8() {
+  const now = new Date();
+  
+  return new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() - 1,
+    8, 0, 0, 0
+  ));
+} 

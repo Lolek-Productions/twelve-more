@@ -40,6 +40,10 @@ const sidebarNavItems = [
       {
         title: "Community Stats",
         href: "/developer/community-stats",
+      },
+      {
+        title: "Daily Stats",
+        href: "/developer/daily-stats",
       }
     ]
   },

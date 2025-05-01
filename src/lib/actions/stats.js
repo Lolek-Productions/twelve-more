@@ -5,6 +5,8 @@ import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';
 import Community from "@/lib/models/community.model.js";
 import Organization from "@/lib/models/organization.model.js";
+import { getYesterdayAt8 } from "@/lib/utils";
+import {clerkClient} from "@clerk/nextjs/server";
 
 export async function getNewPostCountForDateRange(startDate, endDate, options = { inclusive: true }) {
   // Convert string dates to Date objects if necessary
@@ -129,3 +131,95 @@ export async function getNewOrganizationCountForDateRange(startDate, endDate, op
     throw error;
   }
 }
+
+export async function getNewPostsForDailyStats() {
+  const rangeStart = getYesterdayAt8();
+
+  try {
+    await connect();
+    const count = await Post.countDocuments({
+      createdAt: {
+        $gte: rangeStart
+      }
+    });
+    return { success: true, count };
+  } catch (error) {
+    console.error(`Error counting posts between ${rangeStart} and the present:`, error);
+    throw error;
+  }
+}
+
+export async function getNewUsersForDailyStats() {
+  const rangeStart = getYesterdayAt8();
+
+  try {
+    await connect();
+    const count = await User.countDocuments({
+      createdAt: {
+        $gte: rangeStart
+      }
+    });
+    return { success: true, count };
+  } catch (error) {
+    console.error(`Error counting users between ${rangeStart} and the present:`, error);
+    throw error;
+  }
+}
+
+export async function getNewCommunitiesForDailyStats() {
+  const rangeStart = getYesterdayAt8();
+
+  try {
+    await connect();
+    const count = await Community.countDocuments({
+      createdAt: {
+        $gte: rangeStart
+      }
+    });
+    return { success: true, count };
+  } catch (error) {
+    console.error(`Error counting communities between ${rangeStart} and the present:`, error);
+    throw error;
+  }
+}
+
+export async function getNewOrganizationsForDailyStats() {
+  const rangeStart = getYesterdayAt8();
+
+  try {
+    await connect();
+    const count = await Organization.countDocuments({
+      createdAt: {
+        $gte: rangeStart
+      }
+    });
+    return { success: true, count };
+  } catch (error) {
+    console.error(`Error counting organizations between ${rangeStart} and the present:`, error);
+    throw error;
+  }
+}
+
+export async function getActiveUsersForDailyStats() {
+  const rangeStart = getYesterdayAt8();
+
+  try {
+    const client = await clerkClient();
+    const rangeStartUnix = Math.floor(rangeStart.getTime() / 1000);
+
+    console.log('rangeStartUnix', rangeStartUnix);
+
+    const activeUsers = await client.users.getUserList({
+      last_active_at_after: rangeStartUnix,
+      limit: 500  //The number of results to return. Must be an integer greater than zero and less than 501. Can be used for paginating the results together with offset. Defaults to 10
+    })
+
+    console.log('activeUsers', activeUsers);
+
+    return { success: true, count: activeUsers.data.length };
+  } catch (error) {
+    console.error(`Error counting active users between ${rangeStart} and the present:`, error);
+    throw error;
+  }
+}
+  
