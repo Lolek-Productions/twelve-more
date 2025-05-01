@@ -13,7 +13,6 @@ import {
 } from "@tanstack/react-table";
 import { useApiToast } from "@/lib/utils";
 import { runCommand } from "@/lib/actions/command";
-import {error} from "next/dist/build/output/log.js";
 
 function CommandsPage() {
   const [sorting, setSorting] = useState([]);
@@ -27,6 +26,7 @@ function CommandsPage() {
     { id: "4", name: "Send Test SMS" },
     { id: "5", name: "Send Test Batch SMS" },
     { id: "6", name: "TEST" },
+    { id: "7", name: "Create System Post in Test Organization" },
   ];
 
   const columns = [

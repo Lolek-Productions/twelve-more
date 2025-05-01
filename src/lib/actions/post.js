@@ -15,8 +15,6 @@ import mongoose from "mongoose";
 import Community from "@/lib/models/community.model.js";
 
 export async function createPost(postData) {
-  const user = await requireUser();
-
   try {
     await connect();
 
@@ -29,15 +27,6 @@ export async function createPost(postData) {
     const communityId = postData.communityId;
     const organizationId = postData.organizationId;
     const parentId = postData.parentId ?? null;
-
-    if (!userId) {
-      console.error('Warning: Missing userMongoId in publicMetadata');
-      return { success: false, message: 'User Id missing' };
-    }
-
-    if (!user || user.publicMetadata.userMongoId !== userId) {
-      return { success: false, message: 'Unauthorized' };
-    }
 
     // Create and save in one operation
     const newPost = await Post.create({
@@ -179,6 +168,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
       {
         $match: {
           parentId: null, // Only get top-level posts
+          user: { $ne: null }, // Ensure user field is not null - this will exclude system posts
           $or: [
             { organization: { $in: orgObjectIds }, community: null },
             { community: { $in: communityObjectIds } }

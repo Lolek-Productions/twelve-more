@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
 import PostText from "@/components/PostText.jsx";
 import HorizontalDots from "@/components/HorizontalDots.jsx";
+import { SYSTEM_BOT_NAME } from "@/lib/constants";
 
 export default function Post({ post, clickableText = true, showComments = false, isAncestor = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -47,13 +48,24 @@ export default function Post({ post, clickableText = true, showComments = false,
         )}
 
         <div className="flex-shrink-0 mr-2 flex flex-col">
+
+        {post?.user?.id ? (
           <Link href={`/users/${post?.user?.id}`} className="block">
             <img
-              src={post?.profileImg || '/default-avatar.png'}
-              alt="user-img"
+              src={post?.profileImg}
+              alt="User Image"
               className="h-9 w-9 sm:h-11 sm:w-11 rounded-full object-cover flex-shrink-0"
             />
           </Link>
+        ) : (
+          <div className="block">
+            <img
+              src={'/logo.png'}
+              alt="12more logo"
+              className="h-9 w-9 sm:h-11 sm:w-11 rounded-full object-cover flex-shrink-0"
+            />
+          </div>
+        )}
 
           {/* This is the clickable space under the avatar */}
           <Link href={`/posts/${post?.id}`} className="flex-grow" />
@@ -64,9 +76,15 @@ export default function Post({ post, clickableText = true, showComments = false,
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center space-x-1 min-w-0 max-w-full">
                 <h4 className="font-bold text-xs truncate max-w-[120px] xs:max-w-[150px] sm:max-w-[180px]">
+                {post?.user?.id ? (
                   <Link href={`/users/${post?.user?.id}`} className="block truncate">
                     {post?.user?.firstName ?? "empty"} {post?.user?.lastName}
                   </Link>
+                ) : (
+                  <div className="block truncate">
+                    {SYSTEM_BOT_NAME}
+                  </div>
+                )}
                 </h4>
                 <span className="text-lg text-gray-500 mx-0.5 flex-shrink-0">·</span>
                 <span className="text-xs text-gray-500 truncate">

@@ -3,6 +3,7 @@
 import {clerkClient} from "@clerk/nextjs/server";
 import twilioService from "@/lib/services/twilioService";
 import {getPrivateUserById} from "@/lib/actions/user.js";
+import Post from "@/lib/models/post.model";
 
 export async function runCommand(commandName) {
   try {
@@ -86,7 +87,22 @@ export async function runCommand(commandName) {
           console.error("Database error:", dbError);
           return { success: false, message: `Database error: ${dbError.message}` };
         }
+      }
 
+      case "Create System Post in Test Organization": {
+        const organizationId = "67e84cef001522de336670e9";
+        const communityId = "67e84ce27b99696289b14059";
+
+        const newPost = await Post.create({
+          text: "This is a test post from the system",
+          community: communityId,
+          organization: organizationId,
+        });
+
+        return {
+          success: true,
+          message: "System post created successfully",
+        };
       }
 
       default:
