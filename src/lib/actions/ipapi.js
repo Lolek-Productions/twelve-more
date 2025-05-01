@@ -4,7 +4,7 @@
 export async function getLocationData(ip) {
   try {
     // Get the API key from server-side environment variables
-    const apiKey = process.env.IP_API_KEY;
+    const apiKey = process.env.IPSTACK_API_KEY;
 
     if (!apiKey) {
       throw new Error('Missing API key for IP geolocation service');
@@ -15,7 +15,7 @@ export async function getLocationData(ip) {
     }
 
     // Use the provided IP to fetch location data
-    const url = `https://api.ipapi.is?q=${ip}&key=${apiKey}`;
+    const url = `http://api.ipstack.com/${ip}?access_key=${apiKey}`;
     const response = await fetch(url, { cache: 'no-store' });
 
     if (!response.ok) {
@@ -23,10 +23,19 @@ export async function getLocationData(ip) {
     }
 
     const data = await response.json();
+    
+    console.log('data', data);
 
+    // Normalize the ipstack response to match frontend expectations
+    const normalizedLocation = {
+      zip: data.zip,
+      city: data.city,
+      state: data.region_name,
+      country: data.country_name
+    };
     return {
       success: true,
-      location: data.location
+      location: normalizedLocation
     };
   } catch (error) {
     console.error('Error in getLocationData server action:', error);

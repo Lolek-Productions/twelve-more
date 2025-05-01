@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getLocationData } from '@/lib/actions/ipapi.js';
 
 export default function LookupIp() {
@@ -8,19 +8,21 @@ export default function LookupIp() {
   const [error, setError] = useState(null);
   const [locationData, setLocationData] = useState(null);
 
+  const loadedRef = useRef(false);
+
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     const fetchLocation = async () => {
       try {
         setLoading(true);
-
         // First get the IP address from the browser
         const ipResponse = await fetch('https://api.ipify.org?format=json');
         const ipData = await ipResponse.json();
         const ip = ipData.ip;
 
         const result = await getLocationData(ip);
-
-        console.log(result);
+        console.log('result', result);
 
         if (result.success) {
           setLocationData(result.location);
