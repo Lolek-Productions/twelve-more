@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/app/api/system-post/route.js": {
-      "schedule": "0 8 * * *"
-    }
-  }
-}

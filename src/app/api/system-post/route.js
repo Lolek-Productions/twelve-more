@@ -1,3 +1,6 @@
+/**
+ * @vercel/cronschedule 0 8 * * *
+ */
 import { NextResponse } from 'next/server';
 import { createPost } from '@/lib/actions/post';
 
