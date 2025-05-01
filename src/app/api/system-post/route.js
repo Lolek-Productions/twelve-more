@@ -1,6 +1,3 @@
-/**
- * @vercel/cronschedule 0 8 * * *
- */
 import { NextResponse } from 'next/server';
 import Post from "@/lib/models/post.model";
 import { connect } from '@/lib/mongodb/mongoose';
