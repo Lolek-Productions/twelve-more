@@ -3,6 +3,7 @@
 import { connect } from "@/lib/mongodb/mongoose";
 import Post from "@/lib/models/post.model";
 import User from '@/lib/models/user.model';
+import Stats from '@/lib/models/stats.model';
 import Community from "@/lib/models/community.model.js";
 import Organization from "@/lib/models/organization.model.js";
 import { getYesterdayAt8 } from "@/lib/utils";
@@ -216,6 +217,35 @@ export async function getActiveUsersForDailyStats() {
   } catch (error) {
     console.error(`Error counting active users between ${rangeStart} and the present:`, error);
     throw error;
+  }
+}
+
+export async function persistDailyStats() {
+  try {
+    const [postResult, userResult, communityResult, organizationResult, activeUserResult] = await Promise.all([
+      getNewPostsForDailyStats(),
+      getNewUsersForDailyStats(),
+      getNewCommunitiesForDailyStats(),
+      getNewOrganizationsForDailyStats(),
+      getActiveUsersForDailyStats(),
+    ])
+
+    console.log(postResult.count, userResult.count, communityResult.count, organizationResult.count, activeUserResult.count)
+
+    const stats = await Stats.create({
+      date: new Date().toISOString().split('T')[0],
+      newPosts: postResult.count,
+      newUsers: userResult.count,
+      newCommunities: communityResult.count,
+      newOrganizations: organizationResult.count,
+      activeUsers: activeUserResult.count,
+    })
+
+    return { success: true, message: 'Stats persisted successfully' }
+
+  } catch (error) {
+    console.error('Error loading stats:', error)
+    return { success: false, message: 'Error persisting stats' }
   }
 }
   

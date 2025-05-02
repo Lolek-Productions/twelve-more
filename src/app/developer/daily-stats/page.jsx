@@ -6,17 +6,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.j
 import { DAILY_STATS_RUN_AT } from "@/lib/constants"
 import { getNewPostsForDailyStats, getNewUsersForDailyStats, getNewCommunitiesForDailyStats, getNewOrganizationsForDailyStats, getActiveUsersForDailyStats } from "@/lib/actions/stats"
 import { getYesterdayAt8 } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { persistDailyStats } from "@/lib/actions/stats"
+import { useApiToast } from "@/lib/utils"
 
 export default function StatsPage() {
   const [isLoading, setIsLoading] = useState(false);
-
   const [postCount, setPostCount] = useState(null)
   const [userCount, setUserCount] = useState(null)
   const [communityCount, setCommunityCount] = useState(null)
   const [organizationCount, setOrganizationCount] = useState(null)
   const [activeUserCount, setActiveUserCount] = useState(null)
+  const { showResponseToast, showErrorToast } = useApiToast();
 
   const rangeStart = getYesterdayAt8();
+
+  const handlePersistDailyStats = async () => {
+    setIsLoading(true)
+
+    try {
+      const result = await persistDailyStats()
+      if (result.success) showResponseToast(result)
+      else showErrorToast(result)
+    } catch (error) {
+      console.error('Error persisting stats:', error)
+      showErrorToast('Error persisting stats')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const loadAllStats = async () => {
       setIsLoading(true)
@@ -51,6 +69,8 @@ export default function StatsPage() {
     <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-1">Daily Stats</h1>
       <h2 className="mb-2">These are the stats that will be recorded each day at 3:00 Central Time.</h2>
+
+      <Button className="mb-4" onClick={handlePersistDailyStats}>Persist Stats</Button>
 
       <Card>
         <CardHeader className="pb-2">
