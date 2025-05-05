@@ -3,6 +3,7 @@ import "./globals.css";
 import {ClerkLoaded, ClerkLoading, ClerkProvider} from '@clerk/nextjs'
 import Loader from "@/components/Loader";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
 
           {/* Only render Analytics in production */}
           {isProduction && <Analytics />}
+          {isProduction && <SpeedInsights />}
         </body>
       </html>
     </ClerkProvider>
