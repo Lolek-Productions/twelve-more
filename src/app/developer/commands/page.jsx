@@ -27,6 +27,7 @@ function CommandsPage() {
     { id: "5", name: "Send Test Batch SMS" },
     { id: "6", name: "TEST" },
     { id: "7", name: "Create System Post in Test Organization" },
+    { id: "8", name: "Seed Example Course" },
   ];
 
   const columns = [

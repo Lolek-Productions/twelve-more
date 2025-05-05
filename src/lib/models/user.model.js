@@ -75,6 +75,23 @@ const userSchema = new mongoose.Schema(
       ref: 'Organization',
       default: null,
     },
+    courseProgress: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Course',
+          required: true
+        },
+        completedModules: {
+          type: [Number], // array of module indices completed
+          default: []
+        },
+        lastAccessed: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     settings: {
       type: {
         notifyOnNewPostInCommunity: { type: Boolean, default: true },

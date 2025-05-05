@@ -4,6 +4,8 @@ import {clerkClient} from "@clerk/nextjs/server";
 import twilioService from "@/lib/services/twilioService";
 import {getPrivateUserById} from "@/lib/actions/user.js";
 import Post from "@/lib/models/post.model";
+import Course from "@/lib/models/course.model";
+import { connect } from '../mongodb/mongoose.js';
 
 export async function runCommand(commandName) {
   try {
@@ -102,6 +104,53 @@ export async function runCommand(commandName) {
         return {
           success: true,
           message: "System post created successfully",
+        };
+      }
+
+      case "Seed Example Course": {
+        await connect();
+        const exampleCourse = {
+          name: "Example Course",
+          description: "A sample course with all module types.",
+          createdBy: "67b63722b63603a6b567eb31",
+          modules: [
+            {
+              title: "Welcome Video",
+              type: "video",
+              content: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+              order: 1,
+            },
+            {
+              title: "Intro Quiz",
+              type: "quiz",
+              content: [
+                {
+                  question: "What is 2 + 2?",
+                  options: ["3", "4", "5"],
+                  answer: "4",
+                  explanation: "2 plus 2 equals 4.",
+                },
+                {
+                  question: "What color is the sky?",
+                  options: ["Blue", "Green", "Red"],
+                  answer: "Blue",
+                  explanation: "The sky appears blue due to Rayleigh scattering.",
+                },
+              ],
+              order: 2,
+            },
+            {
+              title: "Course Overview",
+              type: "text",
+              content: "This is the overview of the course. Welcome!",
+              order: 3,
+            },
+          ],
+        };
+        const course = await Course.create(exampleCourse);
+        return {
+          success: true,
+          message: `Seeded example course with ID: ${course._id}`,
         };
       }
 

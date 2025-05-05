@@ -52,6 +52,64 @@ export const createOrUpdateUser = async (
   }
 };
 
+// Get a user's progress for a specific course
+export async function getCourseProgress(userId, courseId) {
+  await connect();
+  const user = await User.findOne(
+    { _id: userId, "courseProgress.course": courseId },
+    {
+      courseProgress: {
+        $elemMatch: {
+          course: courseId
+        }
+      }
+    }
+  );
+  if (!user) return {success: false, message:"User not found"};
+
+  const courseProgress = {
+    course: user.courseProgress[0].course._id.toString(),
+    completedModules: user.courseProgress[0].completedModules,
+    lastAccessed: user.courseProgress[0].lastAccessed
+  }
+
+  return {success: true, courseProgress};
+}
+
+// Update (or insert) a user's course progress
+export async function updateCourseProgress(userId, courseId, completedModules) {
+  await connect();
+  // Try to update existing progress
+  const user = await User.findOneAndUpdate(
+    { _id: userId, "courseProgress.course": courseId },
+    {
+      $set: {
+        "courseProgress.$.completedModules": completedModules,
+        "courseProgress.$.lastAccessed": new Date()
+      }
+    },
+    { new: true }
+  );
+  if (user) return {success: true, message: "Course progress updated successfully"};
+  
+  // If no progress exists, push a new entry
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      $push: {
+        courseProgress: {
+          course: courseId,
+          completedModules,
+          lastAccessed: new Date()
+        }
+      }
+    },
+    { new: true }
+  );
+
+  return {success: true, message: "Course progress updated successfully"};
+}
+
 export async function getUserById(userId) {
   try {
     await connect();
