@@ -358,11 +358,11 @@ function CoursePageInner({ courseId }) {
               <li
                 key={mod.id || idx}
                 className="flex items-center justify-between mb-3 cursor-pointer rounded px-2 py-2"
-                style={{ background: selectedModule.id === mod.id ? "#e9ecef" : "transparent" }}
-                onClick={() => { handleModuleClick(mod); setSidebarOpen(false); }}
+                style={{ background: selectedIndex === idx ? "#e9ecef" : "transparent" }}
+                onClick={() => { handleModuleClick(idx); setSidebarOpen(false); }}
               >
                 <span>{mod.title}</span>
-                {completed[mod.id] ? (
+                {completed[idx] ? (
                   <span className="flex items-center justify-center w-4 h-4 rounded-full bg-green-500 ml-2">
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 8.5L7 10.5L11 6.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
