@@ -109,7 +109,7 @@ export default function PostPage() {
           )}
         </div>
 
-        <Button className="mt-4" onClick={() => router.back()}>Go Back</Button>
+        <Button variant="ghost" className="mt-4" onClick={() => router.back()}>Go Back</Button>
       </div>
       );
       }

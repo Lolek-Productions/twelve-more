@@ -4,6 +4,21 @@ This document describes the code style conventions used in this project. It shou
 
 ## UI Components
 
+### Back Button Convention
+
+- For navigation or "Back" actions, always use the shadcn/ui `Button` component with `variant="ghost"`.
+- This ensures a minimal, borderless look that blends with the page and does not distract from primary actions.
+- Example usage:
+
+  ```jsx
+  <Button asChild variant="ghost" className="mb-6">
+    <a href="/developer/courses/[courseId]">
+      ← Back to Course
+    </a>
+  </Button>
+  ```
+- Do **not** use `variant="outline"` or add borders to back/navigation buttons unless there is a specific design reason.
+
 ---
 
 ## Toast Notifications & API Feedback
@@ -131,6 +146,36 @@ This document describes the code style conventions used in this project. It shou
 - **React Hooks:** Prefix custom hooks with `use` (e.g., `useMainContext`).
 
 ## Server Actions & Async Functions
+
+### Server Action Response Structure
+
+- **Always return a plain object with at least a `success` boolean and a `message` string.**
+  - If returning data, include a `data` or `course` field as appropriate.
+- **Never return non-serializable values** (no class instances, functions, etc).
+- **For errors:**  
+  - Use `success: false` and provide a clear `message` describing the failure.
+- **For success:**  
+  - Use `success: true` and provide a user-friendly `message` describing the action.
+  - Optionally include additional fields (e.g., `course`, `data`) if needed by the caller.
+
+**Example:**
+
+```js
+export async function deleteCourse(id) {
+  await connect();
+  try {
+    const result = await Course.findByIdAndDelete(id);
+    if (!result) return { success: false, message: "Course not found" };
+    return { success: true, message: "Course Deleted" };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+```
+
+- **Do not use an `error` field for error messages; always use `message`.**
+- This structure ensures consistency for all server actions and makes UI feedback predictable.
+
 - **Async Functions:**
   - Always use `async` functions for server actions that perform I/O, API calls, or database operations.
   - Use `await` for all asynchronous operations (e.g., API calls, DB queries, file I/O).

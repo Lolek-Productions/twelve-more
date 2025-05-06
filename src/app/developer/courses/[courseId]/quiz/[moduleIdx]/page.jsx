@@ -8,6 +8,7 @@ import { useApiToast } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 export default function QuizEditorPage() {
+  const { showResponseToast, showErrorToast } = useApiToast();
   const router = useRouter();
   const params = useParams();
   const courseId = params.courseId;
@@ -64,7 +65,7 @@ export default function QuizEditorPage() {
     <div className="max-w-2xl mx-auto py-8">
       <Button
         asChild
-        variant="outline"
+        variant="ghost"
         className="mb-6"
       >
         <a href={`/developer/courses/${courseId}`}>
