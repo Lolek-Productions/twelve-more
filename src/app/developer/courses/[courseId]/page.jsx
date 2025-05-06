@@ -165,7 +165,7 @@ export default function DeveloperCourseModulesPage() {
     <div className="max-w-3xl mx-auto px-8">
       <div className="mb-4">
         <Link href="/developer/courses" passHref legacyBehavior>
-          <Button asChild variant="outline">
+          <Button asChild variant="ghost">
             <a>&larr; Back to Courses</a>
           </Button>
         </Link>
@@ -174,6 +174,13 @@ export default function DeveloperCourseModulesPage() {
       {course && (
         <div>
           <h1 className="text-2xl font-bold mb-2">Edit Course</h1>
+          <div className="mb-4">
+            <Link href={`/courses/${courseId}`} passHref legacyBehavior>
+              <Button asChild variant="outline">
+                <a>Go to Course</a>
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
       <div className="text-red-600 mb-4">{error}</div>
