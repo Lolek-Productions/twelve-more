@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { HiOutlinePhotograph } from 'react-icons/hi';
+import { HiOutlinePhotograph, HiOutlineVideoCamera, HiOutlineMicrophone, HiOutlineStop } from 'react-icons/hi';
 import { useRef, useState, useEffect } from 'react';
 import { app } from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL,} from 'firebase/storage';
@@ -10,6 +10,7 @@ import {createPost} from "@/lib/actions/post.js";
 import {useApiToast} from "@/lib/utils.js";
 import {getCommunityById} from "@/lib/actions/community.js";
 import {useMainContext} from "@/components/MainContextProvider.jsx";
+import Recorder from '@/app/(main)/recorder/page';
 
 export default function PostInput({
                                     communityId,
@@ -35,6 +36,17 @@ export default function PostInput({
   const [text, setText] = useState('');
   const imagePickRef = useRef(null);
   const textareaRef = useRef(null);
+
+  // --- Audio Recording State ---
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioFileUploading, setAudioFileUploading] = useState(false);
+  const [audioFileUrl, setAudioFileUrl] = useState(null); // Firebase download URL
+  const [recordedAudioBlob, setRecordedAudioBlob] = useState(null);
+  const [recordingError, setRecordingError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const audioStreamRef = useRef(null);
+  const audioRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   useEffect(() => {
     if (autoFocus) {
@@ -192,6 +204,80 @@ export default function PostInput({
     );
   };
 
+  // --- Audio Recording Logic ---
+  const startRecording = async () => {
+    setRecordingError(null);
+    setIsRecording(true);
+    setRecordedAudioBlob(null);
+    setAudioFileUrl(null);
+    setUploadProgress(0);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      audioRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setRecordedAudioBlob(audioBlob);
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+      };
+      recorder.start();
+    } catch (error) {
+      setRecordingError('Could not start recording: ' + error.message);
+      setIsRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (audioRecorderRef.current && audioRecorderRef.current.state !== 'inactive') {
+      audioRecorderRef.current.stop();
+    }
+  };
+
+  const uploadAudioFileToStorage = async (audioBlob) => {
+    setAudioFileUploading(true);
+    setUploadProgress(0);
+    try {
+      const storage = getStorage(app);
+      const fileName = `${Date.now()}.webm`;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, audioBlob);
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          setRecordingError('Upload failed: ' + error.message);
+          setAudioFileUploading(false);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setAudioFileUrl(downloadURL);
+          setAudioFileUploading(false);
+          setUploadProgress(100);
+        }
+      );
+    } catch (error) {
+      setRecordingError('Upload error: ' + error.message);
+      setAudioFileUploading(false);
+    }
+  };
+
+  // Upload when user clicks upload after preview
+  const handleAudioUpload = async () => {
+    if (!recordedAudioBlob) return;
+    await uploadAudioFileToStorage(recordedAudioBlob);
+  };
+
   const handleSubmit = async () => {
     if (!text.trim() || imageFileUplaoding || isSubmitting) {
       return;
@@ -211,6 +297,7 @@ export default function PostInput({
       text,
       profileImg: appUser.avatar,
       image: imageFileUrl,
+      audio: audioFileUrl,
       organizationId: organizationId,
     })
 
@@ -302,12 +389,52 @@ export default function PostInput({
             }`}
           />
         )}
+        {/* Audio preview and upload controls */}
+        {recordedAudioBlob && !audioFileUrl && (
+          <div className="w-full py-5 flex flex-col items-center">
+            <audio controls src={URL.createObjectURL(recordedAudioBlob)} />
+            <div className="flex gap-2 mt-2">
+              <Button
+                onClick={handleAudioUpload}
+                disabled={audioFileUploading}
+                className="bg-green-500 hover:bg-green-600 text-white"
+              >
+                {audioFileUploading ? `Uploading... (${Math.round(uploadProgress)}%)` : 'Upload Audio'}
+              </Button>
+              <Button
+                onClick={() => setRecordedAudioBlob(null)}
+                className="bg-gray-300 hover:bg-gray-400"
+              >
+                Record Again
+              </Button>
+            </div>
+            {uploadProgress > 0 && audioFileUploading && (
+              <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                <div className="bg-green-500 h-2 rounded" style={{ width: `${uploadProgress}%` }} />
+              </div>
+            )}
+            {recordingError && <div className="text-red-500 mt-2">{recordingError}</div>}
+          </div>
+        )}
+        {audioFileUrl && (
+          <div className="w-full py-5 flex flex-col items-center">
+            <audio controls src={audioFileUrl} />
+            <div className="text-green-600 mt-2">Audio uploaded!</div>
+          </div>
+        )}
+        {recordingError && !isRecording && (
+          <div className="text-red-500 py-2">{recordingError}</div>
+        )}
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
-                                 onClick={() => imagePickRef.current.click()}
+              onClick={() => imagePickRef.current.click()}
             />
-            {/*<span className="text-xs text-gray-500 ml-2">Tip: Press ⌘+Enter to post</span>*/}
+            {isRecording ? (
+              <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+            ) : (
+              <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+            )}
           </div>
           <input
             type='file'

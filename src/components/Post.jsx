@@ -117,6 +117,19 @@ export default function Post({ post, clickableText = true, showComments = false,
 
           <PostText post={post} clickableText={clickableText} />
 
+          {/* Audio playback if audio is present */}
+          {(post?.audio) && (
+            <div className="my-3">
+              <audio
+                controls
+                src={post.audio}
+                className="w-full rounded-lg"
+              >
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          )}
+
           {post?.image && (
             <div className="relative w-full overflow-hidden rounded-lg sm:rounded-2xl cursor-pointer" onClick={handleImageClick}>
               <img

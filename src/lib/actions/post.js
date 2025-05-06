@@ -270,6 +270,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
           _id: 1,
           text: 1,
           image: 1,
+          audio: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -321,6 +322,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,  
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -458,6 +460,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
           _id: 1,
           text: 1,
           image: 1,
+          audio: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -509,6 +512,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -588,6 +592,7 @@ export async function getPostsForOrganizationFeed(limit = 10, appUser, organizat
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,  
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -682,7 +687,6 @@ export async function getAllPosts({limit = 10}) {
         firstName: like.firstName || '',
         lastName: like.lastName || ''
       })),
-
       createdAt: post.createdAt,
     }));
   } catch (error) {
@@ -738,6 +742,7 @@ export async function getPostByIdWithComments(postId) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,  
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -849,6 +854,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
           _id: 1,
           text: 1,
           image: 1,
+          audio: 1,
           profileImg: 1,
           createdAt: 1,
           parentId: 1,
@@ -1041,6 +1047,8 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
         $project: {
           _id: 1,
           text: 1,
+          image: 1,
+          audio: 1,
           profileImg: 1,
           createdAt: 1,
           user: {
@@ -1069,6 +1077,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
       id: mainPostResult._id?.toString(),
       text: mainPostResult.text,
       image: mainPostResult.image,
+      audio: mainPostResult.audio,
       user: mainPostResult.user ? {
         id: mainPostResult.user._id?.toString(),
         firstName: mainPostResult.user.firstName,
@@ -1265,6 +1274,7 @@ export async function getPostForPostPage(postId) {
           _id: 1,
           text: 1,
           image: 1,
+          audio: 1,
           profileImg: 1,
           createdAt: 1,
           likes: 1,
@@ -1317,6 +1327,7 @@ export async function getPostForPostPage(postId) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -1626,6 +1637,7 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -1835,6 +1847,7 @@ export async function searchPosts(searchTerm, appUser, limit = 20) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
+      audio: post.audio,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
