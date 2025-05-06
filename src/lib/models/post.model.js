@@ -12,6 +12,9 @@ const postSchema = new mongoose.Schema(
     audio: {
       type: String,
     },
+    video: {
+      type: String,
+    },
     // Optional parent post reference (for comments)
     parentId: {
       type: mongoose.Schema.Types.ObjectId,

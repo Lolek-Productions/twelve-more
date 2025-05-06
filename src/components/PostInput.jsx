@@ -48,6 +48,29 @@ export default function PostInput({
   const audioRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  // --- Video Recording State ---
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
+  const [videoFileUploading, setVideoFileUploading] = useState(false);
+  const [videoFileUrl, setVideoFileUrl] = useState(null); // Firebase download URL
+  const [recordedVideoBlob, setRecordedVideoBlob] = useState(null);
+  const [videoRecordingError, setVideoRecordingError] = useState(null);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const videoStreamRef = useRef(null);
+  const videoRecorderRef = useRef(null);
+  const videoChunksRef = useRef([]);
+  const videoPreviewRef = useRef(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (recordedVideoBlob) {
+      const url = URL.createObjectURL(recordedVideoBlob);
+      setVideoPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setVideoPreviewUrl(null);
+    }
+  }, [recordedVideoBlob]);
+
   useEffect(() => {
     if (autoFocus) {
       // Short timeout to ensure DOM is ready and any animations have completed
@@ -140,6 +163,15 @@ export default function PostInput({
     }
   };
 
+  // Utility to clear video state after submit
+  const clearVideo = () => {
+    setRecordedVideoBlob(null);
+    setVideoFileUrl(null);
+    setVideoUploadProgress(0);
+    setVideoRecordingError(null);
+    setVideoPreviewUrl(null);
+  };
+
   //Image
   const addImageToPost = (e) => {
     const file = e.target.files[0];
@@ -206,6 +238,7 @@ export default function PostInput({
 
   // --- Audio Recording Logic ---
   const startRecording = async () => {
+    if (isVideoRecording) return;
     setRecordingError(null);
     setIsRecording(true);
     setRecordedAudioBlob(null);
@@ -278,8 +311,83 @@ export default function PostInput({
     await uploadAudioFileToStorage(recordedAudioBlob);
   };
 
+  // --- Video Recording Logic ---
+  const startVideoRecording = async () => {
+    if (isRecording) return;
+    setVideoRecordingError(null);
+    setIsVideoRecording(true);
+    setRecordedVideoBlob(null);
+    setVideoFileUrl(null);
+    setVideoUploadProgress(0);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      videoStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      videoRecorderRef.current = recorder;
+      videoChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          videoChunksRef.current.push(e.data);
+        }
+      };
+      recorder.onstop = () => {
+        const videoBlob = new Blob(videoChunksRef.current, { type: 'video/webm' });
+        setRecordedVideoBlob(videoBlob);
+        videoStreamRef.current.getTracks().forEach(track => track.stop());
+        setIsVideoRecording(false);
+      };
+      recorder.start();
+    } catch (error) {
+      setVideoRecordingError('Could not start video recording: ' + error.message);
+      setIsVideoRecording(false);
+    }
+  };
+
+  const stopVideoRecording = () => {
+    if (videoRecorderRef.current && videoRecorderRef.current.state !== 'inactive') {
+      videoRecorderRef.current.stop();
+    }
+  };
+
+  const uploadVideoFileToStorage = async (videoBlob) => {
+    setVideoFileUploading(true);
+    setVideoUploadProgress(0);
+    try {
+      const storage = getStorage(app);
+      const fileName = `${Date.now()}.webm`;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, videoBlob);
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setVideoUploadProgress(progress);
+        },
+        (error) => {
+          setVideoRecordingError('Video upload failed: ' + error.message);
+          setVideoFileUploading(false);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setVideoFileUrl(downloadURL);
+          setVideoFileUploading(false);
+          setVideoUploadProgress(100);
+        }
+      );
+    } catch (error) {
+      setVideoRecordingError('Video upload error: ' + error.message);
+      setVideoFileUploading(false);
+    }
+  };
+
+  // Upload when user clicks upload after preview
+  const handleVideoUpload = async () => {
+    if (!recordedVideoBlob) return;
+    await uploadVideoFileToStorage(recordedVideoBlob);
+  };
+
   const handleSubmit = async () => {
-    if (!text.trim() || imageFileUplaoding || isSubmitting) {
+    if (!text.trim() || imageFileUplaoding || isSubmitting || audioFileUploading || videoFileUploading) {
       return;
     }
 
@@ -298,27 +406,25 @@ export default function PostInput({
       profileImg: appUser.avatar,
       image: imageFileUrl,
       audio: audioFileUrl,
+      video: videoFileUrl,
       organizationId: organizationId,
     })
 
     // console.log(response)
 
-    if(!response.success) {
-      setIsSubmitting(false);
-      return showErrorToast(response.message);
-    }
-
-    showResponseToast(response);
-    setIsSubmitting(false);
-    setText('');
-    setSelectedFile(null);
-    setImageFileUrl(null);
-    clearDraft();
-
-
-    // Call the refreshMainPage function if provided
-    if (refreshMainPage && typeof refreshMainPage === 'function') {
-      refreshMainPage();
+    if (response && response.success) {
+      setText('');
+      setImageFileUrl(null);
+      setSelectedFile(null);
+      setAudioFileUrl(null);
+      setRecordedAudioBlob(null);
+      setUploadProgress(0);
+      setRecordingError(null);
+      clearVideo();
+      clearDraft();
+      if (refreshMainPage) {
+        refreshMainPage();
+      }
     }
 
     // Call the callback if provided (useful for comment handling)
@@ -425,15 +531,64 @@ export default function PostInput({
         {recordingError && !isRecording && (
           <div className="text-red-500 py-2">{recordingError}</div>
         )}
+        {/* Video preview and upload controls */}
+        {recordedVideoBlob && !videoFileUrl && (
+          <div className="w-full py-5 flex flex-col items-center">
+            <video ref={videoPreviewRef} controls src={videoPreviewUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
+            <div className="flex gap-2 mt-2">
+              <Button
+                onClick={handleVideoUpload}
+                disabled={videoFileUploading}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {videoFileUploading ? `Uploading... (${Math.round(videoUploadProgress)}%)` : 'Upload Video'}
+              </Button>
+              <Button
+                onClick={() => setRecordedVideoBlob(null)}
+                className="bg-gray-300 hover:bg-gray-400"
+              >
+                Record Again
+              </Button>
+            </div>
+            {videoUploadProgress > 0 && videoFileUploading && (
+              <div className="w-full bg-gray-200 rounded h-2 mt-2">
+                <div className="bg-blue-500 h-2 rounded" style={{ width: `${videoUploadProgress}%` }} />
+              </div>
+            )}
+            {videoRecordingError && <div className="text-red-500 mt-2">{videoRecordingError}</div>}
+          </div>
+        )}
+        {videoFileUrl && (
+          <div className="w-full py-5 flex flex-col items-center">
+            <video controls src={videoFileUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
+            <div className="text-blue-600 mt-2">Video uploaded!</div>
+          </div>
+        )}
+        {videoRecordingError && !isVideoRecording && (
+          <div className="text-red-500 py-2">{videoRecordingError}</div>
+        )}
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
             <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
               onClick={() => imagePickRef.current.click()}
             />
+            {/* Audio Controls */}
             {isRecording ? (
               <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
             ) : (
-              <HiOutlineMicrophone onClick={startRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+              <HiOutlineMicrophone onClick={() => {
+                if (isVideoRecording) return;
+                startRecording();
+              }} className={`h-9 w-9 p-2 ${isVideoRecording ? 'opacity-50 cursor-not-allowed' : 'text-red-400 hover:bg-red-100'} rounded-full`} />
+            )}
+            {/* Video Controls */}
+            {isVideoRecording ? (
+              <HiOutlineStop onClick={stopVideoRecording} className='h-9 w-9 p-2 text-purple-500 hover:bg-purple-100 rounded-full cursor-pointer' />
+            ) : (
+              <HiOutlineVideoCamera onClick={() => {
+                if (isRecording) return;
+                startVideoRecording();
+              }} className={`h-9 w-9 p-2 ${isRecording ? 'opacity-50 cursor-not-allowed' : 'text-purple-500 hover:bg-purple-100'} rounded-full`} />
             )}
           </div>
           <input

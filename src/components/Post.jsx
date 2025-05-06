@@ -117,8 +117,21 @@ export default function Post({ post, clickableText = true, showComments = false,
 
           <PostText post={post} clickableText={clickableText} />
 
+          {/* Video playback if video is present */}
+          {post?.video && (
+            <div className="my-3">
+              <video
+                controls
+                src={post.video}
+                className="w-full max-h-[360px]"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
           {/* Audio playback if audio is present */}
-          {(post?.audio) && (
+          {post?.audio && (
             <div className="my-3">
               <audio
                 controls

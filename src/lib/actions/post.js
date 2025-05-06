@@ -27,6 +27,7 @@ export async function createPost(postData) {
     const profileImg = postData.profileImg;
     const image = postData.image;
     const audio = postData.audio;
+    const video = postData.video;
     const communityId = postData.communityId;
     const organizationId = postData.organizationId;
     const parentId = postData.parentId ?? null;
@@ -38,6 +39,7 @@ export async function createPost(postData) {
       profileImg,
       image,
       audio,
+      video,
       community: communityId,
       organization: organizationId,
       parentId: parentId,
@@ -271,6 +273,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
           text: 1,
           image: 1,
           audio: 1,
+          video: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -322,7 +325,8 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
-      audio: post.audio,  
+      audio: post.audio,
+      video: post.video,  
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -461,6 +465,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
           text: 1,
           image: 1,
           audio: 1,
+          video: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -513,6 +518,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
       text: post.text,
       image: post.image,
       audio: post.audio,
+      video: post.video,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -592,7 +598,8 @@ export async function getPostsForOrganizationFeed(limit = 10, appUser, organizat
       id: post._id.toString(),
       text: post.text,
       image: post.image,
-      audio: post.audio,  
+      audio: post.audio,
+      video: post.video,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -742,7 +749,8 @@ export async function getPostByIdWithComments(postId) {
       id: post._id.toString(),
       text: post.text,
       image: post.image,
-      audio: post.audio,  
+      audio: post.audio,
+      video: post.video,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -855,6 +863,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
           text: 1,
           image: 1,
           audio: 1,
+          video: 1,
           profileImg: 1,
           createdAt: 1,
           parentId: 1,
@@ -1049,6 +1058,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
           text: 1,
           image: 1,
           audio: 1,
+          video: 1,
           profileImg: 1,
           createdAt: 1,
           user: {
@@ -1078,6 +1088,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
       text: mainPostResult.text,
       image: mainPostResult.image,
       audio: mainPostResult.audio,
+      video: mainPostResult.video,
       user: mainPostResult.user ? {
         id: mainPostResult.user._id?.toString(),
         firstName: mainPostResult.user.firstName,
@@ -1275,6 +1286,7 @@ export async function getPostForPostPage(postId) {
           text: 1,
           image: 1,
           audio: 1,
+          video: 1,
           profileImg: 1,
           createdAt: 1,
           likes: 1,
@@ -1328,6 +1340,7 @@ export async function getPostForPostPage(postId) {
       text: post.text,
       image: post.image,
       audio: post.audio,
+      video: post.video,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -1512,6 +1525,7 @@ export async function updatePost(postData) {
     const text = postData.text;
     const image = postData.image;
     const audio = postData.audio;
+    const video = postData.video;
     const organizationId = postData.organizationId;
 
     if (!postId) {
@@ -1536,6 +1550,7 @@ export async function updatePost(postData) {
     // Only update these fields if they are provided
     if (image !== undefined) existingPost.image = image;
     if (audio !== undefined) existingPost.audio = audio;
+    if (video !== undefined) existingPost.video = video;
 
     // Save the updated post
     await existingPost.save();
@@ -1638,6 +1653,7 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
       text: post.text,
       image: post.image,
       audio: post.audio,
+      video: post.video,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -1848,6 +1864,7 @@ export async function searchPosts(searchTerm, appUser, limit = 20) {
       text: post.text,
       image: post.image,
       audio: post.audio,
+      video: post.video,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
