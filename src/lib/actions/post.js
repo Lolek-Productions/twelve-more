@@ -15,6 +15,9 @@ import mongoose from "mongoose";
 import Community from "@/lib/models/community.model.js";
 
 export async function createPost(postData) {
+  const user = await getPrivateUserById(postData.userId);
+  if (!user) return { success: false, message: "User not found" };
+  
   try {
     await connect();
 
