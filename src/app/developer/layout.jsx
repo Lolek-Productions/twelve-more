@@ -6,6 +6,10 @@ const sidebarNavItems = [
     href: "/home",
   },
   {
+    title: "Courses",
+    href: "/developer/courses",
+  },
+  {
     title: "New Activity",
     href: "/developer",
   },

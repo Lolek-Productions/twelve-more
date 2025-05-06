@@ -3,9 +3,64 @@
 This document describes the code style conventions used in this project. It should be followed for all new code and when refactoring existing code.
 
 ## UI Components
+
+---
+
+## Toast Notifications & API Feedback
+
+- **Always use the toast utility hooks for user feedback on API/server actions.**
+- Use the `useApiToast` hook from `@/lib/utils` for all API success and error notifications.
+  - This ensures a consistent look and message structure across the app.
+- **Do NOT use the lower-level `toast()` directly for API/server feedback.**
+- Use the following pattern in your React components:
+
+  ```js
+  import { useApiToast } from "@/lib/utils"
+
+  const { showResponseToast, showErrorToast } = useApiToast();
+
+  async function handleSave() {
+    try {
+      const result = await apiCall();
+      showResponseToast(result);
+    } catch (err) {
+      showErrorToast(err);
+    }
+  }
+  ```
+
+- `showResponseToast(result)` will display a success or error toast based on the `success` property of the API/server response, using the `message` property for details.
+- `showErrorToast(error)` will display a standardized error toast for exceptions or unexpected errors.
+- This pattern should be followed for all forms, save buttons, and other actions that communicate with the backend.
+
+---
 - Use [shadcn/ui](https://ui.shadcn.com/) components for all modal, dialog, and similar UI elements.
 - Prefer the shadcn `Dialog` component (see `/components/ui/dialog.jsx`) for modals and popups.
 - Maintain consistency by using shadcn components for new UI features where available.
+
+### Label and Input Relationship (Forms)
+- Always place the `<label>` element **directly above** its corresponding input.
+- Use shadcn/ui `Input`, `Textarea`, or other input primitives for all form fields.
+- **Spacing:**
+  - Use `mb-0.5` on the label to create a tight, visually clear relationship between label and input.
+  - Use `gap-1` between label/input pairs within a form section for compactness.
+  - Group related fields in a container with `gap-4` for separation between different fields.
+- **Styling:**
+  - Labels: `block text-sm font-medium mb-0.5`
+  - Inputs: Use shadcn/ui `Input` component for consistent border, padding, and focus ring.
+  - For bordered form sections, wrap fields in a container with `border rounded-lg p-4 bg-white`.
+- **Accessibility:**
+  - Use `htmlFor` on `<label>` matching the input's `id`.
+  - Always provide a label for every input for clarity and accessibility.
+- **Example:**
+  ```jsx
+  <div className="flex flex-col gap-1">
+    <label htmlFor="course-name" className="block text-sm font-medium mb-0.5">Course Name</label>
+    <Input id="course-name" value={value} onChange={...} required />
+  </div>
+  ```
+- **Button Placement:**
+  - Place action buttons (e.g., Create, Save) inside the bordered form container, below the inputs, to clearly associate actions with the fields.
 
 ## Form Validation & Usage Patterns
 
