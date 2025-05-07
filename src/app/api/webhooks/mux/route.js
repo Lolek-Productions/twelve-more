@@ -22,25 +22,36 @@ export async function POST(req) {
     try {
       await connect();
 
-      // Retry logic: poll for post up to 10 times with 2s delay
-      async function findAndUpdatePostWithRetry(muxUploadId, muxPlaybackId, maxAttempts = 10, delayMs = 2000) {
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          const post = await Post.findOneAndUpdate(
+      // Respond quickly to Mux, do not block for retries
+      (async () => {
+        try {
+          // Try once immediately
+          let post = await Post.findOneAndUpdate(
             { muxUploadId },
             { muxPlaybackId },
             { new: true }
           );
-          if (post) return post;
-          await new Promise(res => setTimeout(res, delayMs));
+          if (!post) {
+            // Retry up to 4 more times with 2s delay (total ~8s), in the background
+            for (let attempt = 0; attempt < 4; attempt++) {
+              await new Promise(res => setTimeout(res, 2000));
+              post = await Post.findOneAndUpdate(
+                { muxUploadId },
+                { muxPlaybackId },
+                { new: true }
+              );
+              if (post) break;
+            }
+            if (!post) {
+              console.error(`Mux webhook: No post found for muxUploadId ${muxUploadId} after background retries.`);
+            }
+          }
+        } catch (err) {
+          console.error('Mux webhook background update error:', err);
         }
-        return null;
-      }
-
-      const post = await findAndUpdatePostWithRetry(muxUploadId, muxPlaybackId);
-      if (!post) {
-        return NextResponse.json({ error: 'No post found for muxUploadId after retrying' }, { status: 404 });
-      }
-      return NextResponse.json({ success: true, postId: post._id.toString(), muxPlaybackId });
+      })();
+      // Always respond quickly to Mux
+      return NextResponse.json({ received: true });
     } catch (err) {
       return NextResponse.json({ error: err.message }, { status: 500 });
     }
