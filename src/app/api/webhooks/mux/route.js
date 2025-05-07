@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Post from '@/lib/models/post.model';
-import mongoose from 'mongoose';
+import { connect } from '@/lib/mongodb/mongoose';
 
 export async function POST(req) {
   let event;
@@ -20,7 +20,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Missing upload or playback ID' }, { status: 400 });
     }
     try {
-      await mongoose.connect(process.env.MONGODB_URI);
+      await connect();
       const post = await Post.findOneAndUpdate(
         { muxUploadId },
         { muxPlaybackId },
@@ -29,7 +29,7 @@ export async function POST(req) {
       if (!post) {
         return NextResponse.json({ error: 'No post found for muxUploadId' }, { status: 404 });
       }
-      return NextResponse.json({ success: true, postId: post._id, muxPlaybackId });
+      return NextResponse.json({ success: true, postId: post._id.toString(), muxPlaybackId });
     } catch (err) {
       return NextResponse.json({ error: err.message }, { status: 500 });
     }
