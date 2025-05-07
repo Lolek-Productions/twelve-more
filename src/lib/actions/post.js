@@ -15,8 +15,9 @@ import mongoose from "mongoose";
 import Community from "@/lib/models/community.model.js";
 
 export async function createPost(postData) {
-  const user = await getPrivateUserById(postData.userId);
-  if (!user) return { success: false, message: "User not found" };
+  const userResponse = await getPrivateUserById(postData.userId);
+  if (!userResponse.success) return { success: false, message: "User not found" };
+  const user = userResponse.user;
   
   try {
     await connect();
@@ -29,6 +30,7 @@ export async function createPost(postData) {
     const audio = postData.audio;
     const video = postData.video;
     const muxPlaybackId = postData.muxPlaybackId;
+    const muxUploadId = postData.muxUploadId;
     const communityId = postData.communityId;
     const organizationId = postData.organizationId;
     const parentId = postData.parentId ?? null;
@@ -44,8 +46,8 @@ export async function createPost(postData) {
       community: communityId,
       organization: organizationId,
       parentId: parentId,
-      muxUploadId: postData.muxUploadId,
-      muxPlaybackId: postData.muxPlaybackId,
+      muxUploadId: muxUploadId,
+      muxPlaybackId: muxPlaybackId,
     });
 
     // If this is a comment (has parentId), notify the parent post owner
