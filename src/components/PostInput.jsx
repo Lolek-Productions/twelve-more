@@ -51,15 +51,27 @@ export default function PostInput({
   // --- Video Recording State ---
   const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [videoFileUploading, setVideoFileUploading] = useState(false);
-  const [videoFileUrl, setVideoFileUrl] = useState(null); // Firebase download URL
+  const [muxUploadId, setMuxUploadId] = useState(null); // Mux upload ID
+  const [muxPlaybackId, setMuxPlaybackId] = useState(null); // Mux playback ID (to be filled by webhook)
+  const [videoFileUrl, setVideoFileUrl] = useState(null); // (legacy, for UI preview only)
   const [recordedVideoBlob, setRecordedVideoBlob] = useState(null);
   const [videoRecordingError, setVideoRecordingError] = useState(null);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+  const [videoProcessing, setVideoProcessing] = useState(false); // new: show processing state
   const videoStreamRef = useRef(null);
   const videoRecorderRef = useRef(null);
   const videoChunksRef = useRef([]);
   const videoPreviewRef = useRef(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    // Live preview: set srcObject to stream while recording
+    if (isVideoRecording && !recordedVideoBlob && videoPreviewRef.current && videoStreamRef.current) {
+      videoPreviewRef.current.srcObject = videoStreamRef.current;
+    } else if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null;
+    }
+  }, [isVideoRecording, recordedVideoBlob]);
 
   useEffect(() => {
     if (recordedVideoBlob) {
@@ -170,6 +182,9 @@ export default function PostInput({
     setVideoUploadProgress(0);
     setVideoRecordingError(null);
     setVideoPreviewUrl(null);
+    setMuxUploadId(null);
+    setMuxPlaybackId(null);
+    setVideoProcessing(false);
   };
 
   //Image
@@ -325,6 +340,10 @@ export default function PostInput({
       const recorder = new MediaRecorder(stream);
       videoRecorderRef.current = recorder;
       videoChunksRef.current = [];
+      // Set live preview srcObject immediately
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+      }
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           videoChunksRef.current.push(e.data);
@@ -334,6 +353,10 @@ export default function PostInput({
         const videoBlob = new Blob(videoChunksRef.current, { type: 'video/webm' });
         setRecordedVideoBlob(videoBlob);
         videoStreamRef.current.getTracks().forEach(track => track.stop());
+        // Clean up live preview
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.srcObject = null;
+        }
         setIsVideoRecording(false);
       };
       recorder.start();
@@ -349,41 +372,40 @@ export default function PostInput({
     }
   };
 
-  const uploadVideoFileToStorage = async (videoBlob) => {
+  // Upload video to Mux
+  const uploadVideoToMux = async (videoBlob) => {
     setVideoFileUploading(true);
     setVideoUploadProgress(0);
+    setVideoProcessing(false);
+    setMuxUploadId(null);
+    setMuxPlaybackId(null);
     try {
-      const storage = getStorage(app);
-      const fileName = `${Date.now()}.webm`;
-      const storageRef = ref(storage, fileName);
-      const uploadTask = uploadBytesResumable(storageRef, videoBlob);
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setVideoUploadProgress(progress);
-        },
-        (error) => {
-          setVideoRecordingError('Video upload failed: ' + error.message);
-          setVideoFileUploading(false);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          setVideoFileUrl(downloadURL);
-          setVideoFileUploading(false);
-          setVideoUploadProgress(100);
-        }
-      );
-    } catch (error) {
-      setVideoRecordingError('Video upload error: ' + error.message);
+      // 1. Request Mux upload URL
+      const res = await fetch('/api/mux-upload-url', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to get Mux upload URL');
+      const { url, id } = await res.json();
+      setMuxUploadId(id);
+      // 2. Upload video blob to Mux
+      const uploadRes = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'video/webm' },
+        body: videoBlob,
+      });
+      if (!uploadRes.ok) throw new Error('Failed to upload video to Mux');
+      setVideoUploadProgress(100);
       setVideoFileUploading(false);
+      setVideoProcessing(true); // Video is now processing on Mux
+    } catch (error) {
+      setVideoRecordingError('Mux upload error: ' + error.message);
+      setVideoFileUploading(false);
+      setVideoProcessing(false);
     }
   };
 
   // Upload when user clicks upload after preview
   const handleVideoUpload = async () => {
     if (!recordedVideoBlob) return;
-    await uploadVideoFileToStorage(recordedVideoBlob);
+    await uploadVideoToMux(recordedVideoBlob);
   };
 
   const handleSubmit = async () => {
@@ -407,6 +429,7 @@ export default function PostInput({
       image: imageFileUrl,
       audio: audioFileUrl,
       video: videoFileUrl,
+      muxUploadId: muxUploadId,
       organizationId: organizationId,
     })
 
@@ -532,9 +555,23 @@ export default function PostInput({
           <div className="text-red-500 py-2">{recordingError}</div>
         )}
         {/* Video preview and upload controls */}
-        {recordedVideoBlob && !videoFileUrl && (
+        {/* Live video preview while recording */}
+        {isVideoRecording && !recordedVideoBlob && (
           <div className="w-full py-5 flex flex-col items-center">
-            <video ref={videoPreviewRef} controls src={videoPreviewUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              muted
+              className="w-full max-h-[300px] rounded-lg border border-gray-200 bg-black"
+              style={{ background: '#000' }}
+            />
+            <div className="text-blue-600 mt-2">Recording…</div>
+          </div>
+        )}
+        {/* Recorded video preview after recording stops */}
+        {!isVideoRecording && recordedVideoBlob && !videoFileUrl && (
+          <div className="w-full py-5 flex flex-col items-center">
+            <video controls src={videoPreviewUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
             <div className="flex gap-2 mt-2">
               <Button
                 onClick={handleVideoUpload}
@@ -558,12 +595,15 @@ export default function PostInput({
             {videoRecordingError && <div className="text-red-500 mt-2">{videoRecordingError}</div>}
           </div>
         )}
-        {videoFileUrl && (
+        {videoProcessing && !muxPlaybackId && (
           <div className="w-full py-5 flex flex-col items-center">
-            <video controls src={videoFileUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
-            <div className="text-blue-600 mt-2">Video uploaded!</div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600">Video uploaded! Processing on Mux...</span>
+            </div>
+            <div className="text-gray-500 text-xs mt-2">It may take a minute for your video to be playable.</div>
           </div>
         )}
+
         {videoRecordingError && !isVideoRecording && (
           <div className="text-red-500 py-2">{videoRecordingError}</div>
         )}

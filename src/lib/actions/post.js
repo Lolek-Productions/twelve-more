@@ -43,6 +43,8 @@ export async function createPost(postData) {
       community: communityId,
       organization: organizationId,
       parentId: parentId,
+      muxUploadId: postData.muxUploadId,
+      muxPlaybackId: postData.muxPlaybackId,
     });
 
     // If this is a comment (has parentId), notify the parent post owner

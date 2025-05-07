@@ -15,6 +15,12 @@ const postSchema = new mongoose.Schema(
     video: {
       type: String,
     },
+    muxUploadId: {
+      type: String,
+    },
+    muxPlaybackId: {
+      type: String,
+    },
     // Optional parent post reference (for comments)
     parentId: {
       type: mongoose.Schema.Types.ObjectId,

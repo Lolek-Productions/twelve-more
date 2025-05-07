@@ -4,10 +4,62 @@ import Link from 'next/link';
 import moment from 'moment';
 import Icons from './Icons';
 import React, { useState, useEffect } from 'react';
+
+// Dynamically add Mux Player CDN script on client
+if (typeof window !== 'undefined' && !window.__MUX_PLAYER_SCRIPT_ADDED__) {
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/@mux/mux-player';
+  script.async = true;
+  document.head.appendChild(script);
+  window.__MUX_PLAYER_SCRIPT_ADDED__ = true;
+}
+
 import { HiX } from 'react-icons/hi';
 import PostText from "@/components/PostText.jsx";
 import HorizontalDots from "@/components/HorizontalDots.jsx";
 import { SYSTEM_BOT_NAME } from "@/lib/constants";
+
+// MuxPlayerWithLoader: Shows a spinner until <mux-player> is loaded and defined
+function MuxPlayerWithLoader({ muxPlaybackId, videoTitle }) {
+  const [muxReady, setMuxReady] = React.useState(
+    typeof window !== 'undefined' && window.customElements?.get('mux-player')
+  );
+
+  React.useEffect(() => {
+    if (muxReady) return;
+    let timeout;
+    function checkMuxPlayerDefined() {
+      if (window.customElements?.get('mux-player')) {
+        setMuxReady(true);
+      } else {
+        timeout = setTimeout(checkMuxPlayerDefined, 100);
+      }
+    }
+    checkMuxPlayerDefined();
+    return () => clearTimeout(timeout);
+  }, [muxReady]);
+
+  return (
+    <div className="my-3 w-full max-h-[360px] flex items-center justify-center min-h-[180px]">
+      {muxReady ? (
+        <mux-player
+          playback-id={muxPlaybackId}
+          stream-type="on-demand"
+          metadata-video-title={videoTitle}
+          primary-color="#0099ff"
+          accent-color="#005577"
+          style={{ width: '100%', maxHeight: '360px' }}
+          controls
+        ></mux-player>
+      ) : (
+        <div className="flex flex-col items-center justify-center w-full h-full min-h-[180px]">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+          <span className="text-gray-500 text-sm">Loading video player…</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Post({ post, clickableText = true, showComments = false, isAncestor = false }) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -117,8 +169,10 @@ export default function Post({ post, clickableText = true, showComments = false,
 
           <PostText post={post} clickableText={clickableText} />
 
-          {/* Video playback if video is present */}
-          {post?.video && (
+          {/* Mux Player if muxPlaybackId is present */}
+          {post?.muxPlaybackId ? (
+            <MuxPlayerWithLoader muxPlaybackId={post.muxPlaybackId} videoTitle={post.text || 'Video'} />
+          ) : post?.video && (
             <div className="my-3">
               <video
                 controls
