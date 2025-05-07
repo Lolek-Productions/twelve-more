@@ -407,6 +407,9 @@ export default function PostInput({
       setVideoProcessing(true); // Video is now processing on Mux
     } catch (error) {
       setVideoRecordingError('Mux upload error: ' + error.message);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!text.trim() || imageFileUplaoding || isSubmitting || audioFileUploading || videoFileUploading) {
       return;
@@ -605,13 +608,6 @@ export default function PostInput({
           <div className="w-full py-5 flex flex-col items-center">
             <video controls src={videoPreviewUrl} className="w-full max-h-[300px] rounded-lg border border-gray-200" />
             <div className="flex gap-2 mt-2">
-              <Button
-                onClick={handleVideoUpload}
-                disabled={videoFileUploading}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                {videoFileUploading ? `Uploading... (${Math.round(videoUploadProgress)}%)` : 'Upload Video'}
-              </Button>
               <Button
                 onClick={() => setRecordedVideoBlob(null)}
                 className="bg-gray-300 hover:bg-gray-400"
