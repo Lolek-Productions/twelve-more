@@ -11,7 +11,7 @@ import {PUBLIC_APP_URL} from "@/lib/constants.js";
 export async function sendCommunityInvitation(phoneNumber, community, appUser) {
   if (!appUser) return { success: false, message: "User is required." };
   const communityLink = `${PUBLIC_APP_URL}/join/${community.id}?phone=${phoneNumber}`;
-  const messageBody = `${appUser.firstName} ${appUser.lastName} invited to join the ${community.name} in ${community.organization.name} at 12More! Click here to join: ${communityLink}`;
+  const messageBody = `${appUser.firstName} ${appUser.lastName} invited you to join the ${community.name} in ${community.organization.name} at 12More! Click here to join: ${communityLink}`;
 
   const smsResult = await twilioService.sendSMS(normalizePhoneNumber(phoneNumber), messageBody);
   if (!smsResult.success) {
