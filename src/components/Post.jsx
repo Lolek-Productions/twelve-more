@@ -21,12 +21,15 @@ import { SYSTEM_BOT_NAME } from "@/lib/constants";
 
 // MuxPlayerWithLoader: Shows a spinner until <mux-player> is loaded and defined
 function MuxPlayerWithLoader({ muxPlaybackId, videoTitle }) {
-  const [muxReady, setMuxReady] = React.useState(
-    typeof window !== 'undefined' && window.customElements?.get('mux-player')
-  );
+  const [muxReady, setMuxReady] = useState(false);
 
-  React.useEffect(() => {
-    if (muxReady) return;
+  useEffect(() => {
+    // Only run on client
+    if (typeof window === 'undefined') return;
+    if (window.customElements?.get('mux-player')) {
+      setMuxReady(true);
+      return;
+    }
     let timeout;
     function checkMuxPlayerDefined() {
       if (window.customElements?.get('mux-player')) {
@@ -37,7 +40,7 @@ function MuxPlayerWithLoader({ muxPlaybackId, videoTitle }) {
     }
     checkMuxPlayerDefined();
     return () => clearTimeout(timeout);
-  }, [muxReady]);
+  }, []);
 
   return (
     <div className="my-3 w-full max-h-[360px] flex items-center justify-center min-h-[180px]">

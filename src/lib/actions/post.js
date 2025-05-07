@@ -28,6 +28,7 @@ export async function createPost(postData) {
     const image = postData.image;
     const audio = postData.audio;
     const video = postData.video;
+    const muxPlaybackId = postData.muxPlaybackId;
     const communityId = postData.communityId;
     const organizationId = postData.organizationId;
     const parentId = postData.parentId ?? null;
@@ -276,6 +277,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
           image: 1,
           audio: 1,
           video: 1,
+          muxPlaybackId: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -329,6 +331,7 @@ export async function getPostsForHomeFeed(limit = 10, appUser, offset = 0) {
       image: post.image,
       audio: post.audio,
       video: post.video,  
+      muxPlaybackId: post.muxPlaybackId,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -468,6 +471,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
           image: 1,
           audio: 1,
           video: 1,
+          muxPlaybackId: 1,
           commentCount: 1,
           createdAt: 1,
           profileImg: 1,
@@ -521,6 +525,7 @@ export async function getPostsForCommunityFeed(limit = 10, appUser, communityId,
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -602,6 +607,7 @@ export async function getPostsForOrganizationFeed(limit = 10, appUser, organizat
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -753,6 +759,7 @@ export async function getPostByIdWithComments(postId) {
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -866,6 +873,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
           image: 1,
           audio: 1,
           video: 1,
+          muxPlaybackId: 1,
           profileImg: 1,
           createdAt: 1,
           parentId: 1,
@@ -1061,6 +1069,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
           image: 1,
           audio: 1,
           video: 1,
+          muxPlaybackId: 1,
           profileImg: 1,
           createdAt: 1,
           user: {
@@ -1091,6 +1100,7 @@ export async function getPostByIdWithAncestorsAndDescendents(postId) {
       image: mainPostResult.image,
       audio: mainPostResult.audio,
       video: mainPostResult.video,
+      muxPlaybackId: mainPostResult.muxPlaybackId,
       user: mainPostResult.user ? {
         id: mainPostResult.user._id?.toString(),
         firstName: mainPostResult.user.firstName,
@@ -1289,6 +1299,7 @@ export async function getPostForPostPage(postId) {
           image: 1,
           audio: 1,
           video: 1,
+          muxPlaybackId: 1,
           profileImg: 1,
           createdAt: 1,
           likes: 1,
@@ -1343,6 +1354,7 @@ export async function getPostForPostPage(postId) {
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: post.user,
       community: post.community,
       organization: post.organization,
@@ -1528,6 +1540,7 @@ export async function updatePost(postData) {
     const image = postData.image;
     const audio = postData.audio;
     const video = postData.video;
+    const muxPlaybackId = postData.muxPlaybackId;
     const organizationId = postData.organizationId;
 
     if (!postId) {
@@ -1553,6 +1566,7 @@ export async function updatePost(postData) {
     if (image !== undefined) existingPost.image = image;
     if (audio !== undefined) existingPost.audio = audio;
     if (video !== undefined) existingPost.video = video;
+    if (muxPlaybackId !== undefined) existingPost.muxPlaybackId = muxPlaybackId;
 
     // Save the updated post
     await existingPost.save();
@@ -1656,6 +1670,7 @@ export async function getPostsByUserForAppUser(user, limit = 3, appUser, offset 
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
@@ -1867,6 +1882,7 @@ export async function searchPosts(searchTerm, appUser, limit = 20) {
       image: post.image,
       audio: post.audio,
       video: post.video,
+      muxPlaybackId: post.muxPlaybackId,
       user: {
         id: post.user?._id.toString(),
         firstName: post.user?.firstName,
