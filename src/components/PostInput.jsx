@@ -407,17 +407,6 @@ export default function PostInput({
       setVideoProcessing(true); // Video is now processing on Mux
     } catch (error) {
       setVideoRecordingError('Mux upload error: ' + error.message);
-      setVideoFileUploading(false);
-      setVideoProcessing(false);
-    }
-  };
-
-  // Upload when user clicks upload after preview
-  const handleVideoUpload = async () => {
-    if (!recordedVideoBlob) return;
-    await uploadVideoToMux(recordedVideoBlob);
-  };
-
   const handleSubmit = async () => {
     if (!text.trim() || imageFileUplaoding || isSubmitting || audioFileUploading || videoFileUploading) {
       return;
@@ -430,6 +419,41 @@ export default function PostInput({
 
     setIsSubmitting(true);
 
+    // If there is a video to upload, upload it to Mux first
+    let finalMuxUploadId = muxUploadId;
+    if (recordedVideoBlob) {
+      setVideoFileUploading(true);
+      setVideoUploadProgress(0);
+      setVideoProcessing(false);
+      setMuxUploadId(null);
+      setMuxPlaybackId(null);
+      try {
+        // 1. Request Mux upload URL
+        const res = await fetch('/api/mux-upload-url', { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to get Mux upload URL');
+        const { url, id } = await res.json();
+        setMuxUploadId(id);
+        finalMuxUploadId = id;
+        // 2. Upload video blob to Mux
+        const uploadRes = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'video/webm' },
+          body: recordedVideoBlob,
+        });
+        if (!uploadRes.ok) throw new Error('Failed to upload video to Mux');
+        setVideoUploadProgress(100);
+        setVideoFileUploading(false);
+        setVideoProcessing(true); // Video is now processing on Mux
+      } catch (error) {
+        setVideoRecordingError('Mux upload error: ' + error.message);
+        setVideoFileUploading(false);
+        setVideoProcessing(false);
+        setIsSubmitting(false);
+        showErrorToast('Mux upload error: ' + error.message);
+        return;
+      }
+    }
+
     const response = await createPost({
       userId: appUser.id,
       communityId: communityId,
@@ -439,22 +463,20 @@ export default function PostInput({
       image: imageFileUrl,
       audio: audioFileUrl,
       video: videoFileUrl,
-      muxUploadId: muxUploadId,
+      muxUploadId: finalMuxUploadId,
       organizationId: organizationId,
     })
 
-    // console.log(response)
-
-    if (response && response.success) {
+    if (response.success) {
+      showResponseToast('Post created!');
+      clearDraft();
       setText('');
       setImageFileUrl(null);
       setSelectedFile(null);
       setAudioFileUrl(null);
       setRecordedAudioBlob(null);
       setUploadProgress(0);
-      setRecordingError(null);
       clearVideo();
-      clearDraft();
       if (refreshMainPage) {
         refreshMainPage();
       }
