@@ -6,6 +6,7 @@ export async function POST(req) {
   let event;
   try {
     event = await req.json();
+    console.log(`[${new Date().toISOString()}] Mux webhook: Incoming event:`, JSON.stringify(event));
   } catch (err) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
@@ -21,38 +22,48 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Missing upload or playback ID' }, { status: 400 });
     }
     try {
+      console.log(`[${new Date().toISOString()}] Mux webhook: Attempting DB connect`);
       await connect();
+      console.log(`[${new Date().toISOString()}] Mux webhook: DB connected`);
 
       // Respond quickly to Mux, do not block for retries
       (async () => {
         try {
           // Try once immediately
-          console.log('Mux webhook: Looking for post with muxUploadId:', muxUploadId, 'Setting muxPlaybackId:', muxPlaybackId);
+          console.log(`[${new Date().toISOString()}] Mux webhook: Looking for post with muxUploadId: ${muxUploadId}, Setting muxPlaybackId: ${muxPlaybackId}`);
           let post = await Post.findOneAndUpdate(
             { muxUploadId },
             { $set: { muxPlaybackId } },
             { new: true }
           );
-          console.log('Mux webhook: Post found and updated:', post);
+          if (post) {
+            console.log(`[${new Date().toISOString()}] Mux webhook: Post found and updated:`, post._id?.toString?.() || post);
+          } else {
+            console.log(`[${new Date().toISOString()}] Mux webhook: No post found for muxUploadId: ${muxUploadId} on initial attempt.`);
+          }
           if (!post) {
-            // Retry up to 8 more times with 2s delay (total ~24s), in the background
+            // Retry up to 8 more times with 3s delay (total ~24s), in the background
             for (let attempt = 0; attempt < 8; attempt++) {
               await new Promise(res => setTimeout(res, 3000));
-              console.log('Mux webhook retry: Looking for post with muxUploadId:', muxUploadId, 'Setting muxPlaybackId:', muxPlaybackId);
+              console.log(`[${new Date().toISOString()}] Mux webhook retry #${attempt+1}: Looking for post with muxUploadId: ${muxUploadId}, Setting muxPlaybackId: ${muxPlaybackId}`);
               post = await Post.findOneAndUpdate(
                 { muxUploadId },
                 { $set: { muxPlaybackId } },
                 { new: true }
               );
-              console.log('Mux webhook retry: Post found and updated:', post);
-              if (post) break;
+              if (post) {
+                console.log(`[${new Date().toISOString()}] Mux webhook retry #${attempt+1}: Post found and updated:`, post._id?.toString?.() || post);
+                break;
+              } else {
+                console.log(`[${new Date().toISOString()}] Mux webhook retry #${attempt+1}: No post found for muxUploadId: ${muxUploadId}`);
+              }
             }
             if (!post) {
-              console.error(`Mux webhook: No post found for muxUploadId ${muxUploadId} after background retries.`);
+              console.error(`[${new Date().toISOString()}] Mux webhook: No post found for muxUploadId ${muxUploadId} after background retries.`);
             }
           }
         } catch (err) {
-          console.error('Mux webhook background update error:', err);
+          console.error(`[${new Date().toISOString()}] Mux webhook background update error:`, err.stack || err);
         }
       })();
       // Always respond quickly to Mux
