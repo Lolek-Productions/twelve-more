@@ -17,6 +17,7 @@ export async function POST(req) {
     // Find the post by muxUploadId (which is the upload that generated this asset)
     const muxUploadId = event.data.upload_id;
     if (!muxUploadId || !muxPlaybackId) {
+      console.error('Mux webhook: Missing upload or playback ID:', event);
       return NextResponse.json({ error: 'Missing upload or playback ID' }, { status: 400 });
     }
     try {
@@ -26,20 +27,24 @@ export async function POST(req) {
       (async () => {
         try {
           // Try once immediately
+          console.log('Mux webhook: Looking for post with muxUploadId:', muxUploadId, 'Setting muxPlaybackId:', muxPlaybackId);
           let post = await Post.findOneAndUpdate(
             { muxUploadId },
-            { muxPlaybackId },
+            { $set: { muxPlaybackId } },
             { new: true }
           );
+          console.log('Mux webhook: Post found and updated:', post);
           if (!post) {
-            // Retry up to 4 more times with 2s delay (total ~8s), in the background
-            for (let attempt = 0; attempt < 4; attempt++) {
-              await new Promise(res => setTimeout(res, 2000));
+            // Retry up to 8 more times with 2s delay (total ~24s), in the background
+            for (let attempt = 0; attempt < 8; attempt++) {
+              await new Promise(res => setTimeout(res, 3000));
+              console.log('Mux webhook retry: Looking for post with muxUploadId:', muxUploadId, 'Setting muxPlaybackId:', muxPlaybackId);
               post = await Post.findOneAndUpdate(
                 { muxUploadId },
-                { muxPlaybackId },
+                { $set: { muxPlaybackId } },
                 { new: true }
               );
+              console.log('Mux webhook retry: Post found and updated:', post);
               if (post) break;
             }
             if (!post) {
