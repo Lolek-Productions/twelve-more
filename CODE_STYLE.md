@@ -45,6 +45,7 @@ This document describes the code style conventions used in this project. It shou
   ```
 
 - `showResponseToast(result)` will display a success or error toast based on the `success` property of the API/server response, using the `message` property for details.
+- **Always pass the entire response object to `showResponseToast` (e.g., `showResponseToast(response);`) rather than just a message or a part of the response. This ensures the toast utility can properly interpret and display the result.**
 - `showErrorToast(error)` will display a standardized error toast for exceptions or unexpected errors.
 - This pattern should be followed for all forms, save buttons, and other actions that communicate with the backend.
 

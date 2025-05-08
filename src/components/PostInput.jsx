@@ -410,6 +410,7 @@ export default function PostInput({
     }
   };
 
+  //Submit post
   const handleSubmit = async () => {
     if (!text.trim() || imageFileUplaoding || isSubmitting || audioFileUploading || videoFileUploading) {
       return;
@@ -470,20 +471,24 @@ export default function PostInput({
       organizationId: organizationId,
     })
 
-    if (response.success) {
-      showResponseToast('Post created!');
-      clearDraft();
-      setText('');
-      setImageFileUrl(null);
-      setSelectedFile(null);
-      setAudioFileUrl(null);
-      setRecordedAudioBlob(null);
-      setUploadProgress(0);
-      clearVideo();
-      if (refreshMainPage) {
-        refreshMainPage();
-      }
+    if(!response.success) {
+      setIsSubmitting(false);
+      return showErrorToast(response.message);
     }
+
+    showResponseToast(response);
+    clearDraft();
+    setText('');
+    setImageFileUrl(null);
+    setSelectedFile(null);
+    setAudioFileUrl(null);
+    setRecordedAudioBlob(null);
+    setUploadProgress(0);
+    clearVideo();
+    if (refreshMainPage) {
+      refreshMainPage();
+    }
+    setIsSubmitting(false);
 
     // Call the callback if provided (useful for comment handling)
     if (onPostCreated && typeof onPostCreated === 'function') {
@@ -507,7 +512,10 @@ export default function PostInput({
   // Handle Command+Enter to submit post
   const handleKeyDown = (e) => {
     // Check for Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    const isCommandOrCtrlPressed = e.metaKey || e.ctrlKey;
+    const isEnterKeyPressed = e.key === 'Enter';
+
+    if (isCommandOrCtrlPressed && isEnterKeyPressed) {
       e.preventDefault(); // Prevent default new line behavior
       handleSubmit();
     }
