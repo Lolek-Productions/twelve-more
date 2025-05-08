@@ -34,13 +34,13 @@ export default function HiDotsHorizontalMenu({ post, onDelete }) {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <div
-          className="p-1.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+          className="p-3 md:p-1.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
         >
-          <HiDotsHorizontal className="w-3 h-3 text-gray-500" />
+          <HiDotsHorizontal className="w-6 h-6 md:w-4 md:h-4 text-gray-500" />
         </div>
       </DropdownMenuTrigger>
 
