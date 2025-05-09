@@ -657,35 +657,34 @@ export default function PostInput({
                 startRecording();
               }} className={`h-9 w-9 p-2 ${isVideoRecording ? 'opacity-50 cursor-not-allowed' : 'text-red-400 hover:bg-red-100'} rounded-full`} />
             )}
+
             {/* Video Controls */}
             {/* iOS fallback: use file input for video capture */}
             {(() => {
               const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-              if (isIOS) {
-                return (
-                  <label className="h-9 w-9 p-2 flex items-center justify-center text-purple-500 hover:bg-purple-100 rounded-full cursor-pointer bg-white border border-purple-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-3A2.25 2.25 0 008.25 5.25V9m7.5 0v10.5A2.25 2.25 0 0113.5 21h-3a2.25 2.25 0 01-2.25-2.25V9m7.5 0h-7.5" />
-                    </svg>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      capture
-                      style={{ display: 'none' }}
-                      onChange={handleMobileVideoFile}
-                    />
-                  </label>
-                );
-              } else {
-                return isVideoRecording ? (
-                  <HiOutlineStop onClick={stopVideoRecording} className='h-9 w-9 p-2 text-purple-500 hover:bg-purple-100 rounded-full cursor-pointer' />
+              // const isIOS = true;
+              const className = `h-9 w-9 p-1 ${isVideoRecording ? 'opacity-50 cursor-not-allowed' : 'text-purple-500 hover:bg-purple-100'} rounded-full`;
+              return isIOS ? (
+                <label className={`${className} outline outline-2 outline-purple-200 flex items-center justify-center`}>
+                  <HiOutlineVideoCamera className="h-6 w-6" />
+                  <input
+                    type="file"
+                    accept="video/*"
+                    capture
+                    style={{ display: 'none' }}
+                    onChange={handleMobileVideoFile}
+                  />
+                </label>
+              ) : (
+                isVideoRecording ? (
+                  <HiOutlineStop onClick={stopVideoRecording} className={className} />
                 ) : (
                   <HiOutlineVideoCamera onClick={() => {
                     if (isRecording) return;
                     startVideoRecording();
-                  }} className={`h-9 w-9 p-2 ${isRecording ? 'opacity-50 cursor-not-allowed' : 'text-purple-500 hover:bg-purple-100'} rounded-full`} />
-                );
-              }
+                  }} className={className} />
+                )
+              );
             })()}
           </div>
           <input
