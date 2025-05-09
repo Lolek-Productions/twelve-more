@@ -43,7 +43,7 @@ function MuxPlayerWithLoader({ muxPlaybackId, videoTitle }) {
   }, []);
 
   return (
-    <div className="my-3 w-full max-h-[360px] flex items-center justify-center min-h-[180px]">
+    <div className="my-3 w-full h-[360px] flex items-center justify-center min-h-[180px]">
       {muxReady ? (
         <mux-player
           playback-id={muxPlaybackId}
@@ -51,7 +51,8 @@ function MuxPlayerWithLoader({ muxPlaybackId, videoTitle }) {
           metadata-video-title={videoTitle}
           primary-color="#0099ff"
           accent-color="#005577"
-          style={{ width: '100%', maxHeight: '360px' }}
+          className="w-full h-full"
+          style={{ height: '100%', maxHeight: '360px' }}
           controls
         ></mux-player>
       ) : (
