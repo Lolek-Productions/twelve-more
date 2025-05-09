@@ -645,8 +645,11 @@ export default function PostInput({
         )}
         <div className='flex items-center justify-between pt-2.5'>
           <div className='flex items-center'>
-            <HiOutlinePhotograph className='h-10 w-10 p-2 text-sky-500 hover:bg-sky-100 rounded-full cursor-pointer'
-              onClick={() => imagePickRef.current.click()}
+            <HiOutlinePhotograph className={`h-10 w-10 p-2 ${isRecording || isVideoRecording ? 'opacity-50 cursor-not-allowed' : 'text-sky-500 hover:bg-sky-100'} rounded-full cursor-pointer`}
+              onClick={() => {
+                if (isRecording || isVideoRecording) return;
+                imagePickRef.current.click();
+              }}
             />
             {/* Audio Controls */}
             {isRecording ? (
@@ -663,7 +666,7 @@ export default function PostInput({
             {(() => {
               const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
               // const isIOS = true;
-              const className = `h-9 w-9 p-1 ${isVideoRecording ? 'opacity-50 cursor-not-allowed' : 'text-purple-500 hover:bg-purple-100'} rounded-full`;
+              const className = `h-9 w-9 p-1 ${isVideoRecording || isRecording ? 'opacity-50 cursor-not-allowed' : 'text-purple-500 hover:bg-purple-100'} rounded-full`;
               return isIOS ? (
                 <label className={`${className} outline outline-2 outline-purple-200 flex items-center justify-center`}>
                   <HiOutlineVideoCamera className="h-6 w-6" />
@@ -677,7 +680,14 @@ export default function PostInput({
                 </label>
               ) : (
                 isVideoRecording ? (
-                  <HiOutlineStop onClick={stopVideoRecording} className={className} />
+                  <div className="flex flex-col items-center">
+                    <HiOutlineStop
+                      onClick={stopVideoRecording}
+                      className={`h-12 w-12 p-3 text-white bg-red-500 rounded-full cursor-pointer animate-pulse shadow-lg border-4 border-red-300`}
+                      title="Stop Video Recording"
+                    />
+                    <span className="mt-2 text-sm text-red-600 font-semibold animate-pulse">Stop Recording</span>
+                  </div>
                 ) : (
                   <HiOutlineVideoCamera onClick={() => {
                     if (isRecording) return;
