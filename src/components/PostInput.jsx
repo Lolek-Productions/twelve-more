@@ -42,11 +42,23 @@ export default function PostInput({
   const [audioFileUploading, setAudioFileUploading] = useState(false);
   const [audioFileUrl, setAudioFileUrl] = useState(null); // Firebase download URL
   const [recordedAudioBlob, setRecordedAudioBlob] = useState(null);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState(null); // Memoized object URL for preview
   const [recordingError, setRecordingError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const audioStreamRef = useRef(null);
   const audioRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  // Memoize object URL for audio preview
+  useEffect(() => {
+    if (recordedAudioBlob) {
+      const url = URL.createObjectURL(recordedAudioBlob);
+      setAudioPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setAudioPreviewUrl(null);
+    }
+  }, [recordedAudioBlob]);
 
   // --- Video Recording State ---
   const [isVideoRecording, setIsVideoRecording] = useState(false);
@@ -458,6 +470,47 @@ export default function PostInput({
       }
     }
 
+    // If there is an audio recording to upload, upload it now
+    let finalAudioFileUrl = audioFileUrl;
+    if (recordedAudioBlob && !audioFileUrl) {
+      setAudioFileUploading(true);
+      setUploadProgress(0);
+      try {
+        const storage = getStorage(app);
+        const fileName = `${Date.now()}.webm`;
+        const storageRef = ref(storage, fileName);
+        const uploadTask = uploadBytesResumable(storageRef, recordedAudioBlob);
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setUploadProgress(progress);
+            },
+            (error) => {
+              setRecordingError('Upload failed: ' + error.message);
+              setAudioFileUploading(false);
+              setIsSubmitting(false);
+              reject(error);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              setAudioFileUrl(downloadURL);
+              setAudioFileUploading(false);
+              setUploadProgress(100);
+              finalAudioFileUrl = downloadURL;
+              resolve();
+            }
+          );
+        });
+      } catch (error) {
+        setRecordingError('Upload error: ' + error.message);
+        setAudioFileUploading(false);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const response = await createPost({
       userId: appUser.id,
       communityId: communityId,
@@ -465,7 +518,7 @@ export default function PostInput({
       text,
       profileImg: appUser.avatar,
       image: imageFileUrl,
-      audio: audioFileUrl,
+      audio: finalAudioFileUrl,
       video: videoFileUrl,
       muxUploadId: finalMuxUploadId,
       organizationId: organizationId,
@@ -564,15 +617,8 @@ export default function PostInput({
         {/* Audio preview and upload controls */}
         {recordedAudioBlob && !audioFileUrl && (
           <div className="w-full py-5 flex flex-col items-center">
-            <audio controls src={URL.createObjectURL(recordedAudioBlob)} />
+            <audio controls src={audioPreviewUrl || undefined} />
             <div className="flex gap-2 mt-2">
-              <Button
-                onClick={handleAudioUpload}
-                disabled={audioFileUploading}
-                className="bg-green-500 hover:bg-green-600 text-white"
-              >
-                {audioFileUploading ? `Uploading... (${Math.round(uploadProgress)}%)` : 'Upload Audio'}
-              </Button>
               <Button
                 onClick={() => setRecordedAudioBlob(null)}
                 className="bg-gray-300 hover:bg-gray-400"
@@ -580,11 +626,7 @@ export default function PostInput({
                 Record Again
               </Button>
             </div>
-            {uploadProgress > 0 && audioFileUploading && (
-              <div className="w-full bg-gray-200 rounded h-2 mt-2">
-                <div className="bg-green-500 h-2 rounded" style={{ width: `${uploadProgress}%` }} />
-              </div>
-            )}
+            
             {recordingError && <div className="text-red-500 mt-2">{recordingError}</div>}
           </div>
         )}
@@ -631,14 +673,8 @@ export default function PostInput({
             {videoRecordingError && <div className="text-red-500 mt-2">{videoRecordingError}</div>}
           </div>
         )}
-        {videoProcessing && !muxPlaybackId && (
-          <div className="w-full py-5 flex flex-col items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-blue-600">Video uploaded! Processing on Mux...</span>
-            </div>
-            <div className="text-gray-500 text-xs mt-2">It may take a minute for your video to be playable.</div>
-          </div>
-        )}
+        
+        {/* Don't show anything while video is processing on Mux */}
 
         {videoRecordingError && !isVideoRecording && (
           <div className="text-red-500 py-2">{videoRecordingError}</div>
@@ -653,7 +689,14 @@ export default function PostInput({
             />
             {/* Audio Controls */}
             {isRecording ? (
-              <HiOutlineStop onClick={stopRecording} className='h-9 w-9 p-2 text-red-400 hover:bg-red-100 rounded-full cursor-pointer' />
+              <div className="flex flex-col items-center">
+                <HiOutlineStop
+                  onClick={stopRecording}
+                  className={`h-12 w-12 p-3 text-white bg-red-500 rounded-full cursor-pointer animate-pulse shadow-lg border-4 border-red-300`}
+                  title="Stop Audio Recording"
+                />
+                <span className="mt-2 text-sm text-red-600 font-semibold animate-pulse">Stop Recording</span>
+              </div>
             ) : (
               <HiOutlineMicrophone onClick={() => {
                 if (isVideoRecording) return;

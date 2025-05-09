@@ -172,20 +172,15 @@ export default function Post({ post, clickableText = true, showComments = false,
 
           <PostText post={post} clickableText={clickableText} />
 
-          {/* Mux Player if muxPlaybackId is present */}
-          {post?.muxPlaybackId ? (
-            <MuxPlayerWithLoader muxPlaybackId={post.muxPlaybackId} videoTitle={post.text || 'Video'} />
-          ) : post?.video && (
-            <div className="my-3">
-              <video
-                controls
-                src={post.video}
-                className="w-full max-h-[360px]"
-              >
-                Your browser does not support the video tag.
-              </video>
+          {post?.muxUploadId && !post?.muxPlaybackId ? (
+            <div className="my-3 flex flex-col items-center justify-center min-h-[100px]">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+              <span className="text-blue-600 text-sm">Processing your video…</span>
+              <span className="text-gray-500 text-xs mt-1">It may take a minute for your video to be playable.</span>
             </div>
-          )}
+          ) : post?.muxPlaybackId ? (
+            <MuxPlayerWithLoader muxPlaybackId={post.muxPlaybackId} videoTitle={post.text || 'Video'} />
+          ) : null}
 
           {/* Audio playback if audio is present */}
           {post?.audio && (
