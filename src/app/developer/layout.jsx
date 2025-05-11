@@ -14,6 +14,10 @@ const sidebarNavItems = [
     href: "/developer",
   },
   {
+    title: "Phone Lookup",
+    href: "/developer/phone-lookup",
+  },
+  {
     title: "Database",
     children: [
       {
@@ -69,10 +73,6 @@ const sidebarNavItems = [
       {
         title: "Lookup IP",
         href: "/developer/lookup-ip",
-      },
-      {
-        title: "Phone Lookup",
-        href: "/developer/phone-lookup",
       },
     ]
   },

@@ -8,6 +8,7 @@ import Community from "@/lib/models/community.model.js";
 import Organization from "@/lib/models/organization.model.js";
 import { getYesterdayAt8 } from "@/lib/utils";
 import {clerkClient} from "@clerk/nextjs/server";
+import {getSevenDaysAgoFormatted} from "@/lib/utils";
 
 export async function getNewPostCountForDateRange(startDate, endDate, options = { inclusive: true }) {
   // Convert string dates to Date objects if necessary
@@ -248,4 +249,20 @@ export async function persistDailyStats() {
     return { success: false, message: 'Error persisting stats' }
   }
 }
-  
+
+export async function getStatsForPreviousWeek() {
+  const start = getSevenDaysAgoFormatted();
+
+  try {
+    await connect();
+    const stats = await Stats.find({
+      date: {
+        $gte: start
+      }
+    })
+    return { success: true, stats };
+  } catch (error) {
+    console.error('Error loading stats:', error)
+    return { success: false, message: 'Error loading stats' }
+  }
+}

@@ -128,6 +128,12 @@ This document describes the code style conventions used in this project. It shou
 - Place form and modal logic within the same component for clarity unless shared across multiple pages.
 
 ## General Formatting
+
+### String Formatting & Line Breaks
+- To add a line break in a string literal (such as for post content or messages), use the `\n` character sequence. For example:
+  const text = `Stats!\n\nThis is a test post from the system.`;
+- This approach is used in files like `system-post.js` for multi-line text content.
+
 - **Indentation:** 2 spaces per indentation level.
 - **Semicolons:** Omit semicolons at the end of statements (unless required for clarity).
 - **Quotes:** Use double quotes (`"`) for JSX and JavaScript strings.

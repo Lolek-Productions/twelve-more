@@ -181,3 +181,20 @@ export function getYesterdayAt8() {
     8, 0, 0, 0
   ));
 } 
+
+export function getSevenDaysAgoFormatted() {
+  // Get current date
+  const now = new Date();
+  
+  // Create a new date 7 days ago
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(now.getDate() - 7);
+  
+  // Format as YYYY-MM-DD
+  const year = sevenDaysAgo.getFullYear();
+  const month = String(sevenDaysAgo.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(sevenDaysAgo.getDate()).padStart(2, '0');
+  
+  // Return formatted date string
+  return `${year}-${month}-${day}`;
+}
