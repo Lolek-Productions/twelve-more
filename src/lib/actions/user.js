@@ -136,6 +136,18 @@ export async function getUserById(userId) {
       .lean();
 
 
+    // Ensure uniqueness by organizationId in organizations array
+    let dedupedOrganizations = [];
+    if (user.organizations && Array.isArray(user.organizations)) {
+      dedupedOrganizations = user.organizations.filter((org, idx, arr) => {
+        const orgId = org.organization?._id?.toString?.() || org.organization?.toString?.() || org._id?.toString?.() || org.id;
+        return idx === arr.findIndex(o => {
+          const compareId = o.organization?._id?.toString?.() || o.organization?.toString?.() || o._id?.toString?.() || o.id;
+          return orgId === compareId;
+        });
+      });
+    }
+
     return {
       success: true,
       user: {
@@ -146,8 +158,8 @@ export async function getUserById(userId) {
         avatar: user.avatar,
         bio: user.bio,
         clerkId: user.clerkId,
-        organizations: user.organizations
-          ? user.organizations.map((org) => ({
+        organizations: dedupedOrganizations
+          ? dedupedOrganizations.map((org) => ({
             id: org.organization?._id.toString(),
             name: org.organization?.name || "Empty Organization",
             role: org.role || "",
