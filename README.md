@@ -1,5 +1,22 @@
 # 12More
 
+# Installation
+### Get the Code
+ Clone the repository using the following command:
+```bash
+git clone https://github.com/Lolek-Productions/twelve-more.git
+```
+### Install Dependencies
+ Install the required dependencies using npm:
+```bash
+npm install --force
+```
+### Start Development
+ Start the development environment:
+```bash
+npm run dev
+```
+
 # Notes
 After changing the schema on the Post model, I had to restart the development server, before it would use the updated Post Model.
 
