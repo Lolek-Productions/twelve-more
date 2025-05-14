@@ -6,9 +6,13 @@ export const connect = async () => {
     return;
   }
 
+  const dbName = (!process.env.NEXT_PUBLIC_ENV || process.env.NEXT_PUBLIC_ENV !== 'local')
+  ? 'twelve-more-app'
+  : 'development-main';
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: 'twelve-more-app',
+      dbName,
     });
     console.log('Connected to MongoDB');
   } catch (error) {
