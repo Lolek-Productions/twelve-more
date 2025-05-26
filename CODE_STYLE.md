@@ -2,6 +2,19 @@
 
 This document describes the code style conventions used in this project. It should be followed for all new code and when refactoring existing code.
 
+## Context Usage: useMainContext
+
+Always use the `useMainContext` hook to access app user and clerk user information throughout the application. Use the following patterns:
+
+- When both users are needed:
+  ```js
+  const { appUser, clerkUser } = useMainContext();
+  ```
+- When only the app user is needed:
+  ```js
+  const { appUser } = useMainContext();
+  ```
+
 ## UI Components
 
 ### Back Button Convention
@@ -12,8 +25,8 @@ This document describes the code style conventions used in this project. It shou
 
   ```jsx
   <Button asChild variant="ghost" className="mb-6">
-    <a href="/developer/courses/[courseId]">
-      ← Back to Course
+    <a href="/courses">
+      ← Back to Courses
     </a>
   </Button>
   ```
